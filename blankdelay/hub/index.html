@@ -19,6 +19,25 @@
       <p>Open any product, grab a test key, or simulate a purchase email.</p>
     </section>
 
+    <section class="tools cardish" id="setupPanel">
+      <h2>Setup status (what still needs your keys)</h2>
+      <ul id="setupList" class="setup-list">
+        <li>Loading…</li>
+      </ul>
+      <p class="hint">Green = ready. Red = you still need to add that in <code>.env</code> / Stripe / Discord.</p>
+    </section>
+
+    <section class="tools cardish">
+      <h2>Help a stuck customer (right now)</h2>
+      <p class="hint">Payment already succeeded? Generate their key + download link here, then DM / email it to them.</p>
+      <div class="row">
+        <input id="stuckEmail" placeholder="customer@email.com" />
+        <select id="stuckProduct"></select>
+        <button id="stuckBtn">Make key + download link</button>
+      </div>
+      <pre id="stuckResult">Enter their email + product, then send them the key and download URL.</pre>
+    </section>
+
     <section class="tools cardish">
       <h2>Key tester</h2>
       <div class="row">

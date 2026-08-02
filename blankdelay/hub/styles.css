@@ -117,6 +117,34 @@ pre {
   white-space: pre-wrap;
   word-break: break-word;
 }
+.setup-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.setup-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.25);
+  font-size: 0.92rem;
+}
+.setup-list .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex: 0 0 auto;
+}
+.setup-list .ok .dot { background: var(--accent2); }
+.setup-list .bad .dot { background: var(--danger); }
+.hint { color: var(--muted); font-size: 0.88rem; margin: 0 0 12px; }
+.hint code { color: var(--accent); }
 footer {
   text-align: center;
   color: var(--muted);
