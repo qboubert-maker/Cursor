@@ -86,9 +86,30 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static hub + downloads
+// Static hub + downloads (force real file download with BlankDelay filename)
 app.use("/hub", express.static(path.join(__dirname, "..", "hub")));
-app.use("/downloads", express.static(path.join(__dirname, "..", "downloads")));
+app.use(
+  "/downloads",
+  (req, res, next) => {
+    if (req.path.toLowerCase().endsWith(".zip")) {
+      const base = path.basename(req.path);
+      res.setHeader("Content-Type", "application/zip");
+      res.setHeader("Content-Disposition", `attachment; filename="${base}"`);
+    }
+    next();
+  },
+  express.static(path.join(__dirname, "..", "downloads"), {
+    setHeaders(res, filePath) {
+      if (filePath.toLowerCase().endsWith(".zip")) {
+        res.setHeader("Content-Type", "application/zip");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="${path.basename(filePath)}"`
+        );
+      }
+    },
+  })
+);
 app.get("/", (_req, res) => res.redirect("/hub"));
 
 app.get("/api/health", (_req, res) => {
@@ -232,37 +253,23 @@ app.post("/api/checkout", async (req, res) => {
   }
 });
 
-// Ensure download zips exist (placeholder packages)
-function ensureDownloadPlaceholders() {
-  for (const p of listProducts()) {
-    const rel = p.downloadPath.replace(/^\//, "");
-    const full = path.join(__dirname, "..", rel);
-    const dir = path.dirname(full);
-    fs.mkdirSync(dir, { recursive: true });
-    if (!fs.existsSync(full)) {
-      const readme = path.join(dir, "README.txt");
-      fs.writeFileSync(
-        readme,
-        `BlankDelay — ${p.name}\n\nReplace this folder's zip with your real installer/build.\nCustomers receive this download link + a unique license key by email after Stripe payment.\n`,
-        "utf8"
-      );
-      // Minimal zip-like placeholder (not a real zip; replace with real build)
-      fs.writeFileSync(
-        full,
-        `BlankDelay placeholder package for ${p.name}. Replace with real software build.\n`,
-        "utf8"
-      );
-      // rename extension note
-      fs.writeFileSync(
-        path.join(dir, "PUT_REAL_INSTALLER_HERE.txt"),
-        `Replace ${path.basename(full)} with your real ${p.name} installer zip/exe.\nKeep the same filename so email links keep working.\n`,
-        "utf8"
-      );
-    }
+// Build real .zip product packages if missing
+function ensureDownloads() {
+  const { execFileSync } = require("child_process");
+  const anyMissing = listProducts().some((p) => {
+    const full = path.join(__dirname, "..", p.downloadPath.replace(/^\//, ""));
+    return !fs.existsSync(full) || fs.statSync(full).size < 200;
+  });
+  if (anyMissing) {
+    console.log("Building BlankDelay product zip downloads…");
+    execFileSync(process.execPath, [path.join(__dirname, "..", "scripts", "build-downloads.js")], {
+      cwd: path.join(__dirname, ".."),
+      stdio: "inherit",
+    });
   }
 }
 
-ensureDownloadPlaceholders();
+ensureDownloads();
 
 app.listen(PORT, () => {
   console.log(`BlankDelay hub + fulfillment running at ${PUBLIC_URL}`);

@@ -8,7 +8,8 @@
     "hub": "node server/index.js",
     "bot": "node discord-bot/bot.js",
     "dev": "node server/index.js",
-    "seed-keys": "node server/seed-keys.js"
+    "seed-keys": "node server/seed-keys.js",
+    "build-downloads": "node scripts/build-downloads.js"
   },
   "engines": {
     "node": ">=18"

@@ -1,2 +1,0 @@
-Replace KeyboardMacroV2-Setup.zip with your real Keyboard Macro V2 installer zip/exe.
-Keep the same filename so email links keep working.
