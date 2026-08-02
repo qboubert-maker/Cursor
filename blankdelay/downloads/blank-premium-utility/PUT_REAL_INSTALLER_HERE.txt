@@ -1,0 +1,2 @@
+Replace BlankPremiumUtility-Setup.zip with your real Blank Premium Utility installer zip/exe.
+Keep the same filename so email links keep working.

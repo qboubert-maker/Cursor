@@ -1,0 +1,2 @@
+Replace ZeroDelay-Setup.zip with your real Zero Delay installer zip/exe.
+Keep the same filename so email links keep working.

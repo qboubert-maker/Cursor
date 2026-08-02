@@ -1,0 +1,2 @@
+Replace PingOptimizer-Setup.zip with your real Ping Optimizer installer zip/exe.
+Keep the same filename so email links keep working.

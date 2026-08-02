@@ -1,0 +1,2 @@
+Replace FPSBoost-Setup.zip with your real FPS Boost installer zip/exe.
+Keep the same filename so email links keep working.
