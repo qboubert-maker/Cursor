@@ -28,10 +28,13 @@ function buildFulfillmentEmail({ email, productId, keyCode, publicUrl }) {
 Product: ${name}
 License key: ${keyCode}
 
-Download your software:
+Download BlankDelay Setup (Windows .exe):
 ${downloadUrl}
 
-Open the app, paste your license key, and activate.
+1. Run the installer
+2. Open BlankDelay Product Hub
+3. Launch ${name}
+4. Paste your license key and activate
 
 Product hub: ${hubUrl}
 
@@ -49,10 +52,10 @@ Need help? Discord: https://discord.gg/cJafcE7y5W
     </p>
     <p>
       <a href="${downloadUrl}" style="background:#111;color:#fff;padding:12px 18px;text-decoration:none;border-radius:6px;display:inline-block">
-        Download software
+        Download BlankDelay Setup.exe
       </a>
     </p>
-    <p style="color:#555;font-size:14px">Open the app → paste your key → activate.</p>
+    <p style="color:#555;font-size:14px">Install → open Product Hub → launch ${name} → paste your key → activate.</p>
     <p style="color:#777;font-size:13px">Hub: <a href="${hubUrl}">${hubUrl}</a><br>
     Discord: <a href="https://discord.gg/cJafcE7y5W">https://discord.gg/cJafcE7y5W</a></p>
   </div>`;

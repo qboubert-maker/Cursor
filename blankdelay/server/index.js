@@ -86,22 +86,32 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static hub + downloads (force real file download with BlankDelay filename)
+// Static hubs + site + downloads (force attachment for .exe / .zip)
 app.use("/hub", express.static(path.join(__dirname, "..", "hub")));
+app.use("/product-hub", express.static(path.join(__dirname, "..", "electron")));
+app.use("/site", express.static(path.join(__dirname, "..", "..", "blankdelay-site")));
 app.use(
   "/downloads",
   (req, res, next) => {
-    if (req.path.toLowerCase().endsWith(".zip")) {
+    const lower = req.path.toLowerCase();
+    if (lower.endsWith(".zip") || lower.endsWith(".exe")) {
       const base = path.basename(req.path);
-      res.setHeader("Content-Type", "application/zip");
+      res.setHeader(
+        "Content-Type",
+        lower.endsWith(".exe") ? "application/octet-stream" : "application/zip"
+      );
       res.setHeader("Content-Disposition", `attachment; filename="${base}"`);
     }
     next();
   },
   express.static(path.join(__dirname, "..", "downloads"), {
     setHeaders(res, filePath) {
-      if (filePath.toLowerCase().endsWith(".zip")) {
-        res.setHeader("Content-Type", "application/zip");
+      const lower = filePath.toLowerCase();
+      if (lower.endsWith(".zip") || lower.endsWith(".exe")) {
+        res.setHeader(
+          "Content-Type",
+          lower.endsWith(".exe") ? "application/octet-stream" : "application/zip"
+        );
         res.setHeader(
           "Content-Disposition",
           `attachment; filename="${path.basename(filePath)}"`
@@ -111,6 +121,9 @@ app.use(
   })
 );
 app.get("/", (_req, res) => res.redirect("/hub"));
+app.get("/product-hub", (_req, res) =>
+  res.redirect("/product-hub/hub.html")
+);
 
 app.get("/api/health", (_req, res) => {
   const { getTransporter } = require("./email");
@@ -253,15 +266,15 @@ app.post("/api/checkout", async (req, res) => {
   }
 });
 
-// Build real .zip product packages if missing
+// Ensure per-product Setup.exe hardlinks exist
 function ensureDownloads() {
   const { execFileSync } = require("child_process");
   const anyMissing = listProducts().some((p) => {
     const full = path.join(__dirname, "..", p.downloadPath.replace(/^\//, ""));
-    return !fs.existsSync(full) || fs.statSync(full).size < 200;
+    return !fs.existsSync(full) || fs.statSync(full).size < 1_000_000;
   });
   if (anyMissing) {
-    console.log("Building BlankDelay product zip downloads…");
+    console.log("Linking BlankDelay-Setup.exe into product download names…");
     execFileSync(process.execPath, [path.join(__dirname, "..", "scripts", "build-downloads.js")], {
       cwd: path.join(__dirname, ".."),
       stdio: "inherit",

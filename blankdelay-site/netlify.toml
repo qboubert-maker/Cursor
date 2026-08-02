@@ -1,0 +1,25 @@
+[build]
+  publish = "."
+  command = ""
+
+[functions]
+  directory = "netlify/functions"
+
+[[redirects]]
+  from = "https://www.blankdelay.com/*"
+  to = "https://blankdelay.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.blankdelay.com/*"
+  to = "https://blankdelay.com/:splat"
+  status = 301
+  force = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

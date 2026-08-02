@@ -72,7 +72,7 @@ async function loadProducts() {
       <div class="price">$${p.price.toFixed(2)}</div>
       <p>${p.description}</p>
       <div class="actions">
-        <a class="btn" href="${p.downloadUrl}">Download</a>
+        <a class="btn" href="${p.downloadUrl}" download>Download ${p.name} Setup.exe</a>
         <button class="ghost checkout-btn" data-id="${p.id}">Checkout</button>
       </div>
     `;

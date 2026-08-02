@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BlankDelay - Shotgun Pack</title>
+<link rel="stylesheet" href="../shared/app.css">
+<link rel="stylesheet" href="../shared/bd-license.css">
+<link rel="stylesheet" href="../shared/aim-assist.css">
+</head>
+<body class="bd-app bd-aim-pro" data-theme="shotgun">
+<canvas id="bg-canvas" class="bg-canvas"></canvas>
+<div id="bd-license-portal" data-eyebrow="BlankDelay - Shotgun Pack" data-title="SHOTGUN PACK" data-tagline="Enter your license key to unlock shotgun aim assist" data-features="Fortnite,Shotgun Only,Toggle"></div>
+<div class="bd-app-main" id="bd-app-main" hidden>
+<div class="app">
+<div class="topbar"><div class="brand"><span class="mark"><svg viewBox="0 0 32 32"><circle cx="8" cy="16" r="3.5" fill="currentColor"/><path fill="currentColor" d="M11 16h4l14-6-3 6 3 6-14-6z"/></svg></span> BLANKDELAY</div><span class="status-pill" id="status-pill">Ready</span></div>
+<div class="hero"><span class="tag">Fortnite Aim Assist Pro</span><h1>Shotgun Pack</h1><p>Shotgun-only lock-on assist. Activates only when holding a shotgun in Fortnite. Weapon icon detection, toggle key, and panic stop.</p></div>
+<div class="tweaks-section" id="tweaks-section" hidden>
+<div class="aim-pro-shell">
+<div class="aim-pro-radar">
+<div class="aim-pro-radar-head"><h3>Lock-On Radar</h3><span class="macro-pro-live"><span class="live-pulse-dot"></span> LIVE</span></div>
+<div class="aim-pro-radar-stage"><div class="aim-pro-crosshair"><div class="aim-pro-ring radius-large" id="aim-ring"></div></div></div>
+<div class="aim-pro-radius-label" id="aim-radius-label">Target zone: Large (wide)</div>
+<div class="aim-pro-status-big"><div class="state" id="aim-state">Inactive</div><div class="sub" id="aim-state-sub">Waiting for Fortnite</div></div>
+</div>
+<div class="aim-pro-workspace">
+<nav class="aim-pro-nav"><button type="button" class="active" data-sec="control">Control</button><button type="button" data-sec="weapons">Shotguns</button><button type="button" data-sec="library">Library</button></nav>
+<div class="aim-pro-stats" style="padding:14px 16px 0;margin:0">
+<div class="aim-pro-stat"><label>Fortnite</label><span id="stat-fortnite">NO</span></div>
+<div class="aim-pro-stat"><label>Weapon</label><span id="stat-weapon">-</span></div>
+<div class="aim-pro-stat"><label>Armed</label><span id="stat-armed">OFF</span></div>
+</div>
+<div class="aim-pro-section active" data-sec="control" style="padding:16px">
+<p class="aim-pro-hint">Only runs when FortniteClient-Win64-Shipping.exe is focused. Smooth human-like nudges. F12 panic stop.</p>
+<button type="button" class="btn btn-primary" id="aim-global-toggle" style="width:100%;margin-bottom:12px">Toggle ON / OFF</button>
+<div class="aim-pro-row"><label>Lock-On Strength</label><input type="range" id="global-strength" min="0" max="100" value="50"><span id="global-strength-val">50</span></div>
+<div class="aim-pro-row"><label>Target Radius</label><select id="global-radius"><option value="small">Small (tight)</option><option value="medium">Medium</option><option value="large" selected>Large (wide)</option></select></div>
+<div class="aim-pro-hint" style="margin-top:4px">Radar ring previews your target zone size live.</div>
+<div class="aim-pro-bind-row">
+<div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:6px">Keyboard Toggle</label><div class="aim-pro-keycap" id="toggle-key">F9</div></div>
+<div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:6px">Controller Toggle</label><div class="aim-pro-keycap" id="toggle-pad">LB</div></div>
+</div>
+<p class="aim-pro-hint" style="margin-bottom:8px">Pick a controller button below or click Controller Toggle and press a button on your pad.</p>
+<div class="aim-pad-grid" id="aim-pad-grid"></div>
+<div class="aim-pro-actions">
+<button type="button" class="btn btn-primary btn-sm" id="btn-start">Arm Assist</button>
+<button type="button" class="btn btn-ghost btn-sm" id="btn-stop">Disarm</button>
+<button type="button" class="btn btn-ghost btn-sm" id="btn-force">Force Shotgun Mode</button>
+</div>
+</div>
+<div class="aim-pro-section" data-sec="weapons"><p class="aim-pro-hint">Choose which shotguns activate the pack. Auto-detection uses HUD pixel sampling.</p><div class="aim-pro-shotgun-list" id="aim-shotgun-list"></div></div>
+<div class="aim-pro-section" data-sec="library" style="padding:16px">
+<p class="aim-pro-hint">Save, load, and share your aim settings.</p>
+<div class="aim-pro-library">
+<input type="text" id="profile-name" placeholder="Profile name" class="aim-pro-input">
+<select id="profile-select" class="aim-pro-input"><option value="">- profile -</option></select>
+<button type="button" class="btn btn-ghost btn-sm" id="btn-save-profile">Save</button>
+<button type="button" class="btn btn-ghost btn-sm" id="btn-load-profile">Load</button>
+<button type="button" class="btn btn-ghost btn-sm" id="btn-export">Export</button>
+<label class="btn btn-ghost btn-sm">Import<input type="file" id="import-file" accept=".json" hidden></label>
+</div>
+</div>
+<div class="aim-pro-log" id="aim-pro-log" style="margin:0 16px 16px"><div>Aim Assist Pro - unlock license to begin.</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script src="../shared/background.js"></script>
+<script src="../shared/bd-license.js"></script>
+<script src="../shared/aim-assist-engine.js"></script>
+<script>
+(async function(){
+  const engine=BlankAimAssist.init({product:"shotgun"});
+  await BdLicensePortal.init({onUnlock:function(){
+    document.getElementById("tweaks-section").hidden=false;
+    engine.unlock();
+    document.getElementById("status-pill").textContent="Licensed";
+  }});
+})();
+</script>
+</body>
+</html>
