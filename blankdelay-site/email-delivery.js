@@ -33,7 +33,9 @@ const BD_EMAIL_SEND = (function () {
         }
 
         const link = deliveryUrl(order);
-        const downloadLink = typeof bdDownloadUrl === 'function' ? bdDownloadUrl(order.slug) : 'https://blankdelay.com/downloads/BlankDelay-Setup.exe';
+        const downloadLink = typeof bdDownloadUrl === 'function'
+            ? bdDownloadUrl(order.slug === 'cart' ? (order.items?.[0]?.slug || 'premium') : (order.slug || 'premium'))
+            : 'https://blankdelay.com/downloads/BlankDelay-Setup.exe';
         const notice = typeof BD_DOWNLOAD_NOTICE !== 'undefined' ? BD_DOWNLOAD_NOTICE : null;
         const params = {
             to_email: order.email,

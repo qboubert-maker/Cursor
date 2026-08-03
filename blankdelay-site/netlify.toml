@@ -17,6 +17,50 @@
   status = 301
   force = true
 
+# Product-named Setup.exe URLs → same hub installer (one file on disk)
+[[redirects]]
+  from = "/downloads/BlankDelay-Blank-Premium-Utility-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 200
+[[redirects]]
+  from = "/downloads/BlankDelay-Zero-Delay-Plus-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 200
+[[redirects]]
+  from = "/downloads/BlankDelay-Zero-Delay-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 200
+[[redirects]]
+  from = "/downloads/BlankDelay-FPS-Boost-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 200
+[[redirects]]
+  from = "/downloads/BlankDelay-Ping-Optimizer-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 200
+[[redirects]]
+  from = "/downloads/BlankDelay-Controller-Macro-V2-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 200
+[[redirects]]
+  from = "/downloads/BlankDelay-Keyboard-Macro-V2-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 200
+[[redirects]]
+  from = "/downloads/BlankDelay-Aim-Bundle-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 200
+[[redirects]]
+  from = "/downloads/BlankDelay-Shotgun-Pack-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 200
+
+[[headers]]
+  for = "/downloads/*"
+  [headers.values]
+    Content-Type = "application/octet-stream"
+    X-Content-Type-Options = "nosniff"
+
 [[headers]]
   for = "/*"
   [headers.values]
