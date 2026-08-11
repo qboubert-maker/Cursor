@@ -1,0 +1,60 @@
+{
+  "name": "blankdelay-desktop",
+  "version": "2.0.0",
+  "description": "BlankDelay desktop product hub and tweak apps",
+  "main": "electron/main.js",
+  "author": "BlankDelay",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "electron:hub": "electron . --product=hub",
+    "electron:premium": "electron . --product=premium",
+    "electron:zero-plus": "electron . --product=zero-plus",
+    "electron:zero": "electron . --product=zero",
+    "electron:fps": "electron . --product=fps",
+    "electron:ping": "electron . --product=ping",
+    "electron:controller": "electron . --product=controller",
+    "electron:keyboard": "electron . --product=keyboard",
+    "electron:aim": "electron . --product=aim",
+    "electron:shotgun": "electron . --product=shotgun",
+    "build:win": "electron-builder --win --x64",
+    "build:win:portable": "electron-builder --win portable --x64"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.blankdelay.desktop",
+    "productName": "BlankDelay",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "BlankDelay-Setup.${ext}",
+      "executableName": "BlankDelay",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "BlankDelay-Setup.exe",
+      "shortcutName": "BlankDelay Hub",
+      "uninstallDisplayName": "BlankDelay Desktop",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}
