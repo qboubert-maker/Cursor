@@ -26,7 +26,8 @@
     </div>
 
     <script src="../shared/background.js"></script>
-    <script src="../shared/bd-splash.js"></script>
+    <script src="../shared/bd-splash-fx.js"></script>
+<script src="../shared/bd-splash.js"></script>
     <script src="../shared/bd-tweaks-grid.js"></script>
     <script>
     const CATEGORIES = [
@@ -82,6 +83,7 @@
                 const grid = BdTweaksGrid.init({
                     mountId: 'tweaks-grid-root',
                     productLabel: 'Zero Delay',
+                    variant: 'latency',
                     subtitle: 'Tweaks apply instantly and persist after restart.',
                     categories: CATEGORIES,
                     onAdminStatus: (isAdmin) => {

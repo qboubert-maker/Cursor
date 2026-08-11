@@ -29,18 +29,22 @@ const BdTweaksGrid = (function () {
         if (!mount) return null;
 
         const categories = opts.categories || [];
+        const variant = opts.variant || 'latency';
+        const statLabel = variant === 'fps' ? 'FPS Gain' : (variant === 'ping' ? 'Ping Drop' : (variant === 'delay-plus' ? 'Boost Level' : 'Est. Latency'));
+        const eyebrow = variant === 'fps' ? 'Frame Performance' : (variant === 'ping' ? 'Network Latency' : (variant === 'delay-plus' ? 'Enhanced Latency' : 'System Optimization'));
         const allTweaks = [];
         categories.forEach(c => c.tweaks.forEach(t => allTweaks.push(t)));
 
         mount.innerHTML = `
-            <div class="bd-tg-wrap">
+            <div class="bd-tg-wrap bd-tg-variant-${variant}">
+                <div class="bd-tg-live-bar"><span class="pulse"></span> LIVE SYSTEM SCAN</div>
                 <div class="bd-tg-admin-warning" id="bd-tg-admin-warning" hidden>
                     <p><strong>⚠ Administrator required</strong> — this app needs admin rights to modify system settings.</p>
                     <button class="bd-tg-btn bd-tg-btn-primary" id="bd-tg-elevate-btn" type="button">Restart as Admin</button>
                 </div>
                 <div class="bd-tg-head">
                     <div class="bd-tg-head-left">
-                        <div class="eyebrow">System Optimization</div>
+                        <div class="eyebrow">${eyebrow}</div>
                         <h1>${opts.productLabel} by BlankDelay</h1>
                         <p>${opts.subtitle || 'Tweaks apply instantly and persist after restart.'}</p>
                     </div>
@@ -52,7 +56,7 @@ const BdTweaksGrid = (function () {
                         <div class="bd-tg-stats">
                             <div class="bd-tg-stat"><div class="val" id="bd-tg-active">0</div><div class="lbl">Active</div></div>
                             <div class="bd-tg-stat"><div class="val" id="bd-tg-total">${allTweaks.length}</div><div class="lbl">Total</div></div>
-                            <div class="bd-tg-stat"><div class="val" id="bd-tg-latency">0%</div><div class="lbl">Est. Latency</div></div>
+                            <div class="bd-tg-stat"><div class="val" id="bd-tg-latency">0%</div><div class="lbl">${statLabel}</div></div>
                         </div>
                         <div class="bd-tg-actions">
                             <button class="bd-tg-btn bd-tg-btn-primary" id="bd-tg-apply-btn" type="button">Apply All Optimizations</button>

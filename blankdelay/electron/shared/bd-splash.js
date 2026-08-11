@@ -2,6 +2,8 @@
 (function () {
     const MARK_SVG = '<svg viewBox="0 0 32 32"><circle cx="8" cy="16" r="3.5" fill="currentColor"/><path fill="currentColor" d="M11 16h4l14-6-3 6 3 6-14-6z"/></svg>';
 
+    function wait(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
     function buildHtml(cfg) {
         return `
         <div class="bd-splash-corner bd-splash-corner-tl">
@@ -18,7 +20,7 @@
             </div>
             <div class="bd-splash-product">${cfg.title}</div>
             <div class="bd-splash-tagline">${cfg.tagline}</div>
-            <button type="button" class="bd-splash-tap" id="bd-splash-tap">Tap logo to continue</button>
+            <button type="button" class="bd-splash-tap" id="bd-splash-tap">Tap to continue</button>
         </div>
 
         <div class="bd-splash-key-wrap" id="bd-splash-key-wrap" hidden>
@@ -37,6 +39,32 @@
         </div>`;
     }
 
+    async function transitionToKey(stage, keyWrap) {
+        stage.classList.add('bd-splash-exit');
+        window.BdSplashFx?.burstAt(stage.querySelector('.bd-splash-word'), 42, 5);
+        await wait(420);
+        stage.style.display = 'none';
+        keyWrap.hidden = false;
+        keyWrap.classList.add('bd-splash-enter');
+        window.BdSplashFx?.spawnAmbient?.();
+        await wait(30);
+        keyWrap.classList.remove('bd-splash-enter');
+    }
+
+    async function transitionToApp(screen, main, onUnlock, result) {
+        window.BdSplashFx?.burstCenter(64, 6);
+        screen.classList.add('bd-splash-unlock');
+        await wait(700);
+        screen.classList.add('panel-hidden');
+        if (main) {
+            main.hidden = false;
+            main.classList.add('bd-app-enter');
+        }
+        document.body.classList.add('bd-licensed');
+        window.BdSplashFx?.destroy?.();
+        if (onUnlock) onUnlock(result);
+    }
+
     async function init(opts) {
         const o = opts || {};
         const mount = document.getElementById('bd-splash-root');
@@ -50,6 +78,7 @@
 
         mount.outerHTML = `<div class="bd-splash-screen" id="bd-splash-screen">${buildHtml(cfg)}</div>`;
 
+        const screen = document.getElementById('bd-splash-screen');
         const stage = document.getElementById('bd-splash-stage');
         const logo = document.getElementById('bd-splash-logo');
         const tapBtn = document.getElementById('bd-splash-tap');
@@ -61,14 +90,24 @@
         const msg = document.getElementById('bd-splash-key-msg');
         const backLink = document.getElementById('bd-splash-back');
 
-        function showKeyScreen() {
-            stage.style.display = 'none';
-            keyWrap.hidden = false;
+        window.BdSplashFx?.mount?.(screen);
+
+        async function showKeyScreen() {
+            window.BdSplashFx?.burstAt(tapBtn, 28, 4);
+            await transitionToKey(stage, keyWrap);
             keyInput.focus();
         }
-        function showLogoScreen() {
+
+        async function showLogoScreen() {
+            keyWrap.classList.add('bd-splash-exit');
+            await wait(320);
             keyWrap.hidden = true;
+            keyWrap.classList.remove('bd-splash-exit', 'bd-splash-enter');
             stage.style.display = 'flex';
+            stage.classList.remove('bd-splash-exit');
+            stage.classList.add('bd-splash-enter');
+            await wait(30);
+            stage.classList.remove('bd-splash-enter');
         }
 
         logo.addEventListener('click', showKeyScreen);
@@ -101,15 +140,11 @@
                     validatedText.textContent = `Key validated: ${key.toUpperCase()}`;
                     validated.hidden = false;
                     msg.textContent = '';
-                    document.body.classList.add('bd-licensed');
-                    const screen = document.getElementById('bd-splash-screen');
+                    window.BdSplashFx?.burstAt(activateBtn, 36, 5);
                     const main = document.getElementById('bd-app-main');
-                    setTimeout(() => {
-                        screen?.classList.add('panel-hidden');
-                        if (main) main.hidden = false;
-                        if (o.onUnlock) o.onUnlock(result);
-                        resolve(result);
-                    }, o.instant ? 0 : 650);
+                    await wait(o.instant ? 0 : 520);
+                    await transitionToApp(screen, main, o.onUnlock, result);
+                    resolve(result);
                 } else {
                     msg.textContent = result.msg || 'Invalid license key.';
                     msg.className = 'bd-splash-key-msg error';

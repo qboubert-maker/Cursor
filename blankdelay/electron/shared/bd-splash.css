@@ -5,6 +5,19 @@
     background: radial-gradient(ellipse 120% 90% at 50% 40%, rgba(255,255,255,0.05) 0%, transparent 55%), #000;
     overflow: hidden;
 }
+.bd-splash-fx-canvas {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.85;
+}
+.bd-splash-screen > *:not(.bd-splash-fx-canvas) { position: relative; z-index: 1; }
+
+.bd-splash-enter { animation: bdSplashIn 0.65s cubic-bezier(0.22,1,0.36,1) both; }
+.bd-splash-exit { animation: bdSplashOut 0.42s cubic-bezier(0.55,0,1,0.45) both; }
+.bd-splash-unlock { animation: bdSplashUnlock 0.72s cubic-bezier(0.22,1,0.36,1) forwards; }
+@keyframes bdSplashOut { from { opacity: 1; transform: none; filter: blur(0); } to { opacity: 0; transform: scale(0.94) translateY(12px); filter: blur(6px); } }
+@keyframes bdSplashUnlock { 0% { opacity: 1; filter: blur(0); } 55% { opacity: 1; filter: blur(0) brightness(1.35); } 100% { opacity: 0; filter: blur(10px) brightness(1.6); transform: scale(1.04); } }
+
+.bd-app-enter { animation: bdAppIn 0.75s cubic-bezier(0.22,1,0.36,1) both; }
+@keyframes bdAppIn { from { opacity: 0; transform: translateY(18px) scale(0.98); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
 .bd-splash-screen.panel-hidden, body.bd-licensed .bd-splash-screen { display: none !important; }
 
 .bd-splash-corner {
@@ -70,6 +83,11 @@
     background: linear-gradient(165deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
     border: 1px solid rgba(255,255,255,0.14);
     box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 60px var(--glow);
+    animation: bdKeyCardGlow 2.8s ease-in-out infinite;
+}
+@keyframes bdKeyCardGlow {
+    0%, 100% { box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 36px var(--glow); border-color: rgba(255,255,255,0.14); }
+    50% { box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 72px var(--glow); border-color: rgba(255,255,255,0.28); }
 }
 .bd-splash-key-mark {
     width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 14px;

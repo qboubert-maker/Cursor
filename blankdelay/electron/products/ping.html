@@ -26,7 +26,8 @@
     </div>
 
     <script src="../shared/background.js"></script>
-    <script src="../shared/bd-splash.js"></script>
+    <script src="../shared/bd-splash-fx.js"></script>
+<script src="../shared/bd-splash.js"></script>
     <script src="../shared/bd-tweaks-grid.js"></script>
     <script>
     const CATEGORIES = [
@@ -75,6 +76,7 @@
                 BdTweaksGrid.init({
                     mountId: 'tweaks-grid-root',
                     productLabel: 'Ping Optimizer',
+                    variant: 'ping',
                     subtitle: 'Lower ping, reduce jitter. Apply instantly, persist after restart.',
                     categories: CATEGORIES,
                     onAdminStatus: (isAdmin) => {
