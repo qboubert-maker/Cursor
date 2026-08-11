@@ -11,9 +11,11 @@ body {
     font-family: var(--font); background: var(--bg); color: var(--text);
     min-height: 100vh; overflow-x: hidden;
 }
+body[data-theme="zero"] { --accent: #3ea6ff; --accent-text: #000; --glow: rgba(62,166,255,0.22); }
 body[data-theme="fps"] { --accent: #39ff14; --accent-text: #000; --glow: rgba(57,255,20,0.2); }
 body[data-theme="ping"] { --accent: #00b4ff; --accent-text: #000; --glow: rgba(0,180,255,0.2); }
 body[data-theme="delay-plus"] { --accent: #8eb8ff; --accent-text: #000; --glow: rgba(142,184,255,0.2); }
+body[data-theme="premium"] { --accent: #d8ff3d; --accent-text: #000; --glow: rgba(216,255,61,0.2); }
 body[data-theme="controller"] { --accent: #57f287; --accent-text: #000; --glow: rgba(87,242,135,0.2); }
 body[data-theme="keyboard"] { --accent: #fff; --accent-text: #000; --glow: rgba(255,255,255,0.15); }
 body[data-theme="aim"] { --accent: #ff4444; --accent-text: #fff; --glow: rgba(255,68,68,0.2); }

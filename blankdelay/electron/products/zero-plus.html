@@ -4,187 +4,74 @@
     <meta charset="UTF-8">
     <title>BlankDelay — Zero Delay Plus</title>
     <link rel="stylesheet" href="../shared/app.css">
-    <link rel="stylesheet" href="../shared/bd-license.css">
+    <link rel="stylesheet" href="../shared/bd-splash.css">
+    <link rel="stylesheet" href="../shared/bd-tweaks-grid.css">
 </head>
 <body class="bd-app" data-theme="delay-plus">
     <script src="../shared/system-live.js"></script>
     <canvas id="bg-canvas" class="bg-canvas"></canvas>
-    <div id="bd-license-portal"
-        data-eyebrow="BlankDelay · Zero Delay Plus"
+    <div id="bd-splash-root"
         data-title="ZERO DELAY PLUS"
-        data-tagline="Enter your license key to unlock enhanced optimizations"
-        data-features="Latency,FPS Boost,Live Scan"></div>
+        data-short-name="Zero Delay Plus"
+        data-tagline="Optimize · Accelerate · Dominate"></div>
     <div class="bd-app-main" id="bd-app-main" hidden>
-    <div class="app">
-        <div class="topbar">
-            <div class="brand"><span class="mark"><svg viewBox="0 0 32 32"><circle cx="8" cy="16" r="3.5" fill="currentColor"/><path fill="currentColor" d="M11 16h4l14-6-3 6 3 6-14-6z"/></svg></span> BLANKDELAY</div>
-            <span class="status-pill" id="status">Checking…</span>
+        <div class="app" style="max-width:1180px">
+            <div class="topbar">
+                <div class="brand"><span class="mark"><svg viewBox="0 0 32 32"><circle cx="8" cy="16" r="3.5" fill="currentColor"/><path fill="currentColor" d="M11 16h4l14-6-3 6 3 6-14-6z"/></svg></span> BLANKDELAY <span style="opacity:.4;margin:0 6px">|</span> <span style="color:var(--accent)">Zero Delay Plus</span></div>
+                <span class="status-pill" id="admin-status-pill">Checking…</span>
+            </div>
+            <div id="tweaks-grid-root"></div>
+            <div class="log" id="log" style="max-width:1180px;margin:18px auto 0;"><div>BlankDelay Zero Delay Plus engine ready.</div></div>
         </div>
-
-        <div class="hero">
-            <span class="tag">Ultimate PC Latency & FPS Optimizer</span>
-            <h1>Zero Delay Plus</h1>
-            <p>The enhanced zero delay experience. Everything in Zero Delay plus advanced FPS optimizations, GPU scheduling, HPET control, and deep system latency fixes.</p>
-        </div>
-
-        <div class="admin-warning card" id="admin-warning" hidden>
-            <h3>⚠ Administrator Required</h3>
-            <p>This app needs admin privileges to modify registry and system settings.</p>
-            <button class="btn btn-primary" id="elevate-btn">Restart as Admin</button>
-        </div>
-
-        <!-- License handled by bd-license portal -->
-
-        <div class="grid" id="metrics-grid">
-            <div class="card"><h3>Input Delay</h3><div class="metric" id="metric-delay">—</div></div>
-            <div class="card"><h3>FPS Target</h3><div class="metric" id="metric-fps">—</div></div>
-            <div class="card"><h3>GPU Scheduling</h3><div class="metric" id="metric-gpu">—</div></div>
-            <div class="card"><h3>Status</h3><div class="metric" id="metric-status" style="font-size:16px">Locked</div></div>
-        </div>
-
-        <div class="tweaks-section" id="tweaks-section" hidden>
-            <h3 class="section-title">Latency Optimizations</h3>
-            <div class="toggles" id="tweak-toggles-latency"></div>
-
-            <h3 class="section-title" style="margin-top:18px">FPS Optimizations</h3>
-            <div class="toggles" id="tweak-toggles-fps"></div>
-
-            <div class="actions">
-                <button class="btn btn-primary" id="apply-btn" disabled>Apply All Tweaks</button>
-                <button class="btn btn-ghost" id="restore-btn">Restore Defaults</button>
-        </div>
-        </div>
-
-        <div class="log" id="log"><div>BlankDelay Zero Delay Plus engine ready.</div></div>
-    </div>
     </div>
 
     <script src="../shared/background.js"></script>
-    <script src="../shared/bd-license.js"></script>
+    <script src="../shared/bd-splash.js"></script>
+    <script src="../shared/bd-tweaks-grid.js"></script>
     <script>
-    const LATENCY_TWEAKS = [
+    const CATEGORIES = [
         {
-            id: 'nagle',
-            name: 'Disable Nagle\'s Algorithm',
-            desc: 'Removes TCP buffering — instant packet send',
-            apply: `Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\*' | ForEach-Object { $path = $_.PSPath; Set-ItemProperty -Path $path -Name TcpAckFrequency -Value 1 -Type DWord -ErrorAction SilentlyContinue; Set-ItemProperty -Path $path -Name TCPNoDelay -Value 1 -Type DWord -ErrorAction SilentlyContinue }`,
-            restore: `Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\*' | ForEach-Object { $path = $_.PSPath; Remove-ItemProperty -Path $path -Name TcpAckFrequency -ErrorAction SilentlyContinue; Remove-ItemProperty -Path $path -Name TCPNoDelay -ErrorAction SilentlyContinue }`
+            name: 'Core Latency',
+            icon: '⚡',
+            tweaks: [
+                { id: 'nagle', name: "Disable Nagle's Algorithm", desc: 'Removes TCP buffering for instant packet delivery', apply: `Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\*' | ForEach-Object { $path = $_.PSPath; Set-ItemProperty -Path $path -Name TcpAckFrequency -Value 1 -Type DWord -ErrorAction SilentlyContinue; Set-ItemProperty -Path $path -Name TCPNoDelay -Value 1 -Type DWord -ErrorAction SilentlyContinue }`, restore: `Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\*' | ForEach-Object { $path = $_.PSPath; Remove-ItemProperty -Path $path -Name TcpAckFrequency -ErrorAction SilentlyContinue; Remove-ItemProperty -Path $path -Name TCPNoDelay -ErrorAction SilentlyContinue }` },
+                { id: 'timer-res', name: 'Force Timer Resolution (0.5ms)', desc: 'Lowest possible system timer for input processing', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel' -Name GlobalTimerResolutionRequests -Value 1 -Type DWord -ErrorAction SilentlyContinue`, restore: `Remove-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel' -Name GlobalTimerResolutionRequests -ErrorAction SilentlyContinue` },
+                { id: 'network-throttle', name: 'Disable Network Throttling', desc: 'Removes packet throttle for unthrottled data flow', apply: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name NetworkThrottlingIndex -Value 0xFFFFFFFF -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name NetworkThrottlingIndex -Value 10 -Type DWord` },
+                { id: 'system-responsiveness', name: 'System Responsiveness (0%)', desc: 'All CPU to foreground — zero background waste', apply: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name SystemResponsiveness -Value 0 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name SystemResponsiveness -Value 20 -Type DWord` },
+                { id: 'game-priority', name: 'Game Priority (Highest)', desc: 'Games scheduling = max priority 6', apply: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name Priority -Value 6 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'Scheduling Category' -Value 'High' -Type String; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'SFIO Priority' -Value 'High' -Type String`, restore: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name Priority -Value 2 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'Scheduling Category' -Value 'Medium' -Type String; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'SFIO Priority' -Value 'Normal' -Type String` },
+                { id: 'power-throttle', name: 'Disable Power Throttling', desc: 'Prevents Windows from throttling app performance', apply: `if (!(Test-Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling')) { New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling' -Name PowerThrottlingOff -Value 1 -Type DWord`, restore: `Remove-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling' -Name PowerThrottlingOff -ErrorAction SilentlyContinue` },
+                { id: 'dynamic-tick', name: 'Disable Dynamic Tick', desc: 'Keeps CPU timer interrupts constant for steadier polling', apply: `bcdedit /set disabledynamictick yes`, restore: `bcdedit /deletevalue disabledynamictick` },
+                { id: 'priority-sep', name: 'CPU Quantum (Short/Fixed)', desc: 'Max foreground quantum for the active game', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl' -Name Win32PrioritySeparation -Value 26 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl' -Name Win32PrioritySeparation -Value 2 -Type DWord` }
+            ]
         },
         {
-            id: 'timer-res',
-            name: 'Force Timer Resolution (0.5ms)',
-            desc: 'Lowest possible system timer for input processing',
-            apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel' -Name GlobalTimerResolutionRequests -Value 1 -Type DWord -ErrorAction SilentlyContinue`,
-            restore: `Remove-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel' -Name GlobalTimerResolutionRequests -ErrorAction SilentlyContinue`
+            name: 'Keyboard & Mouse',
+            icon: '⌨',
+            tweaks: [
+                { id: 'mouse-data-queue', name: 'Mouse Data Queue (Min)', desc: 'Reduces mouse buffer to 16 for instant cursor response', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\mouclass\\Parameters' -Name MouseDataQueueSize -Value 16 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\mouclass\\Parameters' -Name MouseDataQueueSize -Value 100 -Type DWord` },
+                { id: 'keyboard-data-queue', name: 'Keyboard Data Queue (Min)', desc: 'Reduces keyboard buffer for zero-delay keystrokes', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\kbdclass\\Parameters' -Name KeyboardDataQueueSize -Value 16 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\kbdclass\\Parameters' -Name KeyboardDataQueueSize -Value 100 -Type DWord` },
+                { id: 'mouse-accel', name: 'Disable Mouse Acceleration', desc: 'Forces 1:1 linear cursor movement', apply: `Set-ItemProperty -Path 'HKCU:\\Control Panel\\Mouse' -Name MouseSpeed -Value '0'; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Mouse' -Name MouseThreshold1 -Value '0'; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Mouse' -Name MouseThreshold2 -Value '0'`, restore: `Set-ItemProperty -Path 'HKCU:\\Control Panel\\Mouse' -Name MouseSpeed -Value '1'; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Mouse' -Name MouseThreshold1 -Value '6'; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Mouse' -Name MouseThreshold2 -Value '10'` },
+                { id: 'key-repeat-delay', name: 'Fastest Key Repeat Delay', desc: 'Shortest delay before keys start repeating', apply: `Set-ItemProperty -Path 'HKCU:\\Control Panel\\Keyboard' -Name KeyboardDelay -Value '0'`, restore: `Set-ItemProperty -Path 'HKCU:\\Control Panel\\Keyboard' -Name KeyboardDelay -Value '1'` },
+                { id: 'key-repeat-rate', name: 'Fastest Key Repeat Rate', desc: 'Maximum repeat rate once a key is held', apply: `Set-ItemProperty -Path 'HKCU:\\Control Panel\\Keyboard' -Name KeyboardSpeed -Value '31'`, restore: `Set-ItemProperty -Path 'HKCU:\\Control Panel\\Keyboard' -Name KeyboardSpeed -Value '15'` }
+            ]
         },
         {
-            id: 'mouse-data-queue',
-            name: 'Mouse Data Queue (Min)',
-            desc: 'Reduces mouse buffer to 16 for instant cursor response',
-            apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\mouclass\\Parameters' -Name MouseDataQueueSize -Value 16 -Type DWord`,
-            restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\mouclass\\Parameters' -Name MouseDataQueueSize -Value 100 -Type DWord`
-        },
-        {
-            id: 'keyboard-data-queue',
-            name: 'Keyboard Data Queue (Min)',
-            desc: 'Reduces keyboard buffer for zero-delay keystrokes',
-            apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\kbdclass\\Parameters' -Name KeyboardDataQueueSize -Value 16 -Type DWord`,
-            restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\kbdclass\\Parameters' -Name KeyboardDataQueueSize -Value 100 -Type DWord`
-        },
-        {
-            id: 'network-throttle',
-            name: 'Disable Network Throttling',
-            desc: 'Removes packet throttle for unthrottled data flow',
-            apply: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name NetworkThrottlingIndex -Value 0xFFFFFFFF -Type DWord`,
-            restore: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name NetworkThrottlingIndex -Value 10 -Type DWord`
-        },
-        {
-            id: 'system-responsiveness',
-            name: 'System Responsiveness (0%)',
-            desc: 'All CPU to foreground — zero background waste',
-            apply: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name SystemResponsiveness -Value 0 -Type DWord`,
-            restore: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name SystemResponsiveness -Value 20 -Type DWord`
-        },
-        {
-            id: 'game-priority',
-            name: 'Game Priority (Highest)',
-            desc: 'Games scheduling = max priority 6',
-            apply: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name Priority -Value 6 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'Scheduling Category' -Value 'High' -Type String; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'SFIO Priority' -Value 'High' -Type String`,
-            restore: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name Priority -Value 2 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'Scheduling Category' -Value 'Medium' -Type String; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'SFIO Priority' -Value 'Normal' -Type String`
-        },
-        {
-            id: 'power-throttle',
-            name: 'Disable Power Throttling',
-            desc: 'Prevents Windows from throttling app performance',
-            apply: `if (!(Test-Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling')) { New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling' -Name PowerThrottlingOff -Value 1 -Type DWord`,
-            restore: `Remove-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling' -Name PowerThrottlingOff -ErrorAction SilentlyContinue`
+            name: 'System & FPS',
+            icon: '🖥',
+            tweaks: [
+                { id: 'gpu-scheduling', name: 'Hardware GPU Scheduling', desc: 'Enables hardware-accelerated GPU scheduling (Win10 2004+)', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers' -Name HwSchMode -Value 2 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers' -Name HwSchMode -Value 1 -Type DWord` },
+                { id: 'fullscreen-opt', name: 'Disable Fullscreen Optimizations', desc: 'Removes DWM overhead in fullscreen games', apply: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehaviorMode -Value 2 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_HonorUserFSEBehaviorMode -Value 1 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehavior -Value 2 -Type DWord`, restore: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehaviorMode -Value 0 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_HonorUserFSEBehaviorMode -Value 0 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehavior -Value 0 -Type DWord` },
+                { id: 'game-dvr', name: 'Disable Game DVR / Game Bar', desc: 'Stops background recording and Xbox overlay', apply: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_Enabled -Value 0 -Type DWord; if (!(Test-Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR')) { New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR' -Name AllowGameDVR -Value 0 -Type DWord`, restore: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_Enabled -Value 1 -Type DWord; Remove-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR' -Name AllowGameDVR -ErrorAction SilentlyContinue` },
+                { id: 'visual-fx', name: 'Disable Visual Effects', desc: 'Strips animations, transparency, shadows for raw FPS', apply: `Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects' -Name VisualFXSetting -Value 2 -Type DWord; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Desktop' -Name UserPreferencesMask -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0x00,0x00,0x00)) -Type Binary`, restore: `Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects' -Name VisualFXSetting -Value 0 -Type DWord; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Desktop' -Name UserPreferencesMask -Value ([byte[]](0x9E,0x3E,0x07,0x80,0x12,0x00,0x00,0x00)) -Type Binary` },
+                { id: 'game-mode', name: 'Enable Game Mode', desc: 'Dedicates system resources when games are running', apply: `if (!(Test-Path 'HKCU:\\Software\\Microsoft\\GameBar')) { New-Item -Path 'HKCU:\\Software\\Microsoft\\GameBar' -Force | Out-Null }; Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\GameBar' -Name AutoGameModeEnabled -Value 1 -Type DWord`, restore: `Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\GameBar' -Name AutoGameModeEnabled -Value 0 -Type DWord` },
+                { id: 'preemption', name: 'GPU Preemption (Disabled)', desc: 'Prevents GPU context switching mid-frame', apply: `if (!(Test-Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler')) { New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler' -Name EnablePreemption -Value 0 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler' -Name EnablePreemption -Value 1 -Type DWord` }
+            ]
         }
     ];
 
-    const FPS_TWEAKS = [
-        {
-            id: 'gpu-scheduling',
-            name: 'Hardware GPU Scheduling',
-            desc: 'Enables hardware-accelerated GPU scheduling (Win10 2004+)',
-            apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers' -Name HwSchMode -Value 2 -Type DWord`,
-            restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers' -Name HwSchMode -Value 1 -Type DWord`
-        },
-        {
-            id: 'fullscreen-opt',
-            name: 'Disable Fullscreen Optimizations',
-            desc: 'Removes DWM overhead in fullscreen games',
-            apply: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehaviorMode -Value 2 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_HonorUserFSEBehaviorMode -Value 1 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehavior -Value 2 -Type DWord`,
-            restore: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehaviorMode -Value 0 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_HonorUserFSEBehaviorMode -Value 0 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehavior -Value 0 -Type DWord`
-        },
-        {
-            id: 'game-dvr',
-            name: 'Disable Game DVR / Game Bar',
-            desc: 'Stops background recording and Xbox overlay',
-            apply: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_Enabled -Value 0 -Type DWord; if (!(Test-Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR')) { New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR' -Name AllowGameDVR -Value 0 -Type DWord`,
-            restore: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_Enabled -Value 1 -Type DWord; Remove-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR' -Name AllowGameDVR -ErrorAction SilentlyContinue`
-        },
-        {
-            id: 'visual-fx',
-            name: 'Disable Visual Effects',
-            desc: 'Strips animations, transparency, shadows for raw FPS',
-            apply: `Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects' -Name VisualFXSetting -Value 2 -Type DWord; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Desktop' -Name UserPreferencesMask -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0x00,0x00,0x00)) -Type Binary`,
-            restore: `Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects' -Name VisualFXSetting -Value 0 -Type DWord; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Desktop' -Name UserPreferencesMask -Value ([byte[]](0x9E,0x3E,0x07,0x80,0x12,0x00,0x00,0x00)) -Type Binary`
-        },
-        {
-            id: 'game-mode',
-            name: 'Enable Game Mode',
-            desc: 'Dedicates system resources when games are running',
-            apply: `if (!(Test-Path 'HKCU:\\Software\\Microsoft\\GameBar')) { New-Item -Path 'HKCU:\\Software\\Microsoft\\GameBar' -Force | Out-Null }; Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\GameBar' -Name AutoGameModeEnabled -Value 1 -Type DWord`,
-            restore: `Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\GameBar' -Name AutoGameModeEnabled -Value 0 -Type DWord`
-        },
-        {
-            id: 'preemption',
-            name: 'GPU Preemption (Disabled)',
-            desc: 'Prevents GPU context switching mid-frame',
-            apply: `if (!(Test-Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler')) { New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler' -Name EnablePreemption -Value 0 -Type DWord`,
-            restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler' -Name EnablePreemption -Value 1 -Type DWord`
-        }
-    ];
-
-    (async function() {
+    (async function () {
+        const status = document.getElementById('admin-status-pill');
         const log = document.getElementById('log');
-        const status = document.getElementById('status');
-        const tweaksSection = document.getElementById('tweaks-section');
-        const latencyContainer = document.getElementById('tweak-toggles-latency');
-        const fpsContainer = document.getElementById('tweak-toggles-fps');
-        const applyBtn = document.getElementById('apply-btn');
-        const restoreBtn = document.getElementById('restore-btn');
-        let licensed = false;
-        let isAdmin = false;
-
-        await BdLicensePortal.init({
-            onUnlock: () => {
-                licensed = true;
-                addLog('License validated — all tweaks unlocked.', 'ok');
-                unlockTweaks();
-            }
-        });
-
         function addLog(msg, type) {
             const line = document.createElement('div');
             line.className = type || '';
@@ -192,149 +79,26 @@
             log.prepend(line);
         }
 
-        isAdmin = await window.blankDelay.checkAdmin();
-        if (isAdmin) {
-            status.textContent = 'Admin ✓';
-            status.classList.add('admin-ok');
-            addLog('Running as Administrator.', 'ok');
-        } else {
-            status.textContent = 'No Admin';
-            document.getElementById('admin-warning').hidden = false;
-            addLog('Not running as admin — tweaks require elevation.', 'warn');
-        }
-
-        document.getElementById('elevate-btn')?.addEventListener('click', () => {
-            window.blankDelay.restartAsAdmin();
-        });
-
-        const info = await window.blankDelay.getProductInfo();
-        BlankSystemLive.ensureScanPanel();
-        BlankSystemLive.startPolling('latency');
-        addLog('Live system scan started.', 'ok');
-
-        function buildToggles(container, tweaks) {
-            container.innerHTML = '';
-            tweaks.forEach(tweak => {
-                const row = document.createElement('div');
-                row.className = 'toggle-row';
-                row.innerHTML = `
-                    <div><span>${tweak.name}</span><p>${tweak.desc}</p></div>
-                    <div class="switch on" data-id="${tweak.id}" data-label="${tweak.name}"></div>
-                `;
-                container.appendChild(row);
-            });
-            container.querySelectorAll('.switch').forEach(sw => {
-                sw.addEventListener('click', () => {
-                    sw.classList.toggle('on');
-                    addLog(`${sw.dataset.label} ${sw.classList.contains('on') ? 'enabled' : 'disabled'}`);
+        await BdSplash.init({
+            onUnlock: async () => {
+                addLog('License validated — Zero Delay Plus unlocked.', 'ok');
+                BdTweaksGrid.init({
+                    mountId: 'tweaks-grid-root',
+                    productLabel: 'Zero Delay Plus',
+                    subtitle: 'Enhanced latency + FPS optimizations. Apply instantly, persist after restart.',
+                    categories: CATEGORIES,
+                    onAdminStatus: (isAdmin) => {
+                        status.textContent = isAdmin ? 'Admin ✓' : 'No Admin';
+                        status.classList.toggle('admin-ok', isAdmin);
+                        addLog(isAdmin ? 'Running as Administrator.' : 'Not running as admin — click Restart as Admin.', isAdmin ? 'ok' : 'warn');
+                    },
+                    onApplied: () => BlankSystemLive.refresh && BlankSystemLive.refresh('latency'),
+                    onReverted: () => BlankSystemLive.refresh && BlankSystemLive.refresh('latency')
                 });
-            });
-        }
-
-        function unlockTweaks() {
-            tweaksSection.hidden = false;
-            applyBtn.disabled = false;
-            buildToggles(latencyContainer, LATENCY_TWEAKS);
-            buildToggles(fpsContainer, FPS_TWEAKS);
-        }
-
-        function getEnabledTweaks() {
-            const all = [...LATENCY_TWEAKS, ...FPS_TWEAKS];
-            const enabled = [];
-            document.querySelectorAll('.switch.on').forEach(sw => {
-                const tweak = all.find(t => t.id === sw.dataset.id);
-                if (tweak) enabled.push({ id: tweak.id, name: tweak.name, cmd: tweak.apply });
-            });
-            return enabled;
-        }
-
-        applyBtn?.addEventListener('click', async () => {
-            if (!licensed) { addLog('Activate license first.', 'warn'); return; }
-            if (!isAdmin) { addLog('Admin required — click "Restart as Admin".', 'warn'); return; }
-
-            const tweaks = getEnabledTweaks();
-            if (!tweaks.length) { addLog('No tweaks selected.', 'warn'); return; }
-
-            applyBtn.disabled = true;
-            applyBtn.textContent = 'Applying…';
-            addLog(`Applying ${tweaks.length} optimizations…`);
-
-            const results = await BlankSystemLive.animateApply(
-                tweaks.map(t => t.name),
-                () => window.blankDelay.runTweaks(tweaks)
-            );
-            let ok = 0;
-            results.forEach(r => {
-                if (r.success) { ok++; addLog(`✓ ${r.name}`, 'ok'); }
-                else addLog(`✗ ${r.name} — ${r.error}`, 'warn');
-            });
-
-            if (ok > 0) { await BlankSystemLive.refresh('latency'); status.textContent = 'Active ✓'; }
-
-            addLog(`Done — ${ok}/${tweaks.length} applied.`, 'ok');
-            applyBtn.disabled = false;
-            applyBtn.textContent = 'Re-Apply Tweaks';
-        });
-
-        restoreBtn?.addEventListener('click', async () => {
-            if (!isAdmin) { addLog('Admin required to restore.', 'warn'); return; }
-            restoreBtn.disabled = true;
-            restoreBtn.textContent = 'Restoring…';
-            addLog('Restoring all defaults…');
-
-            const all = [...LATENCY_TWEAKS, ...FPS_TWEAKS];
-            const cmds = all.map(t => ({ id: t.id, name: t.name, cmd: t.restore }));
-            const results = await window.blankDelay.runTweaks(cmds);
-            let ok = 0;
-            results.forEach(r => {
-                if (r.success) { ok++; addLog(`↩ ${r.name} restored`, 'ok'); }
-                else addLog(`↩ ${r.name} — skip`, 'warn');
-            });
-
-            document.getElementById('metric-delay').textContent = '—';
-            document.getElementById('metric-fps').textContent = '—';
-            document.getElementById('metric-gpu').textContent = '—';
-            document.getElementById('metric-status').textContent = 'Defaults';
-            document.getElementById('metric-status').classList.remove('text-ok');
-            status.textContent = 'Restored';
-            addLog(`Defaults restored (${ok}/${cmds.length}).`, 'ok');
-            await BlankSystemLive.refresh('latency');
-            restoreBtn.disabled = false;
-            restoreBtn.textContent = 'Restore Defaults';
-        });
-
-        // Background canvas
-        const canvas = document.getElementById('bg-canvas');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            let w, h, particles = [];
-            function resize() {
-                w = canvas.width = window.innerWidth;
-                h = canvas.height = window.innerHeight;
-                if (!particles.length) {
-                    particles = Array.from({ length: 55 }, () => ({
-                        x: Math.random() * w, y: Math.random() * h,
-                        vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6,
-                        r: Math.random() * 1.8 + 0.3
-                    }));
-                }
+                BlankSystemLive.ensureScanPanel?.();
+                BlankSystemLive.startPolling?.('latency');
             }
-            function draw() {
-                ctx.clearRect(0, 0, w, h);
-                particles.forEach(p => {
-                    p.x += p.vx; p.y += p.vy;
-                    if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
-                    if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(142,184,255,0.2)';
-                    ctx.fill();
-                });
-                requestAnimationFrame(draw);
-            }
-            resize(); draw();
-            window.addEventListener('resize', resize);
-        }
+        });
     })();
     </script>
 </body>

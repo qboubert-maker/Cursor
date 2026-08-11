@@ -27,11 +27,13 @@ function createWindow(productKey) {
     const isHub = productKey === 'hub';
     const isTrainer = productKey === 'aim' || productKey === 'shotgun';
     const isMacro = productKey === 'controller' || productKey === 'keyboard';
+    const isDashboard = productKey === 'premium';
+    const isGrid = productKey === 'zero' || productKey === 'zero-plus' || productKey === 'fps' || productKey === 'ping';
     const win = new BrowserWindow({
-        width: isHub ? 1440 : (isTrainer ? 1400 : (isMacro ? 1240 : 960)),
-        height: isHub ? 920 : (isTrainer ? 960 : (isMacro ? 920 : 700)),
-        minWidth: isTrainer ? 1100 : (isMacro ? 1000 : 900),
-        minHeight: isTrainer ? 720 : (isMacro ? 640 : 560),
+        width: isHub ? 1440 : (isTrainer ? 1400 : (isMacro ? 1280 : (isDashboard ? 1320 : (isGrid ? 1240 : 960)))),
+        height: isHub ? 920 : (isTrainer ? 960 : (isMacro ? 900 : (isDashboard ? 860 : (isGrid ? 820 : 700)))),
+        minWidth: isTrainer ? 1100 : (isMacro ? 1080 : (isDashboard ? 1080 : (isGrid ? 1020 : 900))),
+        minHeight: isTrainer ? 720 : (isMacro ? 680 : (isDashboard ? 640 : (isGrid ? 620 : 560))),
         backgroundColor: '#000000',
         autoHideMenuBar: true,
         webPreferences: {

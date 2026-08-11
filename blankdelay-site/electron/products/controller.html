@@ -2,124 +2,30 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BlankDelay - Controller Macro V2</title>
+<title>BlankDelay — Controller Macro V2</title>
 <link rel="stylesheet" href="../shared/app.css">
-<link rel="stylesheet" href="../shared/bd-license.css">
-<link rel="stylesheet" href="../shared/macro-suite.css">
-<link rel="stylesheet" href="../shared/macro-pro.css">
+<link rel="stylesheet" href="../shared/bd-splash.css">
+<link rel="stylesheet" href="../shared/bd-controller-shell.css">
 </head>
-<body class="bd-app bd-macro-app bd-macro-pro" data-theme="controller">
+<body class="bd-app bd-macro-app" data-theme="controller">
 <canvas id="bg-canvas" class="bg-canvas"></canvas>
-<div id="bd-license-portal"
-  data-eyebrow="BlankDelay - Controller Macro V2"
-  data-title="CONTROLLER V2"
-  data-tagline="Enter your license key to unlock controller macros"
-  data-features="Controller,Record,Fortnite,Reactive 3D"></div>
+<div id="bd-splash-root"
+    data-title="CONTROLLER MACRO V2"
+    data-short-name="Controller Macro"
+    data-tagline="Optimize · Accelerate · Dominate"></div>
 <div class="bd-app-main" id="bd-app-main" hidden>
-<div class="app">
-  <div class="topbar">
-    <div class="brand"><span class="mark"><svg viewBox="0 0 32 32"><circle cx="8" cy="16" r="3.5" fill="currentColor"/><path fill="currentColor" d="M11 16h4l14-6-3 6 3 6-14-6z"/></svg></span> BLANKDELAY</div>
-    <span class="status-pill" id="status-pill">Ready</span>
-  </div>
-  <div class="hero macro-pro-hero">
-    <span class="tag">Macro Pro - Controller</span>
-    <h1>Controller Macro V2</h1>
-    <p>Map gamepad buttons to keyboard and mouse macros. Record, edit timelines, per-game Fortnite profiles, and reactive 3D visualization synced to playback.</p>
-  </div>
-  <div class="tweaks-section" id="tweaks-section" hidden>
-    <div class="macro-pro-shell">
-      <div class="macro-pro-viz">
-        <div class="macro-pro-viz-head">
-          <h3>3D Reactive Input</h3>
-          <div class="macro-pro-live"><span class="live-pulse-dot"></span> LIVE</div>
-        </div>
-        <div class="macro-pro-viz-stage" id="macro-pro-viz-stage">
-          <canvas id="holo-fx" class="holo-fx-canvas"></canvas>
-          <div class="holo-flash"></div>
-          <div id="holo-svg-root" class="holo-svg-root"></div>
-          <div id="holo-readout" class="holo-readout"></div>
-        </div>
-        <div class="macro-pro-cam-btns">
-          <button type="button" class="active" data-view="front">Front</button>
-          <button type="button" data-view="iso">Isometric</button>
-          <button type="button" data-view="top">Top-down</button>
-        </div>
-        <div class="macro-pro-viz-foot" id="holo-label">Detecting device...</div>
-      </div>
-      <div class="macro-pro-workspace">
-        <nav class="macro-pro-nav">
-          <button type="button" class="active" data-sec="map">Map</button>
-          <button type="button" data-sec="record">Record</button>
-          <button type="button" data-sec="library">Library</button>
-          <button type="button" data-sec="settings">Settings</button>
-        </nav>
-        <div class="macro-pro-status-row">
-          <div class="macro-pro-stat"><span class="macro-pro-stat-label">Profile</span><span class="macro-pro-stat-span" id="stat-profile">Fortnite</span></div>
-          <div class="macro-pro-stat"><span class="macro-pro-stat-label">Status</span><span class="macro-pro-stat-span" id="stat-status">Ready</span></div>
-          <div class="macro-pro-stat"><span class="macro-pro-stat-label">Macro</span><span class="macro-pro-stat-span" id="stat-macro">Idle</span></div>
-        </div>
-        
-        <div class="macro-pro-section active" data-sec="map">
-          <div class="macro-pro-toolbar">
-            <button type="button" class="btn btn-ghost btn-sm" id="btn-fortnite">Fortnite Preset</button>
-            <span class="macro-pro-hint">OS-level input - works in any game - F12 panic stop</span>
-          </div>
-          <div class="macro-pro-map" id="macro-pro-map"></div>
-          <div class="macro-pro-actions">
-            <button type="button" class="btn btn-primary" id="btn-activate">Activate Mappings</button>
-            <button type="button" class="btn btn-ghost" id="btn-deactivate">Stop All</button>
-          </div>
-        </div>
-        <div class="macro-pro-section" data-sec="record">
-          <p class="macro-pro-hint">Record keystrokes and delays, edit the timeline, then play back or assign to hotkeys.</p>
-          <div class="macro-pro-record-bar">
-            <button type="button" class="btn btn-primary btn-sm" id="btn-record">Record</button>
-            <button type="button" class="btn btn-ghost btn-sm" id="btn-play-tl">Play Timeline</button>
-          </div>
-          <div class="macro-pro-timeline" id="macro-pro-timeline"></div>
-        </div>
-        <div class="macro-pro-section" data-sec="library">
-          <p class="macro-pro-hint">Save, load, import and export macro profiles. Share configs with friends.</p>
-          <div class="macro-pro-library">
-            <input type="text" id="profile-name" placeholder="Profile name" class="macro-pro-input">
-            <select id="profile-select" class="macro-pro-input"><option value="">- profile -</option></select>
-            <button type="button" class="btn btn-ghost btn-sm" id="btn-save-profile">Save</button>
-            <button type="button" class="btn btn-ghost btn-sm" id="btn-load-profile">Load</button>
-            <button type="button" class="btn btn-ghost btn-sm" id="btn-export">Export JSON</button>
-            <label class="btn btn-ghost btn-sm">Import<input type="file" id="import-file" accept=".json" hidden></label>
-          </div>
-        </div>
-        <div class="macro-pro-section" data-sec="settings">
-          <div class="macro-pro-settings">
-            <label>Game profile<select id="game-select" class="macro-pro-input"><option value="fortnite">Fortnite</option><option value="universal">Universal (all games)</option></select></label>
-            <label>Playback delay <input type="range" id="delay-slider" min="1" max="100" value="5"><span id="delay-val">5ms</span></label>
-            <label>Random jitter <input type="range" id="jitter-slider" min="0" max="30" value="0"><span id="jitter-val">0ms</span></label>
-            <label>Loop count <input type="number" id="loops-input" min="1" max="99" value="8" class="macro-pro-input"></label>
-            <label class="macro-pro-check"><input type="checkbox" id="caps-layer"> Caps Lock modifier layer (second macro set)</label>
-            <label>Text expansion shortcode <input type="text" id="text-short" placeholder="!addr" class="macro-pro-input"></label>
-            <label>Expansion output <input type="text" id="text-expand" placeholder="123 Main St..." class="macro-pro-input"></label>
-          </div>
-          <p class="macro-pro-hint">Per-game profiles activate only when the target executable is focused. Low-latency OS input - no game injection.</p>
-        </div>
-        <div class="macro-pro-log" id="macro-pro-log"><div>Macro Pro - unlock license to begin.</div></div>
-      </div>
-    </div>
-  </div>
-</div>
+    <div id="controller-shell-root"></div>
 </div>
 <script src="../shared/background.js"></script>
-<script src="../shared/bd-license.js"></script>
-<script src="../shared/device-holo-models.js"></script>
-<script src="../shared/device-holo.js"></script>
-<script src="../shared/macro-pro-engine.js"></script>
+<script src="../shared/bd-splash.js"></script>
+<script src="../shared/bd-controller-shell.js"></script>
 <script>
-(async function(){
-  const engine=BlankMacroPro.init({product:"controller"});
-  await BdLicensePortal.init({onUnlock:function(){
-    document.getElementById("tweaks-section").hidden=false;
-    engine.unlock();
-    document.getElementById("status-pill").textContent="Licensed";
-  }});
+(async function () {
+    await BdSplash.init({
+        onUnlock: () => {
+            BdControllerShell.init({ mountId: 'controller-shell-root', productLabel: 'Controller Macro' });
+        }
+    });
 })();
 </script>
 </body>

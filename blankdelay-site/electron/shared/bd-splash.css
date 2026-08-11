@@ -1,0 +1,120 @@
+/* BlankDelay — splash + license activation flow (all products) */
+.bd-splash-screen {
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse 120% 90% at 50% 40%, rgba(255,255,255,0.05) 0%, transparent 55%), #000;
+    overflow: hidden;
+}
+.bd-splash-screen.panel-hidden, body.bd-licensed .bd-splash-screen { display: none !important; }
+
+.bd-splash-corner {
+    position: absolute; display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.08em; color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+}
+.bd-splash-corner .mark2 {
+    width: 20px; height: 20px; border-radius: 6px; background: #fff; color: #000;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.bd-splash-corner .mark2 svg { width: 12px; height: 12px; }
+.bd-splash-corner-tl { top: 22px; left: 26px; }
+.bd-splash-corner-br { bottom: 22px; right: 26px; text-align: right; flex-direction: row-reverse; color: rgba(255,255,255,0.35); font-weight: 700; }
+.bd-splash-corner-br .accent2 { color: var(--accent); }
+.bd-splash-power { position: absolute; bottom: 22px; left: 26px; font-size: 10px; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); text-transform: uppercase; font-weight: 600; }
+
+/* ---- Stage 1: logo splash ---- */
+.bd-splash-stage {
+    position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;
+    text-align: center; animation: bdSplashIn 0.9s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes bdSplashIn { from { opacity: 0; transform: translateY(18px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+.bd-splash-word {
+    display: flex; align-items: baseline; gap: 2px; cursor: pointer; user-select: none;
+    filter: drop-shadow(0 0 60px rgba(255,255,255,0.18));
+}
+.bd-splash-word:hover { filter: drop-shadow(0 0 80px rgba(255,255,255,0.28)); }
+.bd-splash-word span {
+    font-size: clamp(56px, 11vw, 118px); font-weight: 900; letter-spacing: -0.02em; line-height: 1;
+    font-family: var(--font);
+}
+.bd-splash-word .w-blank { color: #fff; }
+.bd-splash-word .w-delay { color: var(--accent); }
+
+.bd-splash-product {
+    margin-top: 14px; font-size: clamp(13px, 2vw, 18px); font-weight: 800; letter-spacing: 0.32em;
+    text-transform: uppercase; color: var(--accent);
+}
+.bd-splash-tagline {
+    margin-top: 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.28em;
+    text-transform: uppercase; color: rgba(255,255,255,0.4);
+}
+.bd-splash-tap {
+    margin-top: 46px; padding: 12px 26px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.75); font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; cursor: pointer; transition: all 0.2s;
+    animation: bdTapPulse 2.2s ease-in-out infinite;
+}
+.bd-splash-tap:hover { border-color: var(--accent); color: #fff; background: rgba(255,255,255,0.08); }
+@keyframes bdTapPulse { 0%,100% { opacity: 0.75; } 50% { opacity: 1; } }
+
+/* ---- Stage 2: key card ---- */
+.bd-splash-key-wrap {
+    position: relative; z-index: 2; width: min(420px, 90vw);
+    animation: bdSplashIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+}
+.bd-splash-key-wrap[hidden] { display: none !important; }
+.bd-splash-key-card {
+    padding: 34px 30px 28px; text-align: center; border-radius: 20px;
+    background: linear-gradient(165deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 60px var(--glow);
+}
+.bd-splash-key-mark {
+    width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 14px;
+    background: #fff; color: #000; display: flex; align-items: center; justify-content: center;
+}
+.bd-splash-key-mark svg { width: 28px; height: 28px; }
+.bd-splash-key-card h2 { font-size: 20px; font-weight: 900; letter-spacing: 0.02em; margin-bottom: 4px; }
+.bd-splash-key-card .sub { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 22px; }
+
+.bd-splash-key-input-wrap {
+    position: relative; display: flex; align-items: center; text-align: left;
+    background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 12px; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.bd-splash-key-input-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+.bd-splash-key-input-wrap input {
+    flex: 1; border: none; background: transparent; padding: 15px 14px;
+    font-family: var(--mono); font-size: 14px; font-weight: 600; letter-spacing: 0.06em;
+    color: #fff; width: 100%;
+}
+.bd-splash-key-input-wrap input::placeholder { color: rgba(255,255,255,0.28); }
+
+.bd-splash-activate {
+    width: 100%; margin-top: 14px; padding: 15px 20px; border-radius: 12px; border: none;
+    background: var(--accent); color: var(--accent-text); font-size: 13px; font-weight: 800;
+    letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 6px 24px var(--glow);
+}
+.bd-splash-activate:hover { transform: translateY(-1px); }
+.bd-splash-activate:disabled { opacity: 0.6; cursor: default; transform: none; }
+
+.bd-splash-key-msg { margin-top: 12px; font-size: 12px; min-height: 18px; font-family: var(--mono); }
+.bd-splash-key-msg.error { color: #ff6767; }
+.bd-splash-validated {
+    margin-top: 14px; padding: 12px 14px; border-radius: 10px; text-align: left;
+    background: rgba(90,255,150,0.1); border: 1px solid rgba(90,255,150,0.35);
+    color: #6dffb0; font-size: 12px; font-family: var(--mono); font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+}
+.bd-splash-validated[hidden] { display: none !important; }
+.bd-splash-back {
+    margin-top: 18px; font-size: 11px; color: rgba(255,255,255,0.4); cursor: pointer;
+    text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;
+}
+.bd-splash-back:hover { color: rgba(255,255,255,0.7); }
+
+body.bd-app .bd-app-main[hidden] { display: none !important; }
+body.bd-licensed .bd-app-main { display: block !important; }

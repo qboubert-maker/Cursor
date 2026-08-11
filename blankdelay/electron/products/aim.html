@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <title>BlankDelay - Aim Bundle</title>
 <link rel="stylesheet" href="../shared/app.css">
-<link rel="stylesheet" href="../shared/bd-license.css">
+<link rel="stylesheet" href="../shared/bd-splash.css">
 <link rel="stylesheet" href="../shared/aim-assist.css">
 </head>
 <body class="bd-app bd-aim-pro" data-theme="aim">
 <canvas id="bg-canvas" class="bg-canvas"></canvas>
-<div id="bd-license-portal" data-eyebrow="BlankDelay - Aim Bundle" data-title="AIM BUNDLE" data-tagline="Enter your license key to unlock Fortnite aim assist" data-features="Fortnite,All Weapons,Profiles"></div>
+<div id="bd-splash-root" data-title="AIM BUNDLE" data-short-name="Aim Bundle" data-tagline="Optimize · Accelerate · Dominate"></div>
 <div class="bd-app-main" id="bd-app-main" hidden>
 <div class="app">
-<div class="topbar"><div class="brand"><span class="mark"><svg viewBox="0 0 32 32"><circle cx="8" cy="16" r="3.5" fill="currentColor"/><path fill="currentColor" d="M11 16h4l14-6-3 6 3 6-14-6z"/></svg></span> BLANKDELAY</div><span class="status-pill" id="status-pill">Ready</span></div>
+<div class="topbar"><div class="brand"><span class="mark"><svg viewBox="0 0 32 32"><circle cx="8" cy="16" r="3.5" fill="currentColor"/><path fill="currentColor" d="M11 16h4l14-6-3 6 3 6-14-6z"/></svg></span> BLANKDELAY <span style="opacity:.4;margin:0 6px">|</span> <span style="color:var(--accent)">Aim Bundle</span></div><span class="status-pill" id="status-pill">Ready</span></div>
 <div class="hero"><span class="tag">Fortnite Aim Assist Pro</span><h1>Aim Bundle</h1><p>Universal toggle lock-on for every weapon class in Fortnite. Per-class strength and radius, HUD weapon detection, toggle key, and profile library.</p></div>
 <div class="tweaks-section" id="tweaks-section" hidden>
 <div class="aim-pro-shell">
@@ -66,12 +66,12 @@
 </div>
 </div>
 <script src="../shared/background.js"></script>
-<script src="../shared/bd-license.js"></script>
+<script src="../shared/bd-splash.js"></script>
 <script src="../shared/aim-assist-engine.js"></script>
 <script>
 (async function(){
   const engine=BlankAimAssist.init({product:"aim"});
-  await BdLicensePortal.init({onUnlock:function(){
+  await BdSplash.init({onUnlock:function(){
     document.getElementById("tweaks-section").hidden=false;
     engine.unlock();
     document.getElementById("status-pill").textContent="Licensed";
