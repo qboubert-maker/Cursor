@@ -19,12 +19,13 @@ const BD_EMAIL_SEND = (function () {
     }
 
     function deliveryUrl(order) {
-        if (typeof buildDeliveryUrl === 'function') {
-            return buildDeliveryUrl(order, window.location.origin);
+        const sessionId = order.id || '';
+        if (sessionId) {
+            return window.location.origin + '/thank-you.html?session_id=' + encodeURIComponent(sessionId);
         }
         const slug = order.slug === 'cart' ? (order.items?.[0]?.slug || 'premium') : (order.slug || 'premium');
         const q = new URLSearchParams({ p: slug, order: order.id || '', key: order.license || '', email: order.email || '' });
-        return window.location.origin + '/delivery.html?' + q.toString();
+        return window.location.origin + '/thank-you.html?' + q.toString();
     }
 
     async function sendOrderEmail(order) {

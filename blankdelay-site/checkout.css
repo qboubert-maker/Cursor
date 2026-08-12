@@ -300,6 +300,9 @@ body.cart-open { overflow: hidden; }
 }
 .thank-license-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 .thank-license-row .license-display { font-size: 13px; padding: 10px; }
+.thankyou-license-big { font-size: clamp(16px, 4vw, 22px); text-align: center; }
+.thankyou-hero-card { border-color: rgba(255,255,255,0.22); box-shadow: 0 0 40px rgba(255,255,255,0.06); }
+.thankyou-hero-card .license-display { border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.08); }
 
 /* ── AI Help Support ── */
 .faq-support-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }

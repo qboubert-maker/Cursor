@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thank You — BlankDelay</title>
+    <title>Your License Key — BlankDelay</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="checkout.css">
@@ -32,52 +32,73 @@
     <main class="thankyou-page">
         <div class="wrap thankyou-wrap">
             <div class="thankyou-icon">✓</div>
-            <h1 class="thankyou-title">Thank you for your purchase!</h1>
-            <p class="thankyou-sub">Your order is confirmed. <strong id="thank-product">Blank Premium Utility</strong> is ready — we've sent everything to your inbox.</p>
-            <p class="thankyou-discount mono" id="thank-email-status" style="display:none;margin-bottom:16px;"></p>
-            <p class="thankyou-discount mono" id="thank-discount" style="display:none;margin-bottom:16px;color:#6f6;"></p>
+            <h1 class="thankyou-title">Payment complete!</h1>
+            <p class="thankyou-sub">Your <strong id="thank-product">BlankDelay product</strong> is ready. Copy your license key below, download the app, and paste the key when it asks.</p>
 
-            <div class="thankyou-card card" id="thank-subscription" hidden>
-                <h3>Blank Pass Monthly</h3>
-                <p id="thank-sub-status" style="font-size:15px;margin-bottom:8px;"></p>
-                <p class="mono" id="thank-sub-expiry" style="color:var(--text-dim);font-size:13px;"></p>
-                <p class="checkout-note" id="thank-sub-note" style="margin-top:12px;"></p>
+            <div class="thankyou-card card" id="thank-loading">
+                <p style="text-align:center;color:var(--text-dim);padding:20px 0;">Loading your license key…</p>
             </div>
 
-            <div class="thankyou-card card" id="thank-download-card">
-                <h3>Download</h3>
-                <p style="font-size:14px;color:var(--text-dim);margin-bottom:14px;">Install the BlankDelay desktop app, then enter your license key from email.</p>
-                <a href="https://blankdelay.com/downloads/BlankDelay-Setup.exe" class="btn btn-primary" id="thank-download-btn" target="_blank" rel="noopener">Download BlankDelay App</a>
-                <div id="thank-security-notice"></div>
+            <div id="thank-no-session" hidden>
+                <div class="thankyou-card card">
+                    <h3>Complete your purchase</h3>
+                    <p style="font-size:14px;color:var(--text-dim);line-height:1.6;">This page shows your license key after Stripe checkout. If you just paid, refresh in a few seconds or check your email.</p>
+                    <a href="index.html#products" class="btn btn-primary" style="margin-top:16px;display:inline-block;">Browse Products</a>
+                </div>
             </div>
 
-            <div class="thankyou-card card">
-                <h3>Your License Key</h3>
-                <div class="license-display" id="thank-license">BD-XXXX-XXXX-XXXX</div>
-                <p class="email-sent">📧 Sent to <strong id="thank-email">you@email.com</strong> with download link &amp; setup guide</p>
-            </div>
+            <div id="thank-ready" hidden>
+                <!-- LICENSE KEY FIRST — main thing customer needs -->
+                <div class="thankyou-card card thankyou-hero-card">
+                    <h3>Your License Key</h3>
+                    <p style="font-size:13px;color:var(--text-dim);margin-bottom:14px;">Copy this key — you'll paste it into the BlankDelay app after download.</p>
+                    <div class="license-display thankyou-license-big" id="thank-license">BD-XXXX-XXXX-XXXX</div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+                        <button type="button" class="btn btn-primary" id="thank-copy-key">Copy License Key</button>
+                        <button type="button" class="btn btn-ghost" id="thank-copy-key-inline">Copy Key</button>
+                    </div>
+                </div>
 
-            <div class="thankyou-card card" id="thank-licenses" hidden></div>
+                <!-- DOWNLOAD SECOND -->
+                <div class="thankyou-card card" id="thank-download-card">
+                    <h3>Download Your App</h3>
+                    <p style="font-size:14px;color:var(--text-dim);margin-bottom:14px;">Install BlankDelay, open your product, tap to continue, then paste the license key above.</p>
+                    <a href="https://blankdelay.com/downloads/BlankDelay-Setup.exe" class="btn btn-primary" id="thank-download-btn" target="_blank" rel="noopener" style="width:100%;text-align:center;">Download BlankDelay App</a>
+                    <div id="thank-security-notice"></div>
+                </div>
 
-            <div class="thankyou-card card">
-                <h3>Order Details</h3>
-                <p style="font-size:14px;color:var(--text-dim);margin-bottom:8px;">Order ID: <span class="mono" id="thank-order-id">—</span></p>
-                <p style="font-size:14px;color:var(--text-dim);" id="thank-price-line">Total paid: <strong id="thank-price">$29.99</strong> · One-time purchase</p>
-                <ol class="thankyou-steps">
-                    <li><span>1</span><div>Check your email (including spam) for your license key and secure download link.</div></li>
-                    <li><span>2</span><div>Download and install the BlankDelay desktop app. <strong>If Windows says it may be a virus, see the yellow notice above — it is a false warning. Click More info → Run anyway.</strong></div></li>
-                    <li><span>3</span><div>Enter your license key to activate — optimization starts instantly.</div></li>
-                    <li><span>4</span><div>Need help? Open <a href="index.html#faq" style="color:#fff;text-decoration:underline;">AI Support</a> on the site for instant answers.</div></li>
-                </ol>
+                <p class="thankyou-discount mono" id="thank-email-status" style="display:none;margin-bottom:16px;text-align:center;"></p>
+
+                <div class="thankyou-card card">
+                    <h3>Quick Setup</h3>
+                    <ol class="thankyou-steps">
+                        <li><span>1</span><div><strong>Copy</strong> your license key above.</div></li>
+                        <li><span>2</span><div><strong>Download</strong> and run the app (More info → Run anyway if Windows warns you).</div></li>
+                        <li><span>3</span><div>Open your product → <strong>tap to continue</strong> → paste your key → Activate.</div></li>
+                    </ol>
+                    <p class="email-sent" style="margin-top:16px;">📧 Backup copy sent to <strong id="thank-email">your email</strong></p>
+                </div>
+
+                <div class="thankyou-card card">
+                    <h3>Order Details</h3>
+                    <p style="font-size:14px;color:var(--text-dim);margin-bottom:8px;">Order ID: <span class="mono" id="thank-order-id">—</span></p>
+                    <p style="font-size:14px;color:var(--text-dim);">Total paid: <strong id="thank-price">—</strong></p>
+                </div>
+
+                <div class="thankyou-card card" id="thank-licenses" hidden></div>
+                <div class="thankyou-card card" id="thank-subscription" hidden>
+                    <h3>Blank Pass Monthly</h3>
+                    <p id="thank-sub-status" style="font-size:15px;margin-bottom:8px;"></p>
+                    <p class="mono" id="thank-sub-expiry" style="color:var(--text-dim);font-size:13px;"></p>
+                </div>
             </div>
 
             <div class="thankyou-actions">
-                <a href="index.html#specials" class="btn btn-primary" id="thank-manage-pass" hidden>Manage Subscription</a>
-                <a href="index.html#products" class="btn btn-primary" id="thank-browse">Browse More Products</a>
-                <a href="index.html#faq" class="btn btn-ghost">AI Support</a>
+                <a href="index.html#products" class="btn btn-ghost" id="thank-browse">Browse More Products</a>
+                <a href="index.html#faq" class="btn btn-ghost">Need Help?</a>
             </div>
 
-            <p class="checkout-note" style="margin-top:28px;text-align:center;">14-day money-back guarantee · Free lifetime updates · 100% safe</p>
+            <p class="checkout-note" style="margin-top:28px;text-align:center;">14-day money-back guarantee · Free lifetime updates</p>
         </div>
     </main>
 

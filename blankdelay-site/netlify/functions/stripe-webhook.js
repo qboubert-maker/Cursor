@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const { bdLicenseFromSessionId } = require("./license-key");
 
 const EMAILJS = {
   serviceId: "service_6e3o39a",
@@ -74,10 +75,6 @@ function downloadLinkForSlug(slug) {
   return `https://blankdelay.com/downloads/${cat.setupFile}`;
 }
 
-function generateLicenseKey() {
-  const seg = () => Math.random().toString(36).substring(2, 6).toUpperCase();
-  return `BD-${seg()}-${seg()}-${seg()}`;
-}
 
 function formatPrice(n) {
   return "$" + Number(n).toFixed(2);
@@ -141,15 +138,9 @@ async function fetchStripeSession(sessionId, secretKey) {
 
 async function sendEmailJS(order) {
   const slug = order.slug || "premium";
-  const deliveryLink =
-    "https://blankdelay.com/delivery.html?p=" +
-    encodeURIComponent(slug) +
-    "&order=" +
-    encodeURIComponent(order.id) +
-    "&key=" +
-    encodeURIComponent(order.license) +
-    "&email=" +
-    encodeURIComponent(order.email);
+  const thankYouLink =
+    "https://blankdelay.com/thank-you.html?session_id=" + encodeURIComponent(order.id);
+  const deliveryLink = thankYouLink;
   const downloadLink = downloadLinkForSlug(slug);
   const body = {
     service_id: EMAILJS.serviceId,
@@ -250,8 +241,12 @@ exports.handler = async (event) => {
     email,
     name: session.customer_details?.name || "Customer",
     price,
-    license: generateLicenseKey(),
+    license: bdLicenseFromSessionId(session.id),
   };
+
+  const thankYouLink =
+    "https://blankdelay.com/thank-you.html?session_id=" + encodeURIComponent(order.id);
+  const deliveryLink = thankYouLink;
 
   try {
     await sendEmailJS(order);

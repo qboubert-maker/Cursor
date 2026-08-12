@@ -152,7 +152,7 @@
         {
             id: 'delivery',
             keys: ['deliver', 'delivery', 'email', 'license', 'key', 'download', 'receive', 'after buy', 'thank you'],
-            answer: 'After purchase:<br>1. Thank-you page shows license key instantly<br>2. Email within 1–2 minutes with key + <strong>BlankDelay-Setup.exe</strong> link<br>3. Install app → open your product → activate key<br>4. Check spam if email is missing'
+            answer: 'After purchase you land on the <strong>thank-you page</strong> with your license key and download button right on screen — copy the key, download the app, paste it in. A backup copy is also emailed within 1–2 minutes.'
         },
         {
             id: 'promo',

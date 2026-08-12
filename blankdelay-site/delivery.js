@@ -30,6 +30,10 @@ function buildDeliveryUrl(order, origin) {
     if (!document.getElementById('delivery-page')) return;
 
     const params = new URLSearchParams(window.location.search);
+    if (params.get('session_id') || params.get('key') || params.get('order')) {
+        window.location.replace('thank-you.html?' + params.toString());
+        return;
+    }
     const slug = params.get('p') || 'premium';
     const product = BD_STORE.CATALOG[slug] || BD_STORE.CATALOG.premium;
     const app = BD_PRODUCT_APPS[slug] || { label: product.name, launch: 'npm run electron:hub' };
