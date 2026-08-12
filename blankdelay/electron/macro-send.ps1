@@ -41,6 +41,16 @@ function Send-Part($part) {
         'TAB' { [System.Windows.Forms.SendKeys]::SendWait('{TAB}') }
         'SHIFT' { [System.Windows.Forms.SendKeys]::SendWait('+') }
         'CTRL' { [System.Windows.Forms.SendKeys]::SendWait('^') }
+        'LCTRL' {
+            [BdInput]::KeyDown(0x11)
+            Start-Sleep -Milliseconds 8
+            [BdInput]::KeyUp(0x11)
+        }
+        'RCTRL' {
+            [BdInput]::KeyDown(0x11)
+            Start-Sleep -Milliseconds 8
+            [BdInput]::KeyUp(0x11)
+        }
         'ALT' { [System.Windows.Forms.SendKeys]::SendWait('%') }
         'ESC' { [System.Windows.Forms.SendKeys]::SendWait('{ESC}') }
         default {

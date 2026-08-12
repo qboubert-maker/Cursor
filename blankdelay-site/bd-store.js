@@ -56,7 +56,7 @@ const BD_STORE = {
         return this.getUsers().find(u => u.email === email);
     },
 
-    creditAffiliate(code, amount) {
+    creditAffiliate(code, amount, productName) {
         const users = this.getUsers();
         const u = users.find(x => x.code === code);
         if (!u) return;
@@ -65,8 +65,24 @@ const BD_STORE = {
         u.sales += 1;
         this.saveUsers(users);
         const sales = this.get('bd-aff-sales', []);
-        sales.push({ code, amount, commission, date: Date.now() });
+        sales.push({ code, amount, commission, product: productName || 'BlankDelay Product', date: Date.now() });
         this.set('bd-aff-sales', sales);
+    },
+
+    trackAffiliateClick(code) {
+        if (!code) return;
+        const clicks = this.get('bd-aff-clicks', {});
+        clicks[code] = (clicks[code] || 0) + 1;
+        this.set('bd-aff-clicks', clicks);
+    },
+
+    getAffiliateClicks(code) {
+        const clicks = this.get('bd-aff-clicks', {});
+        return clicks[code] || 0;
+    },
+
+    getAffiliateSales(code) {
+        return this.get('bd-aff-sales', []).filter(s => s.code === code);
     },
 
     getReferrals() { return this.get('bd-referrals', []); },

@@ -21,19 +21,25 @@
 .bd-splash-screen.panel-hidden, body.bd-licensed .bd-splash-screen { display: none !important; }
 
 .bd-splash-corner {
-    position: absolute; display: flex; align-items: center; gap: 8px;
-    font-size: 11px; font-weight: 800; letter-spacing: 0.08em; color: rgba(255,255,255,0.7);
-    text-transform: uppercase;
+    position: absolute; display: flex; align-items: center; gap: 12px;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.08em; color: rgba(255,255,255,0.75);
+    text-transform: uppercase; z-index: 3;
 }
 .bd-splash-corner .mark2 {
-    width: 20px; height: 20px; border-radius: 6px; background: #fff; color: #000;
+    width: 28px; height: 28px; border-radius: 8px; background: #fff; color: #000;
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.bd-splash-corner .mark2 svg { width: 12px; height: 12px; }
-.bd-splash-corner-tl { top: 22px; left: 26px; }
-.bd-splash-corner-br { bottom: 22px; right: 26px; text-align: right; flex-direction: row-reverse; color: rgba(255,255,255,0.35); font-weight: 700; }
-.bd-splash-corner-br .accent2 { color: var(--accent); }
-.bd-splash-power { position: absolute; bottom: 22px; left: 26px; font-size: 10px; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); text-transform: uppercase; font-weight: 600; }
+.bd-splash-corner .mark2 svg { width: 15px; height: 15px; }
+.bd-splash-corner-text { display: flex; flex-direction: column; gap: 3px; line-height: 1.15; }
+.bd-splash-corner-brand { font-size: 12px; letter-spacing: 0.12em; }
+.bd-splash-corner-product { font-size: 10px; letter-spacing: 0.14em; color: var(--accent); font-weight: 700; }
+.bd-splash-corner-tl { top: 28px; left: 32px; }
+.bd-splash-corner-br {
+    bottom: 28px; right: 32px; text-align: right; flex-direction: column; align-items: flex-end;
+    gap: 4px; color: rgba(255,255,255,0.35); font-weight: 700;
+}
+.bd-splash-corner-br .accent2 { color: var(--accent); display: block; font-size: 10px; letter-spacing: 0.12em; }
+.bd-splash-power { position: absolute; bottom: 28px; left: 32px; font-size: 10px; letter-spacing: 0.12em; color: rgba(255,255,255,0.28); text-transform: uppercase; font-weight: 600; z-index: 3; }
 
 /* ---- Stage 1: logo splash ---- */
 .bd-splash-stage {
@@ -48,22 +54,22 @@
 }
 .bd-splash-word:hover { filter: drop-shadow(0 0 80px rgba(255,255,255,0.28)); }
 .bd-splash-word span {
-    font-size: clamp(56px, 11vw, 118px); font-weight: 900; letter-spacing: -0.02em; line-height: 1;
+    font-size: clamp(48px, 9vw, 96px); font-weight: 900; letter-spacing: 0.02em; line-height: 1;
     font-family: var(--font);
 }
-.bd-splash-word .w-blank { color: #fff; }
+.bd-splash-word .w-blank { color: #fff; margin-right: 10px; }
 .bd-splash-word .w-delay { color: var(--accent); }
 
 .bd-splash-product {
-    margin-top: 14px; font-size: clamp(13px, 2vw, 18px); font-weight: 800; letter-spacing: 0.32em;
+    margin-top: 22px; font-size: clamp(12px, 1.8vw, 16px); font-weight: 800; letter-spacing: 0.38em;
     text-transform: uppercase; color: var(--accent);
 }
 .bd-splash-tagline {
-    margin-top: 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.28em;
+    margin-top: 14px; font-size: 11px; font-weight: 700; letter-spacing: 0.3em;
     text-transform: uppercase; color: rgba(255,255,255,0.4);
 }
 .bd-splash-tap {
-    margin-top: 46px; padding: 12px 26px; border-radius: 999px;
+    margin-top: 52px; padding: 14px 32px; border-radius: 999px;
     border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.04);
     color: rgba(255,255,255,0.75); font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
     text-transform: uppercase; cursor: pointer; transition: all 0.2s;

@@ -62,11 +62,6 @@
         <a href="#faq" class="btn btn-ghost btn-sm">AI Support</a>
     </div>
 
-    <div class="purchase-toast" id="purchase-toast">
-        <div class="toast-dot"></div>
-        <div><span class="toast-name">Tyler R.</span> just bought <span class="toast-product">Blank Premium</span></div>
-    </div>
-
     <nav id="nav">
         <div class="nav-shell">
             <a href="#home" class="nav-logo">
@@ -103,7 +98,6 @@
 
     <!-- HOME -->
     <section class="hero" id="home">
-        <div class="hero-badge mono">V4 Out Now! · Statistically proven · 0ms target latency</div>
         <h1 class="hero-title">
             <span class="dim">Delay? We Left</span><br>
             <span class="hit">That BLANK.</span>
@@ -122,7 +116,7 @@
         </div>
         <div class="hero-cta">
             <a href="#products" class="btn btn-primary btn-lg">Buy Products Now</a>
-            <a href="#quiz" class="btn btn-ghost btn-lg">Find Your Setup</a>
+            <a href="#faq" class="btn btn-ghost btn-lg">Get Support</a>
         </div>
 
         <div class="hero-showcase">
@@ -156,24 +150,6 @@
         <span>Chapter / Season ready — BlankDelay updated for latest game patches</span>
     </div>
 
-    <!-- BEFORE / AFTER -->
-    <section class="section section-tight" id="results">
-        <div class="wrap">
-            <div class="section-head center">
-                <div class="section-tag">Real Results</div>
-                <h2 class="section-title">See the difference</h2>
-                <p class="section-desc">Drag the slider — average user results after BlankDelay optimization.</p>
-            </div>
-            <div class="ba-slider" id="ba-slider">
-                <div class="ba-before"><span class="ba-label">Before</span><div class="ba-stat">144 FPS · 18ms delay</div></div>
-                <div class="ba-after"><span class="ba-label">After</span><div class="ba-stat">240 FPS · 0ms delay</div></div>
-                <div class="ba-handle"></div>
-                <input type="range" min="0" max="100" value="50">
-            </div>
-        </div>
-    </section>
-
-    <!-- BEFORE / AFTER -->
     <section class="section products-section" id="products">
         <canvas id="matrix-canvas" class="matrix-canvas"></canvas>
         <div class="wrap">
@@ -190,7 +166,7 @@
                         <h3 class="category-title">System Tweaks</h3>
                         <p class="category-desc">Optimize your PC for maximum gaming performance</p>
                     </div>
-                    <span class="category-badge mono">Updated · V4 Out Now!</span>
+                    <span class="category-badge mono">Updated</span>
                 </div>
                 <div class="product-grid">
 
@@ -422,22 +398,6 @@
                 <div class="compare-row"><span>Instant results</span><span class="yes">✓</span><span class="no">Varies</span></div>
                 <div class="compare-row"><span>One-click apply</span><span class="yes">✓</span><span class="yes">✓</span></div>
                 <div class="compare-row"><span>1000+ games</span><span class="yes">✓</span><span class="no">Limited</span></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- PLATFORM QUIZ -->
-    <section class="section" id="quiz">
-        <div class="wrap">
-            <div class="quiz-box card" id="platform-quiz">
-                <div class="section-tag">Platform Finder</div>
-                <h2 class="section-title" style="margin-bottom:16px">What do you play on?</h2>
-                <div class="quiz-opts">
-                    <button class="quiz-opt card" data-result="Recommended: Blank Premium + Mouse Latency Fix for maximum PC performance.">🖥️ PC</button>
-                    <button class="quiz-opt card" data-result="Recommended: Multiversal Console Pack + Controller Optimization for zero-delay pad play.">🎮 Console</button>
-                    <button class="quiz-opt card" data-result="Recommended: Multiversal Console Pack — mobile touch tuning included.">📱 Mobile</button>
-                </div>
-                <p class="quiz-result" id="quiz-result" hidden></p>
             </div>
         </div>
     </section>
@@ -784,9 +744,12 @@
             <div class="aff-stats">
                 <div class="aff-stat"><span class="lbl">Total Earnings</span><span class="val mono" id="aff-earnings">$0.00</span></div>
                 <div class="aff-stat"><span class="lbl">Sales</span><span class="val mono" id="aff-sales">0</span></div>
+                <div class="aff-stat"><span class="lbl">Link Clicks</span><span class="val mono" id="aff-clicks">0</span></div>
             </div>
             <p class="checkout-note">Your code: <strong class="mono" id="aff-code"></strong></p>
             <div class="aff-link-box mono" id="aff-link"></div>
+            <p class="checkout-note" style="margin-top:12px;">Recent sales from your link</p>
+            <div class="aff-sales-list" id="aff-sales-list" style="max-height:160px;overflow:auto;margin-top:8px;font-size:12px;"></div>
             <div class="actions" style="margin-top:14px;display:flex;gap:10px;">
                 <button class="btn btn-primary" id="aff-copy-btn">Copy Link</button>
                 <button class="btn btn-ghost" id="aff-logout">Log Out</button>

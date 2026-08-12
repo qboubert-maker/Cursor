@@ -1,0 +1,35 @@
+/* BlankDelay — e7d-style live gamepad viewer */
+.bd-gp-viewer { --gp-lit: #fff; --gp-dim: rgba(255,255,255,0.18); }
+.bd-gp-toolbar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+}
+.bd-gp-toolbar select {
+    padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border);
+    background: rgba(0,0,0,0.55); color: #fff; font-size: 11px; font-weight: 700; font-family: inherit;
+}
+.bd-gp-status {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--dim); padding: 7px 12px; border-radius: 999px; border: 1px solid var(--border);
+}
+.bd-gp-status.ok { color: #fff; border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.06); }
+.bd-gp-stage {
+    position: relative; min-height: 320px; border-radius: 18px; overflow: hidden;
+    background: radial-gradient(ellipse 70% 60% at 50% 45%, rgba(255,255,255,0.06), transparent 70%), #050505;
+    border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+}
+.bd-gp-canvas { width: 100%; padding: 12px 18px 8px; }
+.bd-gp-svg { width: 100%; max-width: 480px; height: auto; display: block; margin: 0 auto; filter: drop-shadow(0 12px 40px rgba(255,255,255,0.08)); }
+.bd-gp-svg .lit, .bd-gp-svg g.lit circle, .bd-gp-svg rect.lit, .bd-gp-svg circle.lit {
+    fill: var(--gp-lit) !important; stroke: var(--gp-lit) !important;
+    filter: drop-shadow(0 0 10px var(--gp-lit));
+}
+.bd-gp-wait { text-align: center; padding: 40px 20px; color: var(--dim); }
+.bd-gp-wait strong { display: block; color: #fff; font-size: 16px; margin: 14px 0 6px; letter-spacing: 0.04em; }
+.bd-gp-wait p { font-size: 12px; max-width: 280px; margin: 0 auto; line-height: 1.5; }
+.bd-gp-wait .pulse-ring {
+    width: 54px; height: 54px; margin: 0 auto; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.35); animation: bdGpPulse 1.6s ease-out infinite;
+}
+@keyframes bdGpPulse { 0% { transform: scale(0.85); opacity: 1; } 100% { transform: scale(1.35); opacity: 0; } }
+.bd-gp-meta { margin-top: 10px; font-size: 10px; color: var(--dim); text-align: center; word-break: break-all; }

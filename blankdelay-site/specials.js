@@ -482,19 +482,45 @@
 
         if (!user) return;
 
-        const base = location.origin + location.pathname.replace('index.html', '');
+        const base = (location.origin + location.pathname).replace(/index\.html$/i, '');
 
-        const link = bdStripeUrl('premium') || `${base}index.html#products`;
+        const link = `${base}?aff=${encodeURIComponent(user.code)}#products`.replace('?#', '?').replace(/([^:])\/{2,}/g, '$1/');
 
-        $('aff-link').textContent = link;
+        const branded = `https://blankdelay.com/blankdelayaffiliatetweaks?aff=${encodeURIComponent(user.code)}`;
+
+        $('aff-link').textContent = branded;
 
         $('aff-code').textContent = user.code;
 
-        $('aff-earnings').textContent = formatPrice(user.earnings);
+        $('aff-earnings').textContent = formatPrice(user.earnings || 0);
 
-        $('aff-sales').textContent = user.sales;
+        $('aff-sales').textContent = String(user.sales || 0);
+
+        if ($('aff-clicks')) $('aff-clicks').textContent = String(BD_STORE.getAffiliateClicks?.(user.code) || 0);
 
         $('aff-email').textContent = email;
+
+        const list = $('aff-sales-list');
+
+        if (list) {
+
+            const sales = BD_STORE.getAffiliateSales?.(user.code) || [];
+
+            list.innerHTML = sales.length
+
+                ? sales.slice().reverse().slice(0, 20).map(s =>
+
+                    `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;gap:10px;">
+
+                        <span>${s.product || 'Product'} · ${new Date(s.date).toLocaleDateString()}</span>
+
+                        <strong class="mono">${formatPrice(s.commission || 0)}</strong>
+
+                    </div>`).join('')
+
+                : '<p class="checkout-note">No sales yet — share your BlankDelay Affiliate Tweaks link.</p>';
+
+        }
 
         openModal('affiliate-dash-modal');
 
@@ -528,9 +554,23 @@
 
     const params = new URLSearchParams(location.search);
 
-    if (params.get('aff')) sessionStorage.setItem('bd-aff-pending', params.get('aff'));
+    if (params.get('aff')) {
+
+        sessionStorage.setItem('bd-aff-pending', params.get('aff'));
+
+        BD_STORE.trackAffiliateClick?.(params.get('aff'));
+
+    }
 
     if (params.get('ref')) sessionStorage.setItem('bd-ref-pending', params.get('ref'));
+
+    // Pretty path support: /blankdelayaffiliatetweaks?aff=CODE
+
+    if (/blankdelayaffiliatetweaks/i.test(location.pathname) && params.get('aff')) {
+
+        BD_STORE.trackAffiliateClick?.(params.get('aff'));
+
+    }
 
 })();
 

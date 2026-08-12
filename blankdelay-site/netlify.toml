@@ -16,6 +16,16 @@
   status = 301
   force = true
 
+# Pretty affiliate landing URL
+[[redirects]]
+  from = "/blankdelayaffiliatetweaks"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/blankdelayaffiliatetweaks/"
+  to = "/index.html"
+  status = 200
+
 # Product-named Setup.exe URLs → same hub installer (one file on disk)
 [[redirects]]
   from = "/downloads/BlankDelay-Blank-Premium-Utility-Setup.exe"

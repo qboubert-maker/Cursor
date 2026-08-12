@@ -7,10 +7,15 @@
     function buildHtml(cfg) {
         return `
         <div class="bd-splash-corner bd-splash-corner-tl">
-            <span class="mark2">${MARK_SVG}</span> BLANKDELAY <span style="opacity:.4">|</span> ${cfg.shortName}
+            <span class="mark2">${MARK_SVG}</span>
+            <div class="bd-splash-corner-text">
+                <span class="bd-splash-corner-brand">BLANKDELAY</span>
+                <span class="bd-splash-corner-product">${cfg.shortName}</span>
+            </div>
         </div>
         <div class="bd-splash-corner bd-splash-corner-br">
-            <span>BLANKDELAY</span><span class="accent2">&nbsp;${cfg.shortName}</span>
+            <span class="bd-splash-corner-brand">BLANKDELAY</span>
+            <span class="accent2">${cfg.shortName}</span>
         </div>
         <div class="bd-splash-power">Powered by BlankDelay Systems</div>
 

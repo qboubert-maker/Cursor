@@ -1104,20 +1104,6 @@
         });
     }
 
-    /* ── Purchase notifications ── */
-    const products = ['Blank Premium Utility', 'Zero Delay Plus', 'Zero Delay', 'FPS Boost', 'Ping Optimizer', 'Controller Macro', 'Keyboard Macro', 'Aim Bundle', 'Shotgun Pack'];
-    const names = ['Tyler R.', 'Marcus J.', 'Jordan K.', 'Derek M.', 'Chris N.', 'Ryan T.', 'Brandon L.', 'Kevin H.'];
-    const toast = document.getElementById('purchase-toast');
-    function showToast() {
-        if (!toast) return;
-        toast.querySelector('.toast-name').textContent = names[Math.floor(Math.random() * names.length)];
-        toast.querySelector('.toast-product').textContent = products[Math.floor(Math.random() * products.length)];
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 4500);
-    }
-    setTimeout(showToast, 5000);
-    setInterval(showToast, 14000 + Math.random() * 8000);
-
     document.querySelectorAll('.platform-card').forEach(card => {
         card.addEventListener('mouseenter', () => card.style.borderColor = 'rgba(255,255,255,0.35)');
         card.addEventListener('mouseleave', () => card.style.borderColor = '');

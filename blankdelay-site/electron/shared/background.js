@@ -15,25 +15,7 @@
     const isMacroApp = () => document.body?.classList?.contains('bd-macro-app');
     const isLicenseScreen = () => isBdUniverse() && !document.body.classList.contains('bd-licensed');
 
-    if (isMacroApp()) {
-        function macroBgResize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        function macroBgTick() {
-            const w = canvas.width, h = canvas.height;
-            const g = ctx.createRadialGradient(w * 0.5, h * 0.35, 0, w * 0.5, h * 0.35, Math.max(w, h) * 0.7);
-            g.addColorStop(0, 'rgba(20,20,20,1)');
-            g.addColorStop(1, 'rgba(0,0,0,1)');
-            ctx.fillStyle = g;
-            ctx.fillRect(0, 0, w, h);
-            if (!isLicenseScreen()) requestAnimationFrame(macroBgTick);
-        }
-        window.addEventListener('resize', macroBgResize);
-        macroBgResize();
-        macroBgTick();
-        return;
-    }
+    /* Splash + product apps all use the same live reactive site background */
 
     function resize() {
         w = canvas.width = window.innerWidth;
@@ -285,19 +267,6 @@
 
     function tick() {
         const t = Date.now() * 0.001;
-        if (isLicenseScreen()) {
-            liteFrame++;
-            if (liteFrame % 2 !== 0) { requestAnimationFrame(tick); return; }
-            ctx.fillStyle = '#010108';
-            ctx.fillRect(0, 0, w, h);
-            const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w, h) * 0.45);
-            g.addColorStop(0, 'rgba(255,255,255,0.06)');
-            g.addColorStop(1, 'rgba(0,0,0,0)');
-            ctx.fillStyle = g;
-            ctx.fillRect(0, 0, w, h);
-            requestAnimationFrame(tick);
-            return;
-        }
         ctx.fillStyle = '#010108';
         ctx.fillRect(0, 0, w, h);
 
