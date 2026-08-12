@@ -183,3 +183,5 @@ const BdTweaksGrid = (function () {
 
     return { init, toast };
 })();
+
+window.BdTweaksGrid = BdTweaksGrid;

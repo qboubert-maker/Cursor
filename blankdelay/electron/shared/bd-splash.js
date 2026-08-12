@@ -23,16 +23,21 @@
             <div class="bd-splash-word" id="bd-splash-logo">
                 <span class="w-blank">BLANK</span><span class="w-delay">DELAY</span>
             </div>
+            <div class="bd-splash-divider"></div>
             <div class="bd-splash-product">${cfg.title}</div>
             <div class="bd-splash-tagline">${cfg.tagline}</div>
             <button type="button" class="bd-splash-tap" id="bd-splash-tap">Tap to continue</button>
         </div>
 
         <div class="bd-splash-key-wrap" id="bd-splash-key-wrap" hidden>
+            <div class="bd-splash-key-brand">
+                <span class="kb-name">BLANK<span class="accent3">DELAY</span></span>
+                <span class="kb-product">${cfg.shortName}</span>
+            </div>
             <div class="bd-splash-key-card">
                 <div class="bd-splash-key-mark">${MARK_SVG}</div>
-                <h2>${cfg.title}</h2>
-                <p class="sub">Enter your license key to unlock ${cfg.shortName}</p>
+                <h2>Activate ${cfg.shortName}</h2>
+                <p class="sub">Enter the license key from your purchase email</p>
                 <div class="bd-splash-key-input-wrap">
                     <input id="bd-splash-key-input" type="text" placeholder="BD-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
                 </div>

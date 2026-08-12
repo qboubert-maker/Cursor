@@ -79,17 +79,59 @@ function runDeviceScan() {
     }
 }
 
+let macroDaemon = null;
+
+function ensureMacroDaemon() {
+    if (macroDaemon && !macroDaemon.killed && macroDaemon.stdin.writable) return macroDaemon;
+    const script = path.join(__dirname, 'macro-daemon.ps1');
+    if (!fs.existsSync(script)) return null;
+    try {
+        macroDaemon = spawn('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', script], {
+            stdio: ['pipe', 'pipe', 'pipe'],
+            windowsHide: true
+        });
+        macroDaemon.on('exit', () => { macroDaemon = null; });
+        macroDaemon.on('error', () => { macroDaemon = null; });
+    } catch (_) {
+        macroDaemon = null;
+    }
+    return macroDaemon;
+}
+
+function stopMacroDaemon() {
+    if (!macroDaemon) return;
+    try {
+        macroDaemon.stdin.write('EXIT\n');
+        macroDaemon.kill();
+    } catch (_) {}
+    macroDaemon = null;
+}
+
+// Games read scancode input, so all macro output goes through the scancode sender.
+// The daemon keeps one PowerShell alive because spawning per-fire cannot keep up
+// with drag/spam macros running on 8ms loops.
 function sendMacroKeys(keys, delayMs, mode, repeat) {
-    const script = path.join(__dirname, 'macro-send.ps1');
-    const safeKeys = String(keys || '').replace(/"/g, '');
+    const safeKeys = String(keys || '').replace(/["|\r\n]/g, '');
+    if (!safeKeys) return { success: false, error: 'no keys' };
     const m = mode || 'once';
     const r = repeat || 8;
+    const d = delayMs || 5;
+
+    const daemon = ensureMacroDaemon();
+    if (daemon && daemon.stdin.writable) {
+        try {
+            daemon.stdin.write(`${safeKeys}|${d}|${m}|${r}\n`);
+            return { success: true, via: 'daemon' };
+        } catch (_) { /* fall through to one-shot */ }
+    }
+
+    const script = path.join(__dirname, 'macro-send.ps1');
     try {
         execSync(
-            `powershell -NoProfile -ExecutionPolicy Bypass -File "${script}" -Keys "${safeKeys}" -DelayMs ${delayMs || 20} -Mode "${m}" -Repeat ${r}`,
-            { timeout: 15000 }
+            `powershell -NoProfile -ExecutionPolicy Bypass -File "${script}" -Keys "${safeKeys}" -DelayMs ${d} -Mode "${m}" -Repeat ${r}`,
+            { timeout: 15000, windowsHide: true }
         );
-        return { success: true };
+        return { success: true, via: 'oneshot' };
     } catch (err) {
         return { success: false, error: err.message };
     }
@@ -336,12 +378,14 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
     stopMacroEngine();
     stopAimAssist();
+    stopMacroDaemon();
     if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('will-quit', () => {
     stopMacroEngine();
     stopAimAssist();
+    stopMacroDaemon();
     globalShortcut.unregisterAll();
 });
 

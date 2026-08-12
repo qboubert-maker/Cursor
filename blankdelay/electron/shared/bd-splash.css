@@ -49,29 +49,35 @@
 @keyframes bdSplashIn { from { opacity: 0; transform: translateY(18px) scale(0.97); } to { opacity: 1; transform: none; } }
 
 .bd-splash-word {
-    display: flex; align-items: baseline; gap: 2px; cursor: pointer; user-select: none;
+    display: flex; align-items: baseline; justify-content: center; gap: 14px;
+    cursor: pointer; user-select: none;
     filter: drop-shadow(0 0 60px rgba(255,255,255,0.18));
 }
 .bd-splash-word:hover { filter: drop-shadow(0 0 80px rgba(255,255,255,0.28)); }
 .bd-splash-word span {
-    font-size: clamp(48px, 9vw, 96px); font-weight: 900; letter-spacing: 0.02em; line-height: 1;
+    font-size: clamp(44px, 8vw, 88px); font-weight: 900; letter-spacing: 0.04em; line-height: 1.05;
     font-family: var(--font);
 }
-.bd-splash-word .w-blank { color: #fff; margin-right: 10px; }
+.bd-splash-word .w-blank { color: #fff; }
 .bd-splash-word .w-delay { color: var(--accent); }
 
+.bd-splash-divider {
+    width: 76px; height: 2px; margin: 30px auto 0; border-radius: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.85;
+}
 .bd-splash-product {
-    margin-top: 22px; font-size: clamp(12px, 1.8vw, 16px); font-weight: 800; letter-spacing: 0.38em;
-    text-transform: uppercase; color: var(--accent);
+    margin-top: 26px; font-size: clamp(13px, 1.7vw, 17px); font-weight: 800; letter-spacing: 0.3em;
+    text-transform: uppercase; color: var(--accent); line-height: 1.6;
 }
 .bd-splash-tagline {
-    margin-top: 14px; font-size: 11px; font-weight: 700; letter-spacing: 0.3em;
-    text-transform: uppercase; color: rgba(255,255,255,0.4);
+    margin-top: 16px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.26em;
+    text-transform: uppercase; color: rgba(255,255,255,0.42); line-height: 1.8;
 }
 .bd-splash-tap {
-    margin-top: 52px; padding: 14px 32px; border-radius: 999px;
+    margin-top: 58px; padding: 15px 36px; border-radius: 999px;
     border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.04);
-    color: rgba(255,255,255,0.75); font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.78); font-size: 11px; font-weight: 800; letter-spacing: 0.16em;
     text-transform: uppercase; cursor: pointer; transition: all 0.2s;
     animation: bdTapPulse 2.2s ease-in-out infinite;
 }
@@ -80,10 +86,18 @@
 
 /* ---- Stage 2: key card ---- */
 .bd-splash-key-wrap {
-    position: relative; z-index: 2; width: min(420px, 90vw);
+    position: relative; z-index: 2; width: min(440px, 90vw);
     animation: bdSplashIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
 }
 .bd-splash-key-wrap[hidden] { display: none !important; }
+.bd-splash-key-brand {
+    display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 22px;
+}
+.bd-splash-key-brand .kb-name { font-size: 20px; font-weight: 900; letter-spacing: 0.2em; }
+.bd-splash-key-brand .kb-name .accent3 { color: var(--accent); }
+.bd-splash-key-brand .kb-product {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.45);
+}
 .bd-splash-key-card {
     padding: 34px 30px 28px; text-align: center; border-radius: 20px;
     background: linear-gradient(165deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
@@ -100,8 +114,11 @@
     background: #fff; color: #000; display: flex; align-items: center; justify-content: center;
 }
 .bd-splash-key-mark svg { width: 28px; height: 28px; }
-.bd-splash-key-card h2 { font-size: 20px; font-weight: 900; letter-spacing: 0.02em; margin-bottom: 4px; }
-.bd-splash-key-card .sub { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 22px; }
+.bd-splash-key-card h2 {
+    font-size: 15px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
+    margin-bottom: 10px; line-height: 1.5;
+}
+.bd-splash-key-card .sub { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 24px; line-height: 1.6; }
 
 .bd-splash-key-input-wrap {
     position: relative; display: flex; align-items: center; text-align: left;

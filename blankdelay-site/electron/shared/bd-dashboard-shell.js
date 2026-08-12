@@ -219,3 +219,5 @@ const BdDashboardShell = (function () {
 
     return { init };
 })();
+
+window.BdDashboardShell = BdDashboardShell;
