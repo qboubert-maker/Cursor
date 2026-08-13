@@ -224,7 +224,11 @@ async function testKeyboard() {
     check('macro rows rendered', window.document.querySelectorAll('.bd-cs-macro').length >= 6);
     check('Fortnite keybinds present', window.document.querySelectorAll('[data-bind]').length >= 10);
 
-    window.document.querySelector('[data-toggle="crouch-spam"]').click();
+    check('optimizer-style macros present',
+        !!window.document.querySelector('[data-toggle="pickup"]')
+        && !!window.document.querySelector('[data-toggle="double-edit"]')
+        && !!window.document.querySelector('[data-toggle="pickaxe"]'));
+    window.document.querySelector('[data-toggle="pickup"]').click();
     window.document.getElementById('bd-cs-master').click();
     await new Promise((r) => setTimeout(r, 150));
     check('macro toggle reports live',

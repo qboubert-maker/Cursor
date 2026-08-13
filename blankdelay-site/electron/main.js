@@ -1,7 +1,8 @@
-const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { exec, execSync, spawn } = require('child_process');
+const { validateDiscordLinkedKey } = require('./license-discord');
 
 const PRODUCTS = {
     premium: 'Blank Premium Utility',
@@ -14,8 +15,6 @@ const PRODUCTS = {
     aim: 'Aim Bundle',
     shotgun: 'Shotgun Pack'
 };
-
-const PURCHASE_KEY_RE = /^BD-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/i;
 
 let macroState = { active: false, shortcuts: [], gamepadPoll: null, panicRegistered: false };
 let aimState = { running: false, armed: false, interval: null, toggleKey: null, togglePadBtn: -1, config: null, forceClass: null, forceShotgun: false, locked: false, input: { firing: false } };
@@ -52,6 +51,29 @@ function createWindow(productKey) {
 
 const productArg = process.argv.find(a => a.startsWith('--product='));
 const productKey = productArg ? productArg.split('=')[1] : 'hub';
+
+function findControllerMacroExe() {
+    const candidates = [
+        path.join(__dirname, '..', 'apps', 'controller-macro', 'runtime', 'BlankDelay-Controller-Macro.exe'),
+        path.join(process.env.LOCALAPPDATA || '', 'BlankDelay', 'ControllerMacroV2', 'BlankDelay-Controller-Macro.exe'),
+        path.join(__dirname, '..', 'downloads', 'BlankDelay-Controller-Macro.exe')
+    ];
+    return candidates.find((p) => p && fs.existsSync(p)) || null;
+}
+
+function launchExternalControllerOrWindow() {
+    if (productKey === 'controller' && process.platform === 'win32') {
+        const exe = findControllerMacroExe();
+        if (exe) {
+            try {
+                spawn(exe, [], { detached: true, stdio: 'ignore' }).unref();
+                setTimeout(() => app.quit(), 400);
+                return true;
+            } catch (_) { /* fall through to in-hub UI */ }
+        }
+    }
+    return false;
+}
 
 function runMetrics(type) {
     const script = path.join(__dirname, 'metrics-runner.ps1');
@@ -202,16 +224,53 @@ function safeProfileName(name) {
     return String(name || 'Default').replace(/[<>:"/\\|?*\x00-\x1F]/g, '').trim().slice(0, 50) || 'Default';
 }
 
+function fortniteRunningFallback() {
+    if (process.platform !== 'win32') {
+        return { fortniteRunning: false, fortniteFocused: false, fortnite: false, weaponClass: 'none' };
+    }
+    try {
+        const out = execSync(
+            'tasklist /FO CSV /NH',
+            { encoding: 'utf8', timeout: 4000, windowsHide: true }
+        );
+        const lower = String(out || '').toLowerCase();
+        const running = lower.includes('fortniteclient-win64-shipping');
+        return {
+            fortnite: running,
+            fortniteRunning: running,
+            fortniteFocused: running,
+            weaponClass: running ? 'unknown' : 'none',
+            process: running ? 'FortniteClient-Win64-Shipping' : '',
+            title: '',
+            source: 'tasklist-fallback'
+        };
+    } catch (err) {
+        return { fortnite: false, fortniteRunning: false, fortniteFocused: false, weaponClass: 'unknown', error: err.message };
+    }
+}
+
 function runHudDetect() {
     const script = path.join(__dirname, 'fortnite-hud-detect.ps1');
     try {
         const out = execSync(
             `powershell -NoProfile -ExecutionPolicy Bypass -File "${script}"`,
-            { encoding: 'utf8', timeout: 4000 }
+            { encoding: 'utf8', timeout: 6000, windowsHide: true }
         );
-        return JSON.parse(out.trim());
+        const parsed = JSON.parse(out.trim());
+        // If PowerShell said not running, double-check with tasklist (customers reported false negatives)
+        if (!parsed.fortniteRunning) {
+            const fb = fortniteRunningFallback();
+            if (fb.fortniteRunning) {
+                return Object.assign({}, parsed, {
+                    fortniteRunning: true,
+                    fortniteFocused: parsed.fortniteFocused || fb.fortniteFocused,
+                    fortnite: parsed.fortniteFocused || fb.fortniteFocused
+                });
+            }
+        }
+        return parsed;
     } catch (err) {
-        return { fortnite: false, weaponClass: 'unknown', error: err.message };
+        return fortniteRunningFallback();
     }
 }
 
@@ -368,6 +427,7 @@ function saveFortniteExport(config, filename) {
 }
 
 app.whenReady().then(() => {
+    if (launchExternalControllerOrWindow()) return;
     createWindow(productKey);
     registerPanicShortcut();
     app.on('activate', () => {
@@ -391,6 +451,18 @@ app.on('will-quit', () => {
 
 ipcMain.handle('launch-product', (_e, key) => {
     if (!PRODUCTS[key]) return { success: false, error: 'Unknown product' };
+    // Controller Macro customers get the new Blank Optimizer-based build.
+    if (key === 'controller') {
+        const exe = findControllerMacroExe();
+        if (exe && process.platform === 'win32') {
+            try {
+                spawn(exe, [], { detached: true, stdio: 'ignore' }).unref();
+                return { success: true, product: key, external: true };
+            } catch (err) {
+                return { success: false, error: err.message };
+            }
+        }
+    }
     createWindow(key);
     return { success: true, product: key };
 });
@@ -400,10 +472,13 @@ ipcMain.handle('get-product-info', () => ({
     name: PRODUCTS[productKey] || 'BlankDelay'
 }));
 
-ipcMain.handle('validate-key', (_e, key) => {
-    const normalized = (key || '').trim().toUpperCase();
-    if (PURCHASE_KEY_RE.test(normalized)) return { valid: true, msg: 'License activated.' };
-    return { valid: false, msg: 'Invalid license key.' };
+ipcMain.handle('validate-key', async (_e, key) => validateDiscordLinkedKey(key, productKey));
+ipcMain.handle('open-external', async (_e, url) => {
+    if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
+        await shell.openExternal(url);
+        return { ok: true };
+    }
+    return { ok: false };
 });
 
 ipcMain.handle('run-tweaks', async (_e, tweakList) => {

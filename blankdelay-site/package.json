@@ -33,14 +33,18 @@
     },
     "files": [
       "electron/**/*",
-      "package.json"
+      "package.json",
+      "apps/controller-macro/src/**/*",
+      "apps/controller-macro/installer.nsi"
     ],
     "asar": true,
     "win": {
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "artifactName": "BlankDelay-Setup.${ext}",

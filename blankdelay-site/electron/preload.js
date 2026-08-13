@@ -11,7 +11,12 @@ contextBridge.exposeInMainWorld('blankDelay', {
     detectDevices: () => ipcRenderer.invoke('detect-devices'),
     startMacroEngine: (config) => ipcRenderer.invoke('start-macro-engine', config),
     stopMacroEngine: () => ipcRenderer.invoke('stop-macro-engine'),
-    fireMacro: (keys, delayMs) => ipcRenderer.invoke('fire-macro', keys, delayMs),
+    fireMacro: (keysOrConfig, delayMs) => {
+        if (keysOrConfig && typeof keysOrConfig === 'object') {
+            return ipcRenderer.invoke('fire-macro', keysOrConfig);
+        }
+        return ipcRenderer.invoke('fire-macro', { keys: keysOrConfig, speed: delayMs });
+    },
     pollInputState: () => ipcRenderer.invoke('poll-input-state'),
     listMacroProfiles: (product) => ipcRenderer.invoke('list-macro-profiles', product),
     saveMacroProfile: (product, name, profile) => ipcRenderer.invoke('save-macro-profile', product, name, profile),
@@ -19,6 +24,7 @@ contextBridge.exposeInMainWorld('blankDelay', {
     deleteMacroProfile: (product, name) => ipcRenderer.invoke('delete-macro-profile', product, name),
     exportFortniteSettings: (data) => ipcRenderer.invoke('export-fortnite-settings', data),
     launchProduct: (key) => ipcRenderer.invoke('launch-product', key),
+    openExternal: (url) => ipcRenderer.invoke('open-external', url),
     onMacroFired: (cb) => ipcRenderer.on('macro-fired', (_e, data) => cb(data)),
     onMacroPanic: (cb) => ipcRenderer.on('macro-panic', () => cb()),
     detectFortniteHud: () => ipcRenderer.invoke('detect-fortnite-hud'),

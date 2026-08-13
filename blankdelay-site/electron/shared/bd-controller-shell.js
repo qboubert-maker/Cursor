@@ -14,7 +14,7 @@ const BdControllerShell = (function () {
         { i: 12, ps: 'D-Pad Up', xb: 'D-Pad Up' }, { i: 13, ps: 'D-Pad Down', xb: 'D-Pad Down' },
         { i: 14, ps: 'D-Pad Left', xb: 'D-Pad Left' }, { i: 15, ps: 'D-Pad Right', xb: 'D-Pad Right' }
     ];
-    const KB_TRIGGERS = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11'];
+    const KB_TRIGGERS = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'];
 
     /* The player's Fortnite keybinds. Defaults match Fortnite's own defaults. */
     const FN_ACTIONS = [
@@ -28,6 +28,7 @@ const BdControllerShell = (function () {
         { id: 'CROUCH', name: 'Crouch', def: 'LCTRL' },
         { id: 'JUMP', name: 'Jump', def: 'SPACE' },
         { id: 'HARVEST', name: 'Harvesting Tool', def: '1' },
+        { id: 'INTERACT', name: 'Interact / Pick Up', def: 'E' },
         { id: 'SLOT1', name: 'Weapon Slot 1', def: '2' },
         { id: 'SLOT2', name: 'Weapon Slot 2', def: '3' },
         { id: 'SLOT3', name: 'Weapon Slot 3', def: '4' },
@@ -58,18 +59,28 @@ const BdControllerShell = (function () {
         const binds = {};
         FN_ACTIONS.forEach((a) => { binds[a.id] = a.def; });
 
-        /* Sequences use actions so they always line up with the player's binds. */
-        const ROWS = [
-            { id: 'instant-build', name: 'Instant Build', bindIdx: isKb ? 0 : 3, seq: '{WALL}+{STAIRS}+{FLOOR}', mode: 'once', repeat: 1, enabled: false },
-            { id: 'crouch-spam', name: 'Crouch Spam', bindIdx: isKb ? 1 : 11, seq: '{CROUCH}', mode: 'repeat', repeat: 14, enabled: false },
-            { id: 'weapon-switcher', name: 'Weapon Switcher', bindIdx: isKb ? 2 : 2, seq: '{SLOT1}+{SLOT2}', mode: 'once', repeat: 1, enabled: false },
-            { id: 'double-edit', name: 'Double Edit', bindIdx: isKb ? 3 : 4, seq: '{EDIT}+{CONFIRM}+{EDIT}+{CONFIRM}', mode: 'once', repeat: 1, enabled: false },
-            { id: 'edit-reset', name: 'Edit Reset', bindIdx: isKb ? 4 : 14, seq: '{EDIT}+{RESET}+{CONFIRM}', mode: 'once', repeat: 1, enabled: false },
-            { id: 'ramp-wall', name: 'Wall + Ramp', bindIdx: isKb ? 5 : 15, seq: '{WALL}+{STAIRS}', mode: 'once', repeat: 1, enabled: false },
-            { id: 'prefire', name: 'Prefire Macro', bindIdx: isKb ? 6 : 5, seq: '{EDIT}+{CONFIRM}+{FIRE}', mode: 'once', repeat: 1, enabled: false }
+        /* Keyboard product mirrors Blank Optimizer macro set (keyboard-only triggers).
+           Controller hub UI keeps the same Fortnite action rows for in-hub fallback. */
+        const ROWS = isKb ? [
+            { id: 'pickup', name: 'Pick-up Spam', bindIdx: 0, seq: '{INTERACT}', mode: 'repeat', repeat: 18, enabled: false },
+            { id: 'shooting', name: 'Rapid Fire', bindIdx: 1, seq: '{FIRE}', mode: 'repeat', repeat: 16, enabled: false },
+            { id: 'double-edit', name: 'Double Edit', bindIdx: 2, seq: '{EDIT}+{CONFIRM}+{EDIT}+{CONFIRM}', mode: 'once', repeat: 1, enabled: false },
+            { id: 'drag-edit', name: 'Drag Edit', bindIdx: 3, seq: '{EDIT}+{CONFIRM}', mode: 'hold', repeat: 1, enabled: false },
+            { id: 'reset', name: 'Reset / Repair', bindIdx: 4, seq: '{RESET}', mode: 'once', repeat: 1, enabled: false },
+            { id: 'pickaxe', name: 'Pickaxe Pullout', bindIdx: 5, seq: '{HARVEST}', mode: 'once', repeat: 1, enabled: false },
+            { id: 'build', name: 'Build Piece', bindIdx: 6, seq: '{WALL}', mode: 'once', repeat: 1, enabled: false },
+            { id: 'instant-build', name: 'Instant Build', bindIdx: 7, seq: '{WALL}+{STAIRS}+{FLOOR}', mode: 'once', repeat: 1, enabled: false }
+        ] : [
+            { id: 'instant-build', name: 'Instant Build', bindIdx: 3, seq: '{WALL}+{STAIRS}+{FLOOR}', mode: 'once', repeat: 1, enabled: false },
+            { id: 'crouch-spam', name: 'Crouch Spam', bindIdx: 11, seq: '{CROUCH}', mode: 'repeat', repeat: 14, enabled: false },
+            { id: 'weapon-switcher', name: 'Weapon Switcher', bindIdx: 2, seq: '{SLOT1}+{SLOT2}', mode: 'once', repeat: 1, enabled: false },
+            { id: 'double-edit', name: 'Double Edit', bindIdx: 4, seq: '{EDIT}+{CONFIRM}+{EDIT}+{CONFIRM}', mode: 'once', repeat: 1, enabled: false },
+            { id: 'edit-reset', name: 'Edit Reset', bindIdx: 14, seq: '{EDIT}+{RESET}+{CONFIRM}', mode: 'once', repeat: 1, enabled: false },
+            { id: 'ramp-wall', name: 'Wall + Ramp', bindIdx: 15, seq: '{WALL}+{STAIRS}', mode: 'once', repeat: 1, enabled: false },
+            { id: 'prefire', name: 'Prefire Macro', bindIdx: 5, seq: '{EDIT}+{CONFIRM}+{FIRE}', mode: 'once', repeat: 1, enabled: false }
         ];
-        const DRAG = { enabled: false, pullShotgunAfter: true, delayMs: 8, scroll: 'down' };
-        const SETTINGS = { delay: 6, jitter: 0, fortniteOnly: true };
+        const DRAG = { enabled: isKb, pullShotgunAfter: true, delayMs: 8, scroll: 'down' };
+        const SETTINGS = { delay: isKb ? 4 : 6, jitter: 0, fortniteOnly: true };
 
         let masterOn = false;
         let fortniteFocused = false;
@@ -232,7 +243,8 @@ const BdControllerShell = (function () {
                             <label>Mode</label>
                             <select data-mode="${r.id}">
                                 <option value="once" ${r.mode === 'once' ? 'selected' : ''}>Tap once</option>
-                                <option value="repeat" ${r.mode === 'repeat' ? 'selected' : ''}>Repeat</option>
+                                <option value="repeat" ${r.mode === 'repeat' ? 'selected' : ''}>Repeat / spam</option>
+                                <option value="hold" ${r.mode === 'hold' ? 'selected' : ''}>Hold (drag)</option>
                             </select>
                         </div>
                         <div class="bd-cs-field">

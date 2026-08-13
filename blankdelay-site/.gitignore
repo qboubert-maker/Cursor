@@ -1,3 +1,7 @@
-node_modules/
+
+apps/controller-macro/runtime/
 dist/
+downloads/BlankDelay-Controller-Macro-V2-Portable.zip
+hub-installer.nsi
+node_modules/
 package-lock.json

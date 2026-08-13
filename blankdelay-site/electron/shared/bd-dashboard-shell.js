@@ -24,7 +24,7 @@ const BdDashboardShell = (function () {
                         <div class="name1">BLANKDELAY</div>
                         <div class="name2">${opts.productName}</div>
                     </div>
-                    <a class="bd-ds-discord" href="https://discord.gg/cJafcE7y5W" target="_blank" rel="noreferrer">Join Discord</a>
+                    <a class="bd-ds-discord" href="https://discord.gg/5gyVpYMY9" target="_blank" rel="noreferrer">Join Discord</a>
                     <div class="bd-ds-nav-label">Main</div>
                     <div class="bd-ds-nav-item active" data-view="dashboard"><span class="ic">⌂</span> Dashboard</div>
                     <div class="bd-ds-nav-label">Tweak Categories</div>
