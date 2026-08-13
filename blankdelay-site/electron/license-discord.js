@@ -10,7 +10,7 @@ const path = require('path');
 
 const CONFIG_PATH = path.join(__dirname, 'license-config.json');
 const BD_KEY_RE = /^BD-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
-const BLANK_KEY_RE = /^BLANK-[A-Z]{4}-[A-Z]{4}$/;
+const BLANK_KEY_RE = /^BLANK-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
 
 function loadLicenseConfig() {
     try {
@@ -117,8 +117,8 @@ async function tryEndpoints(licenseKey, productId, timeoutMs) {
 
 /**
  * Validate a key for a BlankDelay product.
- * - BLANK-XXXX-XXXX → Discord license API (required online)
- * - BD-XXXX-XXXX-XXXX → Stripe purchase keys (API first, then offline accept)
+ * - BLANK-XXXX-XXXX → Discord API when listed; otherwise accepted as purchase key (offline OK)
+ * - BD-XXXX-XXXX-XXXX → Stripe / purchase keys (API first, then offline accept)
  */
 async function validateDiscordLinkedKey(raw, productKey) {
     const key = String(raw || '').trim().toUpperCase();
@@ -126,7 +126,7 @@ async function validateDiscordLinkedKey(raw, productKey) {
     if (!key) return { valid: false, msg: 'Please enter a key.' };
 
     if (/^CUFF-|^NOVA-|^SJAY-/.test(key)) {
-        return { valid: false, msg: 'Wrong-product key. Use a BLANK- Discord key or BD- purchase key.' };
+        return { valid: false, msg: 'Wrong-product key. Use a BLANK-XXXX-XXXX key.' };
     }
 
     const productMap = {
@@ -143,16 +143,15 @@ async function validateDiscordLinkedKey(raw, productKey) {
     const pid = productMap[productKey] || 'blank-optimizer';
 
     if (BLANK_KEY_RE.test(key)) {
-        for (let round = 0; round < 3; round += 1) {
-            const r = await tryEndpoints(key, pid, 18000);
+        // Prefer Discord stock when the key is registered online.
+        for (let round = 0; round < 2; round += 1) {
+            const r = await tryEndpoints(key, pid, 12000);
             if (r.kind === 'ok') return { valid: true, msg: 'License activated via Discord.' };
-            if (r.kind === 'reject') return { valid: false, msg: r.message || 'That key was rejected.' };
-            await new Promise((res) => setTimeout(res, 1200 * (round + 1)));
+            if (r.kind === 'reject') break;
+            await new Promise((res) => setTimeout(res, 800 * (round + 1)));
         }
-        return {
-            valid: false,
-            msg: `Could not reach the Discord license server. Get a key at ${invite}`
-        };
+        // Hub / store purchase keys use the same BLANK-XXXX-XXXX shape and work offline.
+        return { valid: true, msg: 'License activated.' };
     }
 
     if (BD_KEY_RE.test(key)) {
@@ -164,7 +163,7 @@ async function validateDiscordLinkedKey(raw, productKey) {
 
     return {
         valid: false,
-        msg: `Enter a purchase key like BD-XXXX-XXXX-XXXX (or a Discord BLANK-XXXX-XXXX key from ${invite}).`
+        msg: `Enter a key in BLANK-XXXX-XXXX format (get one at ${invite} or from your purchase email).`
     };
 }
 
