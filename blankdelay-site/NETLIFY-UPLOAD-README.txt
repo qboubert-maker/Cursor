@@ -3,32 +3,30 @@
 ================================================================================
 
 WHAT THIS IS
-  Complete blankdelay.com site + Stripe webhook + downloads + EmailJS hooks.
+  Complete blankdelay.com site + Stripe webhook + download redirects.
 
-  License keys are NOT stored in this folder. When someone pays, Stripe calls
-  netlify/functions/stripe-webhook.js → creates BD-XXXX-XXXX-XXXX → EmailJS
-  emails their key + product download link.
+  Desktop .exe builds are on GitHub Releases (Netlify max file size).
+  /downloads/BlankDelay-Setup.exe and Controller Macro URLs redirect there.
 
 HOW TO UPLOAD (Netlify)
-  1. Select ALL files inside this folder (index.html must be at the top level).
-  2. Zip them OR drag this whole folder to Netlify → Deploys → drop zone.
-  3. WRONG: zipping a parent so the zip only contains "blankdelay-netlify-deploy/"
-     with index.html inside — open your zip and fix if needed.
+  1. Unzip BlankDelay-Netlify-Upload.zip
+  2. Open the folder — index.html must be at the TOP level
+  3. Drag the WHOLE folder onto Netlify → Deploys → drop zone
+     OR zip the CONTENTS (not a parent wrapper folder) and upload
 
-AFTER UPLOAD — READ: AFTER-DEPLOY-EMAIL-SETUP.txt (same folder)
+AFTER UPLOAD — READ: AFTER-DEPLOY-EMAIL-SETUP.txt
 
-QUICK TESTS (after deploy)
-  • https://blankdelay.com/.netlify/functions/stripe-webhook → 405 (not 404)
-  • https://blankdelay.com/downloads/BlankDelay-Setup.exe → downloads ~79 MB
-  • https://blankdelay.com/downloads/BlankDelay-Zero-Delay-Plus-Setup.exe → same file
+QUICK TESTS
+  • https://blankdelay.com/.netlify/functions/stripe-webhook → Method not allowed
+  • https://blankdelay.com/downloads/BlankDelay-Setup.exe → starts Hub download
+  • https://blankdelay.com/downloads/BlankDelay-Controller-Macro-V2-Setup.exe
+    → Controller Macro (Drive redesign)
 
 INCLUDED
   ✓ Storefront (index.html, cart, Stripe payment links)
-  ✓ downloads/BlankDelay-Setup.exe (Product Hub installer for all 9 products)
-  ✓ Product-named .exe URLs (Netlify rewrites → same installer)
-  ✓ netlify/functions/stripe-webhook.js (auto key + email on purchase)
-  ✓ EmailJS config (bd-email-config.js)
-  ✓ delivery.html / thank-you.html
-  ✓ electron/ (source for desktop apps — customers use the .exe, not this folder)
+  ✓ Download redirects for Hub + Controller Macro + product-named Setup URLs
+  ✓ netlify/functions (stripe-webhook, get-fulfillment, license-key)
+  ✓ thank-you.html / delivery.html / EmailJS hooks
+  ✓ Updated electron/ source (for reference; customers use the .exe downloads)
 
-Discord: https://discord.gg/cJafcE7y5W
+Discord keys: https://discord.gg/5gyVpYMY9
