@@ -1,0 +1,98 @@
+/* BlankDelay — sidebar dashboard shell (Premium / Aphrodite-style layout) */
+.bd-ds-shell { display: flex; min-height: 100vh; }
+
+.bd-ds-sidebar {
+    width: 250px; flex-shrink: 0; background: rgba(255,255,255,0.02);
+    border-right: 1px solid var(--border); padding: 22px 16px; display: flex; flex-direction: column;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.bd-ds-brand { text-align: center; margin-bottom: 18px; }
+.bd-ds-brand .mark3 {
+    width: 48px; height: 48px; margin: 0 auto 10px; border-radius: 12px; background: #fff; color: #000;
+    display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px var(--glow);
+}
+.bd-ds-brand .mark3 svg { width: 24px; height: 24px; }
+.bd-ds-brand .name1 { font-size: 15px; font-weight: 900; letter-spacing: 0.02em; }
+.bd-ds-brand .name2 { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+
+.bd-ds-discord {
+    display: block; text-align: center; margin: 14px 0 18px; padding: 9px 12px; border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: 11px;
+    font-weight: 700; text-decoration: none; cursor: pointer;
+}
+.bd-ds-discord:hover { border-color: var(--accent); }
+
+.bd-ds-nav-label { font-size: 10px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); margin: 14px 6px 8px; }
+.bd-ds-nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+    font-size: 12.5px; font-weight: 700; color: var(--dim); cursor: pointer; margin-bottom: 2px;
+    transition: background 0.15s, color 0.15s;
+}
+.bd-ds-nav-item .ic { width: 16px; text-align: center; flex-shrink: 0; }
+.bd-ds-nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.bd-ds-nav-item.active { background: var(--accent); color: var(--accent-text); }
+.bd-ds-nav-item .cnt { margin-left: auto; font-family: var(--mono); font-size: 10px; opacity: 0.7; }
+
+.bd-ds-sidebar-foot { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border); }
+.bd-ds-profile-pill { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; color: var(--dim); padding: 8px 10px; }
+.bd-ds-profile-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: #ff5a5a; }
+.bd-ds-profile-pill.ok .dot { background: #6dffb0; }
+
+.bd-ds-main { flex: 1; min-width: 0; padding: 26px 32px 60px; }
+.bd-ds-main-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.bd-ds-main-head h1 { font-size: 20px; font-weight: 900; display: flex; align-items: center; gap: 10px; }
+
+.bd-ds-view[hidden] { display: none !important; }
+
+.bd-ds-section-title { font-size: 13px; font-weight: 800; margin: 0 0 14px; display: flex; align-items: center; gap: 8px; }
+.bd-ds-section-title::before { content: ''; width: 3px; height: 16px; background: var(--accent); border-radius: 2px; }
+
+.bd-ds-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 30px; }
+@media (max-width: 900px) { .bd-ds-stat-grid { grid-template-columns: repeat(2, 1fr); } }
+.bd-ds-stat-card {
+    padding: 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 8px;
+}
+.bd-ds-stat-card .ic2 { width: 30px; height: 30px; border-radius: 9px; background: var(--glow); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.bd-ds-stat-card .lbl2 { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.bd-ds-stat-card .val2 { font-family: var(--mono); font-size: 18px; font-weight: 800; color: var(--accent); }
+
+.bd-ds-actions-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 26px; }
+.bd-ds-action-btn {
+    padding: 13px 20px; border-radius: 12px; border: 1px solid var(--border); background: transparent;
+    color: var(--text); font-size: 12.5px; font-weight: 800; cursor: pointer; font-family: inherit;
+    transition: transform 0.15s;
+}
+.bd-ds-action-btn:hover { transform: translateY(-1px); }
+.bd-ds-action-btn-primary { background: linear-gradient(135deg, var(--accent), rgba(255,255,255,0.7)); color: var(--accent-text); border-color: transparent; box-shadow: 0 8px 26px var(--glow); }
+
+.bd-ds-getting-started {
+    padding: 16px 18px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border);
+    font-size: 12px; color: var(--dim); line-height: 1.6;
+}
+.bd-ds-getting-started strong { color: var(--text); }
+
+.bd-ds-cat-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.bd-ds-cat-head h2 { font-size: 18px; font-weight: 900; }
+.bd-ds-cat-actions { display: flex; gap: 10px; }
+
+.bd-ds-toggle-list { display: flex; flex-direction: column; gap: 8px; }
+.bd-ds-toggle-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 13px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+}
+.bd-ds-toggle-row .name3 { font-size: 12.5px; font-weight: 700; }
+.bd-ds-toggle-row .desc3 { font-size: 10.5px; color: var(--dim); margin-top: 2px; }
+.bd-ds-switch {
+    width: 42px; height: 23px; border-radius: 999px; background: rgba(255,255,255,0.1);
+    border: 1px solid var(--border); position: relative; cursor: pointer; flex-shrink: 0; transition: background 0.2s;
+}
+.bd-ds-switch.on { background: var(--accent); border-color: transparent; }
+.bd-ds-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 17px; height: 17px; border-radius: 50%; background: #fff; transition: transform 0.2s; }
+.bd-ds-switch.on::after { transform: translateX(19px); background: var(--accent-text); }
+
+.bd-ds-admin-banner {
+    margin-bottom: 20px; padding: 13px 16px; border-radius: 12px; border: 1px solid rgba(255,90,90,0.35);
+    background: rgba(255,90,90,0.06); display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+}
+.bd-ds-admin-banner p { font-size: 12px; color: #ffb0b0; margin: 0; }

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlankDelay Hub</title>
+    <link rel="stylesheet" href="shared/app.css">
+    <style>
+        .hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        .hub-card {
+            padding: 22px; border-radius: 14px; border: 1px solid var(--border);
+            background: var(--surface); transition: border-color 0.2s, transform 0.2s;
+        }
+        .hub-card.launchable { cursor: pointer; }
+        .hub-card.launchable:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 0 16px var(--glow); }
+        .hub-card h2 { font-size: 17px; margin-bottom: 6px; }
+        .hub-card p { font-size: 12px; color: var(--dim); line-height: 1.5; }
+        .hub-card .price { font-family: var(--mono); font-size: 13px; margin-top: 10px; font-weight: 700; }
+        .hub-card .launch-hint { font-size: 10px; color: var(--accent); margin-top: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas" class="bg-canvas"></canvas>
+    <div class="app">
+        <div class="topbar">
+            <div class="brand"><span class="mark"><svg viewBox="0 0 32 32"><circle cx="8" cy="16" r="3.5" fill="currentColor"/><path fill="currentColor" d="M11 16h4l14-6-3 6 3 6-14-6z"/></svg></span> BLANKDELAY HUB</div>
+            <span class="status-pill">Click any product to launch</span>
+        </div>
+        <div class="hero">
+            <span class="tag">Desktop Suite</span>
+            <h1>BlankDelay Product Hub</h1>
+            <p>Click a product card to open it in a new window. Each app runs as a standalone BlankDelay desktop tool.</p>
+        </div>
+        <div class="hub-grid" id="hub-grid"></div>
+    </div>
+    <script>
+    const PRODUCTS = [
+        { key: 'premium', name: 'Blank Premium Utility', desc: 'All-in-one optimization — FPS, input, network & OS.', price: '$29.99' },
+        { key: 'zero-plus', name: 'Zero Delay Plus', desc: 'Enhanced zero delay + advanced FPS optimizations.', price: '$14.99' },
+        { key: 'zero', name: 'Zero Delay', desc: 'Quantum delay engine — eliminate input lag.', price: '$9.99' },
+        { key: 'fps', name: 'FPS Boost', desc: 'Dynamic frame stabilizer for max frame rate.', price: '$9.99' },
+        { key: 'ping', name: 'Ping Optimizer', desc: 'Lower ping and reduce network jitter.', price: '$9.99' },
+        { key: 'controller', name: 'Controller Macro', desc: 'Standalone BlankDelay Controller Macro app (Drive redesign) — opens its own .exe.', price: '$19.99' },
+        { key: 'keyboard', name: 'Keyboard Macro', desc: 'Standalone BlankDelay Keyboard Macro app — Fortnite binds + Optimizer-style macros.', price: '$19.99' },
+        { key: 'aim', name: 'Aim Bundle', desc: '3D first-person aim trainer + Fortnite sensitivity.', price: '$14.99' },
+        { key: 'shotgun', name: 'Shotgun Pack', desc: 'Close-range shotgun box-fight trainer.', price: '$9.99' }
+    ];
+    const grid = document.getElementById('hub-grid');
+    PRODUCTS.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'hub-card launchable';
+        card.innerHTML = `<h2>${p.name}</h2><p>${p.desc}</p><div class="price">${p.price}</div><div class="launch-hint">Click to launch →</div>`;
+        card.addEventListener('click', async () => {
+            if (window.blankDelay?.launchProduct) {
+                await window.blankDelay.launchProduct(p.key);
+            }
+        });
+        grid.appendChild(card);
+    });
+    </script>
+    <script src="shared/app.js"></script>
+</body>
+</html>
