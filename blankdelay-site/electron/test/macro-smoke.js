@@ -127,90 +127,22 @@ async function unlock(window) {
 }
 
 async function testController() {
-    console.log('\nController Macro');
-    const padState = { pad: null };
-    const { window, errors } = await loadProduct('controller.html', padState);
-
-    check('splash renders BLANKDELAY + product name',
-        /BLANK/.test(window.document.body.textContent) && /CONTROLLER MACRO/i.test(window.document.body.textContent));
-    check('tap-to-continue button present', !!window.document.getElementById('bd-splash-tap'));
-
-    await unlock(window);
-    check('app unlocked after key', !window.document.getElementById('bd-app-main').hidden);
-
-    const viewer = window.document.querySelector('.bd-gp-viewer');
-    check('live gamepad viewer mounted', !!viewer);
-    const svg = window.document.querySelector('.bd-gp-svg');
-    check('controller is drawn even with NO pad connected', !!svg);
-    check('overlay tells user to connect', !window.document.getElementById('bd-gp-overlay').hidden);
-
-    const skinSel = window.document.getElementById('bd-gp-skin');
-    const colorSel = window.document.getElementById('bd-gp-color');
-    check('controller type selector present', !!skinSel);
-    check('color selector present', !!colorSel);
-
-    skinSel.value = 'xbox';
-    skinSel.dispatchEvent(new window.Event('change'));
-    check('switching to Xbox redraws pad while disconnected',
-        /XBOX/i.test(window.document.querySelector('.bd-gp-svg').textContent));
-
-    colorSel.value = 'blue';
-    colorSel.dispatchEvent(new window.Event('change'));
-    check('color switch applies', window.document.querySelector('.bd-gp-viewer').dataset.color === 'blue');
-
-    skinSel.value = 'dualsense';
-    skinSel.dispatchEvent(new window.Event('change'));
-    check('switching back to DualSense works',
-        /DUALSENSE/i.test(window.document.querySelector('.bd-gp-svg').textContent));
-
-    // connect a pad and press buttons
-    padState.pad = fakePad();
-    await new Promise((r) => setTimeout(r, 120));
-    check('status flips to live when pad connects',
-        window.document.getElementById('bd-gp-status').classList.contains('ok'),
-        window.document.getElementById('bd-gp-status').textContent);
-    check('overlay hides once connected', window.document.getElementById('bd-gp-overlay').hidden);
-
-    padState.pad.buttons[0] = { pressed: true, value: 1 };
-    await new Promise((r) => setTimeout(r, 120));
-    check('pressing a button lights it on the display',
-        !!window.document.querySelector('.bd-gp-svg [data-btn="0"].lit'));
-
-    padState.pad.buttons[7] = { pressed: true, value: 1 };
-    await new Promise((r) => setTimeout(r, 120));
-    const trig = window.document.querySelector('[data-trigger="7"]');
-    check('trigger meter fills with analog value', trig && Number(trig.getAttribute('width')) > 0);
-
-    // macros
-    const macroRows = window.document.querySelectorAll('.bd-cs-macro');
-    check('macro list rendered with options', macroRows.length >= 6, 'rows=' + macroRows.length);
-    check('Fortnite keybinds tab rendered', window.document.querySelectorAll('[data-bind]').length >= 10);
-
-    const outEl = window.document.querySelector('[data-out="instant-build"]');
-    check('instant build shows resolved Fortnite keys', outEl && /Q/.test(outEl.textContent), outEl && outEl.textContent);
-
-    // change a bind and confirm macro output follows it
-    const wallSel = window.document.querySelector('[data-bind="WALL"]');
-    wallSel.value = 'Z';
-    wallSel.dispatchEvent(new window.Event('change'));
-    check('changing the Fortnite bind updates macro output',
-        /Z/.test(window.document.querySelector('[data-out="instant-build"]').textContent),
-        window.document.querySelector('[data-out="instant-build"]').textContent);
-
-    // arm + fire via pad
-    window.document.getElementById('bd-cs-master').click();
-    window.document.querySelector('[data-toggle="instant-build"]').click();
-    await new Promise((r) => setTimeout(r, 250));
-    check('Fortnite focus detected', window.document.getElementById('bd-cs-fn-chip').classList.contains('ok'));
-    padState.pad.buttons[3] = { pressed: true, value: 1 };
-    await new Promise((r) => setTimeout(r, 200));
-    const fired = window.blankDelay.fired.filter((f) => /Z/.test(f.keys));
-    check('pressing pad trigger fires the macro with bound keys', fired.length > 0,
-        JSON.stringify(window.blankDelay.fired.slice(0, 3)));
-
-    check('no black/white invert handler present',
-        !/invert/.test(window.document.documentElement.innerHTML));
-    check('no runtime script errors', errors.length === 0, errors.join(' | '));
+    console.log('\nController Macro (Drive app only — old HTML deleted)');
+    const oldHtml = path.join(ROOT, 'products', 'controller.html');
+    const driveExe = path.join(ROOT, '..', 'apps', 'controller-macro', 'runtime', 'BlankDelay-Controller-Macro.exe');
+    const driveSrc = path.join(ROOT, '..', 'apps', 'controller-macro', 'src', 'index.html');
+    check('old controller.html deleted', !fs.existsSync(oldHtml));
+    check('Drive Controller Macro exe present', fs.existsSync(driveExe));
+    check('Drive Controller Macro source present', fs.existsSync(driveSrc));
+    if (fs.existsSync(driveSrc)) {
+        const html = fs.readFileSync(driveSrc, 'utf8');
+        check('Drive app has tap-to-continue splash', /Tap logo to continue|novaLoginLogoTrigger/i.test(html));
+        check('Drive app branded BlankDelay', /BlankDelay Controller Macro/i.test(html));
+    }
+    const mainJs = fs.readFileSync(path.join(ROOT, 'main.js'), 'utf8');
+    check('hub has HTML product allow-list', /HUB_HTML_PRODUCTS/.test(mainJs));
+    check('hub launches external controller exe only', /function launchControllerMacroApp/.test(mainJs) && /BlankDelay-Controller-Macro\.exe/.test(mainJs));
+    check('createWindow refuses controller key', /if \(key === 'controller' \|\| !HUB_HTML_PRODUCTS\.has\(key\)\)/.test(mainJs));
 }
 
 async function testKeyboard() {

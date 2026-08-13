@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, globalShortcut, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut, shell, dialog, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { exec, execSync, spawn } = require('child_process');
@@ -16,63 +16,132 @@ const PRODUCTS = {
     shotgun: 'Shotgun Pack'
 };
 
+/** Old HTML Controller Macro is deleted — only the Drive Blank Optimizer build is allowed. */
+const HUB_HTML_PRODUCTS = new Set([
+    'hub', 'premium', 'zero-plus', 'zero', 'fps', 'ping', 'keyboard', 'aim', 'shotgun'
+]);
+
 let macroState = { active: false, shortcuts: [], gamepadPoll: null, panicRegistered: false };
 let aimState = { running: false, armed: false, interval: null, toggleKey: null, togglePadBtn: -1, config: null, forceClass: null, forceShotgun: false, locked: false, input: { firing: false } };
 let mainWindow = null;
 let deviceCache = { data: null, at: 0 };
 
-function createWindow(productKey) {
-    const name = PRODUCTS[productKey] || 'BlankDelay Hub';
-    const isHub = productKey === 'hub';
-    const isTrainer = productKey === 'aim' || productKey === 'shotgun';
-    const isMacro = productKey === 'controller' || productKey === 'keyboard';
-    const isDashboard = productKey === 'premium';
-    const isGrid = productKey === 'zero' || productKey === 'zero-plus' || productKey === 'fps' || productKey === 'ping';
+function appIconPath() {
+    const candidates = [
+        path.join(__dirname, 'assets', 'icon.png'),
+        path.join(__dirname, 'assets', 'icon.ico'),
+        path.join(process.resourcesPath || '', 'icon.png'),
+        path.join(__dirname, '..', 'build', 'icon.png'),
+        path.join(__dirname, '..', 'build', 'icon.ico')
+    ];
+    return candidates.find((p) => p && fs.existsSync(p)) || null;
+}
+
+function resolveProductKey() {
+    const fromArg = process.argv.find((a) => a.startsWith('--product='));
+    if (fromArg) return fromArg.split('=')[1] || 'hub';
+
+    // Branded product launchers / renamed exes
+    const base = path.basename(process.execPath || '', path.extname(process.execPath || '')).toLowerCase();
+    const byName = {
+        'blankdelay': 'hub',
+        'blankdelay hub': 'hub',
+        'blankdelay-hub': 'hub',
+        'blankdelay-premium-utility': 'premium',
+        'blankdelay-zero-delay-plus': 'zero-plus',
+        'blankdelay-zero-delay': 'zero',
+        'blankdelay-fps-boost': 'fps',
+        'blankdelay-ping-optimizer': 'ping',
+        'blankdelay-keyboard-macro-v2': 'keyboard',
+        'blankdelay-aim-bundle': 'aim',
+        'blankdelay-shotgun-pack': 'shotgun'
+    };
+    if (byName[base]) return byName[base];
+
+    // Sidecar written next to launcher exes
+    try {
+        const sidecar = path.join(path.dirname(process.execPath), `${path.basename(process.execPath, path.extname(process.execPath))}.product`);
+        if (fs.existsSync(sidecar)) {
+            const v = fs.readFileSync(sidecar, 'utf8').trim();
+            if (v) return v;
+        }
+    } catch (_) { /* ignore */ }
+
+    return 'hub';
+}
+
+const productKey = resolveProductKey();
+
+function createWindow(key) {
+    if (key === 'controller' || !HUB_HTML_PRODUCTS.has(key)) {
+        // Never load the removed old Controller Macro page (or unknown keys).
+        return null;
+    }
+    const name = PRODUCTS[key] || 'BlankDelay Hub';
+    const isHub = key === 'hub';
+    const isTrainer = key === 'aim' || key === 'shotgun';
+    const isMacro = key === 'keyboard';
+    const isDashboard = key === 'premium';
+    const isGrid = key === 'zero' || key === 'zero-plus' || key === 'fps' || key === 'ping';
+    const icon = appIconPath();
     const win = new BrowserWindow({
         width: isHub ? 1440 : (isTrainer ? 1400 : (isMacro ? 1280 : (isDashboard ? 1320 : (isGrid ? 1240 : 960)))),
         height: isHub ? 920 : (isTrainer ? 960 : (isMacro ? 900 : (isDashboard ? 860 : (isGrid ? 820 : 700)))),
         minWidth: isTrainer ? 1100 : (isMacro ? 1080 : (isDashboard ? 1080 : (isGrid ? 1020 : 900))),
         minHeight: isTrainer ? 720 : (isMacro ? 680 : (isDashboard ? 640 : (isGrid ? 620 : 560))),
-        backgroundColor: '#000000',
+        backgroundColor: '#050506',
         autoHideMenuBar: true,
+        icon: icon || undefined,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
             nodeIntegration: false
         },
-        title: `BlankDelay — ${name}`
+        title: key === 'hub' ? 'BlankDelay Hub' : `BlankDelay — ${name}`
     });
 
-    const file = isHub ? 'hub.html' : `products/${productKey}.html`;
+    if (icon) {
+        try { win.setIcon(nativeImage.createFromPath(icon)); } catch (_) { /* ignore */ }
+    }
+
+    const file = isHub ? 'hub.html' : `products/${key}.html`;
     win.loadFile(path.join(__dirname, file));
     mainWindow = win;
     return win;
 }
 
-const productArg = process.argv.find(a => a.startsWith('--product='));
-const productKey = productArg ? productArg.split('=')[1] : 'hub';
-
 function findControllerMacroExe() {
+    const resources = process.resourcesPath || path.join(__dirname, '..');
     const candidates = [
+        // Bundled next to hub (extraResources)
+        path.join(resources, 'controller-macro', 'BlankDelay-Controller-Macro.exe'),
+        path.join(resources, 'apps', 'controller-macro', 'runtime', 'BlankDelay-Controller-Macro.exe'),
+        // Dev / repo layout
         path.join(__dirname, '..', 'apps', 'controller-macro', 'runtime', 'BlankDelay-Controller-Macro.exe'),
+        // Standalone install from Controller Macro Setup
         path.join(process.env.LOCALAPPDATA || '', 'BlankDelay', 'ControllerMacroV2', 'BlankDelay-Controller-Macro.exe'),
-        path.join(__dirname, '..', 'downloads', 'BlankDelay-Controller-Macro.exe')
+        path.join(path.dirname(process.execPath || ''), 'controller-macro', 'BlankDelay-Controller-Macro.exe'),
+        path.join(path.dirname(process.execPath || ''), 'BlankDelay-Controller-Macro.exe')
     ];
     return candidates.find((p) => p && fs.existsSync(p)) || null;
 }
 
-function launchExternalControllerOrWindow() {
-    if (productKey === 'controller' && process.platform === 'win32') {
-        const exe = findControllerMacroExe();
-        if (exe) {
-            try {
-                spawn(exe, [], { detached: true, stdio: 'ignore' }).unref();
-                setTimeout(() => app.quit(), 400);
-                return true;
-            } catch (_) { /* fall through to in-hub UI */ }
-        }
+function launchControllerMacroApp() {
+    const exe = findControllerMacroExe();
+    if (!exe) {
+        dialog.showErrorBox(
+            'BlankDelay Controller Macro',
+            'The new Controller Macro app was not found.\n\nInstall BlankDelay-Controller-Macro-V2-Setup.exe (the Google Drive redesign), then try again.\n\nThe old Electron Controller Macro UI has been removed.'
+        );
+        return { success: false, error: 'controller-macro-missing' };
     }
-    return false;
+    try {
+        spawn(exe, [], { detached: true, stdio: 'ignore', cwd: path.dirname(exe) }).unref();
+        return { success: true, product: 'controller', external: true, exe };
+    } catch (err) {
+        dialog.showErrorBox('BlankDelay Controller Macro', err.message || String(err));
+        return { success: false, error: err.message };
+    }
 }
 
 function runMetrics(type) {
@@ -427,7 +496,16 @@ function saveFortniteExport(config, filename) {
 }
 
 app.whenReady().then(() => {
-    if (launchExternalControllerOrWindow()) return;
+    app.setName('BlankDelay');
+    try { if (process.platform === 'win32') app.setAppUserModelId('com.blankdelay.desktop'); } catch (_) { /* ignore */ }
+
+    // Controller Macro = Drive Blank Optimizer build only (never old HTML UI)
+    if (productKey === 'controller') {
+        launchControllerMacroApp();
+        setTimeout(() => app.quit(), 500);
+        return;
+    }
+
     createWindow(productKey);
     registerPanicShortcut();
     app.on('activate', () => {
@@ -451,18 +529,7 @@ app.on('will-quit', () => {
 
 ipcMain.handle('launch-product', (_e, key) => {
     if (!PRODUCTS[key]) return { success: false, error: 'Unknown product' };
-    // Controller Macro customers get the new Blank Optimizer-based build.
-    if (key === 'controller') {
-        const exe = findControllerMacroExe();
-        if (exe && process.platform === 'win32') {
-            try {
-                spawn(exe, [], { detached: true, stdio: 'ignore' }).unref();
-                return { success: true, product: key, external: true };
-            } catch (err) {
-                return { success: false, error: err.message };
-            }
-        }
-    }
+    if (key === 'controller') return launchControllerMacroApp();
     createWindow(key);
     return { success: true, product: key };
 });

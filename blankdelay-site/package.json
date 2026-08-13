@@ -1,6 +1,6 @@
 {
   "name": "blankdelay-desktop",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "BlankDelay desktop product hub and tweak apps",
   "main": "electron/main.js",
   "author": "BlankDelay",
@@ -18,27 +18,44 @@
     "electron:aim": "electron . --product=aim",
     "electron:shotgun": "electron . --product=shotgun",
     "build:win": "electron-builder --win --x64",
-    "build:win:portable": "electron-builder --win portable --x64"
+    "build:win:portable": "electron-builder --win portable --x64",
+    "build:icons": "node -e \"console.log('icons in build/')\""
   },
   "devDependencies": {
     "electron": "^33.2.1",
-    "electron-builder": "^25.1.8"
+    "electron-builder": "^25.1.8",
+    "rcedit": "^4.0.1",
+    "resedit": "^3.0.2"
   },
   "build": {
     "appId": "com.blankdelay.desktop",
     "productName": "BlankDelay",
+    "copyright": "BlankDelay",
     "directories": {
       "output": "dist",
       "buildResources": "build"
     },
     "files": [
       "electron/**/*",
-      "package.json",
-      "apps/controller-macro/src/**/*",
-      "apps/controller-macro/installer.nsi"
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "apps/controller-macro/runtime",
+        "to": "controller-macro",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "build/icon.png",
+        "to": "icon.png"
+      }
     ],
     "asar": true,
+    "afterPack": "scripts/after-pack.js",
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         {
           "target": "nsis",
@@ -58,7 +75,10 @@
       "shortcutName": "BlankDelay Hub",
       "uninstallDisplayName": "BlankDelay Desktop",
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico"
     }
   }
 }
