@@ -164,7 +164,7 @@ async function validateDiscordLinkedKey(raw, productKey) {
 
     return {
         valid: false,
-        msg: `Enter a Discord key (BLANK-XXXX-XXXX) from ${invite} or your BD- purchase key.`
+        msg: `Enter a purchase key like BD-XXXX-XXXX-XXXX (or a Discord BLANK-XXXX-XXXX key from ${invite}).`
     };
 }
 

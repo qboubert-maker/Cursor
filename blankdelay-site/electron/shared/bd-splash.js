@@ -7,6 +7,7 @@
 
     function formatKey(raw) {
         const compact = String(raw || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        // Check BLANK before BD — "BLANK..." must not be treated as a BD- key.
         if (compact.startsWith('BLANK')) {
             const rest = compact.slice(5);
             const a = rest.slice(0, 4);
@@ -70,13 +71,13 @@
                         <h2>Activate your key</h2>
                     </div>
                 </div>
-                <p class="sub">Paste your <strong>BLANK-XXXX-XXXX</strong> Discord key from <a href="${DISCORD_KEYS_URL}" target="_blank" rel="noopener">our server</a>, or your <strong>BD-</strong> purchase key.</p>
+                <p class="sub">Paste your license key from your purchase email. Format: <strong>BD-XXXX-XXXX-XXXX</strong>. Discord <strong>BLANK-XXXX-XXXX</strong> keys also work.</p>
                 <div class="bd-splash-key-input-wrap">
-                    <input id="bd-splash-key-input" type="password" placeholder="BLANK-XXXX-XXXX or BD-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
+                    <input id="bd-splash-key-input" type="text" placeholder="BD-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
                     <button type="button" class="bd-splash-key-toggle" id="bd-splash-key-toggle" aria-label="Show key">Show</button>
                 </div>
                 <button type="button" class="bd-splash-activate" id="bd-splash-activate-btn">Verify &amp; unlock</button>
-                <a class="bd-splash-discord" href="${DISCORD_KEYS_URL}" target="_blank" rel="noopener">Get a key on Discord</a>
+                <a class="bd-splash-discord" href="${DISCORD_KEYS_URL}" target="_blank" rel="noopener">Need a key? Discord</a>
                 <div class="bd-splash-validated" id="bd-splash-validated" hidden>✓ <span id="bd-splash-validated-text">Key validated</span></div>
                 <p class="bd-splash-key-msg" id="bd-splash-key-msg"></p>
             </div>
