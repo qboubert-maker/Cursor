@@ -126,12 +126,20 @@ function findControllerMacroExe() {
     return candidates.find((p) => p && fs.existsSync(p)) || null;
 }
 
+function showMainError(title, message) {
+    const show = () => {
+        try { dialog.showErrorBox(title, message); } catch (_) { /* ignore */ }
+    };
+    if (app.isReady()) show();
+    else app.whenReady().then(show).catch(() => {});
+}
+
 function launchControllerMacroApp() {
     const exe = findControllerMacroExe();
     if (!exe) {
-        dialog.showErrorBox(
+        showMainError(
             'BlankDelay Controller Macro',
-            'The new Controller Macro app was not found.\n\nInstall BlankDelay-Controller-Macro-V2-Setup.exe (the Google Drive redesign), then try again.\n\nThe old Electron Controller Macro UI has been removed.'
+            'The Controller Macro app was not found.\n\nInstall BlankDelay-Controller-Macro-V2-Setup.exe, then try again.'
         );
         return { success: false, error: 'controller-macro-missing' };
     }
@@ -139,7 +147,7 @@ function launchControllerMacroApp() {
         spawn(exe, [], { detached: true, stdio: 'ignore', cwd: path.dirname(exe) }).unref();
         return { success: true, product: 'controller', external: true, exe };
     } catch (err) {
-        dialog.showErrorBox('BlankDelay Controller Macro', err.message || String(err));
+        showMainError('BlankDelay Controller Macro', err.message || String(err));
         return { success: false, error: err.message };
     }
 }
@@ -496,21 +504,32 @@ function saveFortniteExport(config, filename) {
 }
 
 app.whenReady().then(() => {
-    app.setName('BlankDelay');
-    try { if (process.platform === 'win32') app.setAppUserModelId('com.blankdelay.desktop'); } catch (_) { /* ignore */ }
+    try {
+        app.setName('BlankDelay');
+        try { if (process.platform === 'win32') app.setAppUserModelId('com.blankdelay.desktop'); } catch (_) { /* ignore */ }
 
-    // Controller Macro = Drive Blank Optimizer build only (never old HTML UI)
-    if (productKey === 'controller') {
-        launchControllerMacroApp();
-        setTimeout(() => app.quit(), 500);
-        return;
+        // Controller Macro = Drive Blank Optimizer build only (never old HTML UI)
+        if (productKey === 'controller') {
+            launchControllerMacroApp();
+            setTimeout(() => app.quit(), 500);
+            return;
+        }
+
+        const win = createWindow(productKey);
+        if (!win) {
+            showMainError('BlankDelay', `Could not open product: ${productKey}`);
+            setTimeout(() => app.quit(), 500);
+            return;
+        }
+        registerPanicShortcut();
+        app.on('activate', () => {
+            if (BrowserWindow.getAllWindows().length === 0) createWindow(productKey);
+        });
+    } catch (err) {
+        showMainError('BlankDelay', err && err.stack ? err.stack : String(err));
     }
-
-    createWindow(productKey);
-    registerPanicShortcut();
-    app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) createWindow(productKey);
-    });
+}).catch((err) => {
+    showMainError('BlankDelay', err && err.stack ? err.stack : String(err));
 });
 
 app.on('window-all-closed', () => {

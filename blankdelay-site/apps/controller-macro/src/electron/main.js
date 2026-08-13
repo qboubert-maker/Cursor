@@ -20,13 +20,12 @@ try { app.commandLine.appendSwitch('disable-gpu-compositing'); } catch { /* igno
 // own lock is per userData, which a portable build sidesteps.
 const globalLock = singletonLock.acquire();
 if (!globalLock.ok) {
-  try {
-    dialog.showErrorBox(
-      'BlankDelay Controller Macro',
-      `Another copy of BlankDelay Controller Macro is already running${globalLock.otherPid ? ` (PID ${globalLock.otherPid})` : ''}.\n\nRight-click its tray icon → Fully close, then open this one.\n\nTwo copies = two virtual pads → choppy FPS and ruined sticks.`,
-    );
-  } catch { /* ignore */ }
-  app.exit(0);
+  // dialog before app.ready throws "JavaScript error occurred in the main process"
+  const msg = `Another copy of BlankDelay Controller Macro is already running${globalLock.otherPid ? ` (PID ${globalLock.otherPid})` : ''}.\n\nRight-click its tray icon → Fully close, then open this one.\n\nTwo copies = two virtual pads → choppy FPS and ruined sticks.`;
+  app.whenReady().then(() => {
+    try { dialog.showErrorBox('BlankDelay Controller Macro', msg); } catch { /* ignore */ }
+    app.exit(0);
+  }).catch(() => app.exit(0));
 }
 
 /** @type {BrowserWindow | null} */
