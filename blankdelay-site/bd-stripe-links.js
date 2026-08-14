@@ -1,4 +1,4 @@
-/* BlankDelay - live Stripe Payment Links */
+/* BlankDelay Stripe links + affiliate attribution */
 const BD_STRIPE_LINKS = {
     premium: "https://buy.stripe.com/9B628kdDc7jQdyL4Ih9bO0d",
     "zero-plus": "https://buy.stripe.com/9B66oAbv4aw2bqDcaJ9bO0c",
@@ -18,13 +18,29 @@ function bdActivePromo() {
     try { return (localStorage.getItem("bd-discount-code") || "").trim(); } catch { return ""; }
 }
 
+function bdPendingAffiliate() {
+    try {
+        return (
+            sessionStorage.getItem("bd-aff-pending")
+            || localStorage.getItem("bd-aff-code")
+            || ""
+        ).trim().toUpperCase();
+    } catch {
+        return "";
+    }
+}
+
 function bdStripeUrl(slug) {
     const base = BD_STRIPE_LINKS[slug];
     if (!base) return null;
-    const code = bdActivePromo();
-    if (!code) return base;
-    const sep = base.includes("?") ? "&" : "?";
-    return base + sep + "prefilled_promo_code=" + encodeURIComponent(code);
+    const params = new URLSearchParams();
+    const promo = bdActivePromo();
+    if (promo) params.set("prefilled_promo_code", promo);
+    const aff = bdPendingAffiliate();
+    if (aff) params.set("client_reference_id", aff);
+    const qs = params.toString();
+    if (!qs) return base;
+    return base + (base.includes("?") ? "&" : "?") + qs;
 }
 
 function bdGoStripe(slug) {

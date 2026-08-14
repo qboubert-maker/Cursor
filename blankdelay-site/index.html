@@ -582,7 +582,7 @@
                     <div class="refer-success" id="refer-success" hidden><p class="mono">Share this link with your friend:</p><p class="refer-link mono" id="refer-link-out"></p></div>
                     <button class="btn btn-ghost btn-sm" id="refer-redeem-btn" style="margin-top:10px">Redeem Earnings</button>
                 </div>
-                <div class="affiliate-card card"><h3>Creator Affiliate Program</h3><p>Earn 20% on every sale. Dashboard + custom link.</p><button class="btn btn-ghost" id="affiliate-btn">Apply as Creator</button></div>
+                <div class="affiliate-card card"><h3>Creator Affiliate Program</h3><p>Keep 80% on every sale from your link. Track clicks, sales, and cash out anytime.</p><button class="btn btn-ghost" id="affiliate-btn">Apply as Creator</button></div>
                 <div class="gift-card card"><h3>Gift Cards</h3><p>Send BlankDelay credit to a friend.</p><div class="gift-opts"><span>$10</span><span>$25</span><span class="active">$50</span></div><button class="btn btn-ghost" id="gift-buy-btn">Buy Gift Card</button></div>
             </div>
 
@@ -716,7 +716,7 @@
         <div class="bd-modal-inner card">
             <button class="exit-close" data-close-modal="auth-modal" aria-label="Close">×</button>
             <h3>Creator Affiliate Program</h3>
-            <p class="checkout-note" style="margin-bottom:14px;">Earn 20% on every sale. Create an account or log in to get your custom link.</p>
+            <p class="checkout-note" style="margin-bottom:14px;">Keep 80% of every sale from your link. BlankDelay keeps 20%. Create an account or log in for your custom link.</p>
             <div class="auth-tabs">
                 <button type="button" class="auth-tab active" id="auth-tab-signup">Sign Up</button>
                 <button type="button" class="auth-tab" id="auth-tab-login">Log In</button>
@@ -732,6 +732,16 @@
                 <div class="form-group"><label for="auth-login-email">Email</label><input type="email" id="auth-login-email" required placeholder="creator@email.com" autocomplete="email"></div>
                 <div class="form-group"><label for="auth-login-pass">Password</label><input type="password" id="auth-login-pass" required placeholder="Your password" autocomplete="current-password"></div>
                 <button type="submit" class="btn btn-primary checkout-btn">Log In to Dashboard</button>
+                <p class="checkout-note" style="margin-top:10px;"><a href="#" id="auth-forgot-link">Forgot password?</a></p>
+            </form>
+            <form id="auth-forgot-form" class="checkout-form" hidden>
+                <div class="form-group"><label for="auth-forgot-email">Email</label><input type="email" id="auth-forgot-email" required placeholder="creator@email.com" autocomplete="email"></div>
+                <button type="submit" class="btn btn-primary checkout-btn">Get Reset Link</button>
+            </form>
+            <form id="auth-reset-form" class="checkout-form" hidden>
+                <input type="hidden" id="auth-reset-token">
+                <div class="form-group"><label for="auth-reset-pass">New password</label><input type="password" id="auth-reset-pass" required placeholder="Min. 6 characters" minlength="6" autocomplete="new-password"></div>
+                <button type="submit" class="btn btn-primary checkout-btn">Save New Password</button>
             </form>
         </div>
     </div>
@@ -740,9 +750,10 @@
         <div class="bd-modal-inner card">
             <button class="exit-close" data-close-modal="affiliate-dash-modal" aria-label="Close">×</button>
             <h3>Affiliate Dashboard</h3>
-            <p class="checkout-note">Logged in as <strong id="aff-email"></strong> · 20% commission per sale</p>
+            <p class="checkout-note">Logged in as <strong id="aff-email"></strong> · <span id="aff-rate-note">80% commission per sale · 20% cash-out fee to BlankDelay</span></p>
             <div class="aff-stats">
                 <div class="aff-stat"><span class="lbl">Total Earnings</span><span class="val mono" id="aff-earnings">$0.00</span></div>
+                <div class="aff-stat"><span class="lbl">Available</span><span class="val mono" id="aff-balance">$0.00</span></div>
                 <div class="aff-stat"><span class="lbl">Sales</span><span class="val mono" id="aff-sales">0</span></div>
                 <div class="aff-stat"><span class="lbl">Link Clicks</span><span class="val mono" id="aff-clicks">0</span></div>
             </div>
@@ -750,8 +761,15 @@
             <div class="aff-link-box mono" id="aff-link"></div>
             <p class="checkout-note" style="margin-top:12px;">Recent sales from your link</p>
             <div class="aff-sales-list" id="aff-sales-list" style="max-height:160px;overflow:auto;margin-top:8px;font-size:12px;"></div>
-            <div class="actions" style="margin-top:14px;display:flex;gap:10px;">
+            <div class="form-group" style="margin-top:14px;">
+                <label for="aff-paypal">Cash out to PayPal email</label>
+                <input type="email" id="aff-paypal" placeholder="paypal@email.com">
+            </div>
+            <p class="checkout-note">Cash-out sends 80% to you and 20% to BlankDelay from your available balance (min $5).</p>
+            <p class="checkout-note" id="aff-cashout-msg" hidden></p>
+            <div class="actions" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
                 <button class="btn btn-primary" id="aff-copy-btn">Copy Link</button>
+                <button class="btn btn-primary" id="aff-cashout-btn">Cash Out</button>
                 <button class="btn btn-ghost" id="aff-logout">Log Out</button>
             </div>
         </div>
@@ -781,6 +799,7 @@
 
     <script src="background.js"></script>
     <script src="bd-store.js"></script>
+    <script src="bd-affiliate.js"></script>
     <script src="logo-assets.js"></script>
     <script src="bd-stripe-links.js"></script>
     <script src="main.js"></script>

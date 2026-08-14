@@ -42,7 +42,7 @@
         {
             id: 'nav-specials',
             keys: ['specials', 'deals', 'bundle', 'pass', 'refer', 'affiliate', 'gift', 'extras'],
-            answer: 'The <strong>Specials</strong> tab has:<br>• <strong>Blank Pass Full Kit</strong> ($39.99) — season bundle<br>• <strong>Blank Pass Monthly</strong> ($9.99/mo) — all core products<br>• <strong>Refer a Friend</strong> — $5 credit<br>• <strong>Creator Affiliate</strong> — 20% commission<br>• <strong>Gift Cards</strong> ($10/$25/$50)'
+            answer: 'The <strong>Specials</strong> tab has:<br>• <strong>Blank Pass Full Kit</strong> ($39.99) — season bundle<br>• <strong>Blank Pass Monthly</strong> ($9.99/mo) — all core products<br>• <strong>Refer a Friend</strong> — $5 credit<br>• <strong>Creator Affiliate</strong> — keep 80% per sale<br>• <strong>Gift Cards</strong> ($10/$25/$50)'
         },
         {
             id: 'nav-faq',
@@ -136,8 +136,8 @@
         },
         {
             id: 'affiliate',
-            keys: ['affiliate', 'creator program', 'commission', '20%', 'partner', 'earn money', 'tiktok', 'linktree'],
-            answer: '<strong>Creator Affiliate Program</strong> (Specials): 20% commission per sale. If TikTok blocks in-app links, tell viewers to tap <strong>Open in browser</strong> or paste <strong>blankdelay.com</strong> directly.'
+            keys: ['affiliate', 'creator program', 'commission', '80%', '20%', 'partner', 'earn money', 'tiktok', 'linktree', 'cash out'],
+            answer: '<strong>Creator Affiliate Program</strong> (Specials): keep <strong>80%</strong> of each sale from your link (BlankDelay keeps 20%). Track clicks + sales in your dashboard. Cash out to PayPal anytime (20% cash-out fee). Forgot password? Use the reset link on login. If TikTok blocks in-app links, tell viewers to tap <strong>Open in browser</strong> or paste <strong>blankdelay.com</strong>.'
         },
         {
             id: 'cart',

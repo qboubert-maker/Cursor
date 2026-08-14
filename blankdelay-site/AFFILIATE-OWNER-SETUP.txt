@@ -1,0 +1,45 @@
+# BlankDelay Affiliate Program — Owner Setup
+
+## What you get
+- **Owner dashboard:** https://blankdelay.com/affiliate-owner
+- See every affiliate email, code, clicks, sales, products sold
+- Their earnings (**80%** of attributed sales) and **your 20%** share
+- Cash-out queue: when they withdraw, **another 20%** of that withdrawal is your fee; pay them the **net** via PayPal and mark paid
+- Affiliates: signup/login, live click tracking, Stripe sale attribution, forgot-password reset
+
+## Required Netlify env var
+Set this in Netlify → Site settings → Environment variables:
+
+```
+AFFILIATE_ADMIN_TOKEN=pick-a-long-random-secret-only-you-know
+```
+
+Optional overrides:
+```
+AFFILIATE_COMMISSION_RATE=0.8
+OWNER_SALE_SHARE=0.2
+CASHOUT_FEE_RATE=0.2
+```
+
+Redeploy after setting the token.
+
+## Passwords (important)
+Affiliate passwords are **hashed** and **never shown** in the owner panel (including for people who already applied).  
+If someone forgets theirs: they use **Forgot password**, or you click **Reset link** on their row and send them the link.
+
+When you **Create** an affiliate in the owner panel, a temporary password is shown **once** so you can text it to them.
+
+## Existing applicants
+Old browser-only signups were stored only on their device. Have them sign up again on the live site, or create their account in the owner panel with their email.
+
+## How tracking works
+1. Visitor opens `https://blankdelay.com/blankdelayaffiliatetweaks?aff=AFF-XXXXXX`
+2. Click is recorded on the server
+3. Checkout Stripe links include `client_reference_id=AFF-XXXXXX`
+4. Stripe webhook credits the affiliate (80%) and your share (20%)
+
+## Cash-out flow
+1. Affiliate clicks **Cash Out** (min $5)
+2. System deducts 20% as your fee and creates a pending payout for the remaining 80%
+3. You pay their PayPal the **net** amount from the owner dashboard
+4. Click **Mark paid**

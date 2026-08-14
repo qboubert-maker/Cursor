@@ -26,6 +26,16 @@
   to = "/index.html"
   status = 200
 
+# Owner-only affiliate admin
+[[redirects]]
+  from = "/affiliate-owner"
+  to = "/affiliate-owner.html"
+  status = 200
+[[redirects]]
+  from = "/affiliate-owner/"
+  to = "/affiliate-owner.html"
+  status = 200
+
 # Large desktop builds live on GitHub Releases (Netlify file size limit)
 [[redirects]]
   from = "/downloads/BlankDelay-Setup.exe"

@@ -1,7 +1,7 @@
 /* BlankDelay client-side store (demo — connect Stripe for real payments) */
 const BD_STORE = {
     DISCOUNTS: { BLANK15: 0.15, BLANK10: 0.10, CREATOR20: 0.20 },
-    AFFILIATE_RATE: 0.20,
+    AFFILIATE_RATE: 0.80,
     REFER_BONUS: 5,
 
     CATALOG: {

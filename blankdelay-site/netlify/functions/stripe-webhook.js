@@ -248,9 +248,34 @@ exports.handler = async (event) => {
     "https://blankdelay.com/thank-you.html?session_id=" + encodeURIComponent(order.id);
   const deliveryLink = thankYouLink;
 
+  // Attribute sale to affiliate when Stripe client_reference_id / metadata carries AFF-CODE
+  const affCode = String(
+    session.client_reference_id
+    || session.metadata?.aff
+    || session.metadata?.affiliate
+    || ""
+  ).trim().toUpperCase();
+  let affiliateCredit = null;
+  if (affCode.startsWith("AFF-")) {
+    try {
+      const { creditSaleFromWebhook } = require("./affiliate");
+      affiliateCredit = await creditSaleFromWebhook({
+        code: affCode,
+        amount: price,
+        product: productName,
+        orderId: order.id,
+      });
+    } catch (err) {
+      console.error("Affiliate credit error:", err.message);
+    }
+  }
+
   try {
     await sendEmailJS(order);
-    return { statusCode: 200, body: JSON.stringify({ ok: true, order: order.id }) };
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ ok: true, order: order.id, affiliate: affiliateCredit }),
+    };
   } catch (err) {
     console.error("Fulfillment error:", err.message);
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
