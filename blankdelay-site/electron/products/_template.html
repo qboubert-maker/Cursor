@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BlankDelay — PRODUCT_NAME</title>
+    <link rel="stylesheet" href="../shared/app.css">
+</head>
+<body data-theme="THEME_KEY" data-fps-target="FPS_TARGET" data-ping-target="PING_TARGET">
+    <canvas id="bg-canvas" class="bg-canvas"></canvas>
+    <div class="app">
+        <div class="topbar">
+            <div class="brand"><span class="mark">▶</span> BLANKDELAY</div>
+            <span class="status-pill" id="status">● Ready</span>
+        </div>
+        <div class="hero">
+            <span class="tag">PRODUCT_TAG</span>
+            <h1>PRODUCT_NAME</h1>
+            <p>PRODUCT_DESC</p>
+        </div>
+        <div class="license card">
+            <h3>License Key</h3>
+            <input id="license-key" type="text" placeholder="BD-XXXX-XXXX-XXXX">
+            <div class="actions" style="margin-top:10px">
+                <button class="btn btn-ghost" id="license-btn">Activate</button>
+            </div>
+        </div>
+        <div class="grid">
+            <div class="card"><h3>Input Delay</h3><div class="metric" id="metric-delay">12ms</div></div>
+            <div class="card"><h3>FPS</h3><div class="metric" id="metric-fps">144</div></div>
+            <div class="card"><h3>Ping</h3><div class="metric" id="metric-ping">45ms</div></div>
+            <div class="card"><h3>Status</h3><div class="metric" style="font-size:16px">Idle</div></div>
+        </div>
+        <div class="toggles">TOGGLE_ROWS</div>
+        <div class="actions">
+            <button class="btn btn-primary" id="apply-btn">Apply Optimization</button>
+            <button class="btn btn-ghost" onclick="location.reload()">Reset</button>
+        </div>
+        <div class="log" id="log"><div>BlankDelay engine ready.</div></div>
+    </div>
+    <script src="../shared/app.js"></script>
+</body>
+</html>

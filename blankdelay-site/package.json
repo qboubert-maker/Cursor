@@ -1,0 +1,12 @@
+{
+  "name": "blankdelay-desktop",
+  "version": "2.1.0",
+  "description": "BlankDelay desktop product hub and tweak apps",
+  "main": "electron/main.js",
+  "author": "BlankDelay",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@netlify/blobs": "^10.7.13"
+  }
+}

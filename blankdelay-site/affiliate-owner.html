@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BlankDelay · Owner Affiliate Admin</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="checkout.css">
+<style>
+  .owner-wrap { max-width: 1100px; margin: 40px auto; padding: 0 16px 80px; }
+  .owner-wrap h1 { font-size: 28px; margin: 0 0 8px; }
+  .owner-note { opacity: .7; margin-bottom: 20px; }
+  .owner-gate, .owner-panel { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 20px; }
+  .owner-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0 24px; }
+  .owner-stat { background: rgba(0,0,0,.25); border-radius: 12px; padding: 14px; }
+  .owner-stat .lbl { display: block; font-size: 11px; opacity: .6; margin-bottom: 6px; }
+  .owner-stat .val { font-size: 20px; font-weight: 700; }
+  table.owner-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.owner-table th, table.owner-table td { text-align: left; padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,.08); vertical-align: top; }
+  table.owner-table th { opacity: .55; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; background: rgba(255,255,255,.08); }
+  .pill.pending { background: rgba(255,180,0,.2); color: #ffd27a; }
+  .pill.paid { background: rgba(80,220,140,.18); color: #8dffb4; }
+  .row-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .owner-section { margin-top: 28px; }
+  .owner-section h2 { font-size: 18px; margin: 0 0 12px; }
+  .create-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-top: 10px; }
+  @media (max-width: 700px) { .create-row { grid-template-columns: 1fr; } }
+  .msg { margin-top: 10px; font-size: 13px; }
+  .msg.err { color: #ff8f8f; }
+  .msg.ok { color: #8dffb4; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+</style>
+</head>
+<body class="bd-app">
+<canvas id="bg-canvas" class="bg-canvas"></canvas>
+<div class="owner-wrap">
+  <h1>BLANKDELAY · Affiliate Owner</h1>
+  <p class="owner-note">Private owner view — affiliates, clicks, sales, your 20% share, and cash-outs. Passwords are hashed and never shown; use Reset link if someone forgets.</p>
+
+  <div class="owner-gate" id="owner-gate">
+    <div class="form-group">
+      <label for="owner-token">Owner admin token</label>
+      <input type="password" id="owner-token" placeholder="AFFILIATE_ADMIN_TOKEN from Netlify" autocomplete="off">
+    </div>
+    <button type="button" class="btn btn-primary" id="owner-login">Unlock dashboard</button>
+    <p class="msg" id="gate-msg"></p>
+  </div>
+
+  <div class="owner-panel" id="owner-panel" hidden>
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
+      <div>
+        <strong>Live affiliate program</strong>
+        <div class="owner-note" id="rates-line" style="margin:4px 0 0;"></div>
+      </div>
+      <div class="row-actions">
+        <button type="button" class="btn btn-ghost btn-sm" id="owner-refresh">Refresh</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="owner-logout">Lock</button>
+      </div>
+    </div>
+
+    <div class="owner-stats" id="owner-stats"></div>
+
+    <div class="owner-section">
+      <h2>Create / re-add affiliate</h2>
+      <p class="owner-note">Use this for people who already applied. A temporary password is shown once — they should change it via Forgot password.</p>
+      <div class="create-row">
+        <input type="email" id="create-email" placeholder="creator@email.com">
+        <input type="text" id="create-pass" placeholder="Temp password (optional)">
+        <button type="button" class="btn btn-primary" id="create-btn">Create</button>
+      </div>
+      <p class="msg" id="create-msg"></p>
+    </div>
+
+    <div class="owner-section">
+      <h2>Affiliates</h2>
+      <div style="overflow:auto;">
+        <table class="owner-table" id="users-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Code</th>
+              <th>Clicks</th>
+              <th>Sales</th>
+              <th>They earned (80%)</th>
+              <th>Your share (20%)</th>
+              <th>Balance</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="owner-section">
+      <h2>Pending cash-outs</h2>
+      <p class="owner-note">When they cash out, 20% is already deducted as your fee. Pay the <strong>net</strong> amount to their PayPal, then mark paid.</p>
+      <div style="overflow:auto;">
+        <table class="owner-table" id="payouts-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Affiliate</th>
+              <th>Gross</th>
+              <th>Your 20% fee</th>
+              <th>Pay them</th>
+              <th>PayPal</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="owner-section">
+      <h2>Recent attributed sales</h2>
+      <div style="overflow:auto;">
+        <table class="owner-table" id="sales-table">
+          <thead>
+            <tr>
+              <th>When</th>
+              <th>Affiliate</th>
+              <th>Product</th>
+              <th>Sale</th>
+              <th>Their cut</th>
+              <th>Your cut</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="background.js"></script>
+<script>
+(function () {
+  const API = '/.netlify/functions/affiliate';
+  const $ = (id) => document.getElementById(id);
+  const money = (n) => '$' + Number(n || 0).toFixed(2);
+
+  function token() {
+    return sessionStorage.getItem('bd-owner-token') || '';
+  }
+  function setToken(v) {
+    if (v) sessionStorage.setItem('bd-owner-token', v);
+    else sessionStorage.removeItem('bd-owner-token');
+  }
+
+  async function api(action, payload = {}) {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-BD-Admin-Token': token()
+      },
+      body: JSON.stringify({ action, adminToken: token(), ...payload })
+    });
+    return res.json();
+  }
+
+  function showGate(msg) {
+    $('owner-gate').hidden = false;
+    $('owner-panel').hidden = true;
+    if (msg) {
+      $('gate-msg').textContent = msg;
+      $('gate-msg').className = 'msg err';
+    }
+  }
+
+  async function load() {
+    if (!token()) {
+      showGate('');
+      return;
+    }
+    const data = await api('admin_overview');
+    if (!data.ok) {
+      setToken('');
+      showGate(data.msg || 'Unauthorized');
+      return;
+    }
+    $('owner-gate').hidden = true;
+    $('owner-panel').hidden = false;
+    $('rates-line').textContent =
+      `Affiliates keep ${(data.rates.affiliate * 100).toFixed(0)}% of attributed sales · You get ${(data.rates.owner * 100).toFixed(0)}% · Cash-out fee ${(data.rates.cashoutFee * 100).toFixed(0)}% to you`;
+
+    const s = data.summary;
+    $('owner-stats').innerHTML = [
+      ['Affiliates', s.affiliates],
+      ['Clicks', s.totalClicks],
+      ['Sales', s.totalSales],
+      ['Affiliate earnings', money(s.totalAffiliateEarnings)],
+      ['Your sale share (20%)', money(s.yourShareFromSales)],
+      ['Your cash-out fees', money(s.yourCashoutFees)],
+      ['Your total', money(s.yourTotal)]
+    ].map(([lbl, val]) => `<div class="owner-stat"><span class="lbl">${lbl}</span><span class="val mono">${val}</span></div>`).join('');
+
+    const tb = $('users-table').querySelector('tbody');
+    tb.innerHTML = (data.users || []).length
+      ? data.users.map((u) => `<tr>
+          <td>${u.email}</td>
+          <td class="mono">${u.code}</td>
+          <td class="mono">${u.clicks}</td>
+          <td class="mono">${u.sales}</td>
+          <td class="mono">${money(u.earnings)}</td>
+          <td class="mono">${money(u.ownerShare)}</td>
+          <td class="mono">${money(u.balance)}</td>
+          <td class="row-actions">
+            <button type="button" class="btn btn-ghost btn-sm" data-reset="${u.email}">Reset link</button>
+          </td>
+        </tr>
+        <tr><td colspan="8" style="opacity:.65;font-size:12px;">
+          ${(u.recentSales || []).slice(0, 5).map((sale) => `${sale.product} · ${money(sale.amount)} → them ${money(sale.commission)} / you ${money(sale.ownerShare)}`).join(' · ') || 'No sales yet'}
+        </td></tr>`).join('')
+      : '<tr><td colspan="8">No affiliates yet — create one above or have them sign up on the site.</td></tr>';
+
+    const pb = $('payouts-table').querySelector('tbody');
+    pb.innerHTML = (data.pendingPayouts || []).length
+      ? data.pendingPayouts.map((p) => `<tr>
+          <td class="mono">${p.id}</td>
+          <td>${p.email}<div class="mono" style="opacity:.6">${p.code}</div></td>
+          <td class="mono">${money(p.amount)}</td>
+          <td class="mono">${money(p.fee)}</td>
+          <td class="mono"><strong>${money(p.net)}</strong></td>
+          <td>${p.paypalEmail}</td>
+          <td><button type="button" class="btn btn-primary btn-sm" data-paid="${p.id}">Mark paid</button></td>
+        </tr>`).join('')
+      : '<tr><td colspan="7">No pending cash-outs.</td></tr>';
+
+    const sb = $('sales-table').querySelector('tbody');
+    sb.innerHTML = (data.sales || []).length
+      ? data.sales.map((sale) => `<tr>
+          <td>${new Date(sale.date).toLocaleString()}</td>
+          <td>${sale.email || sale.code}</td>
+          <td>${sale.product}</td>
+          <td class="mono">${money(sale.amount)}</td>
+          <td class="mono">${money(sale.commission)}</td>
+          <td class="mono">${money(sale.ownerShare)}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="6">No attributed sales yet. Clicks + Stripe checkouts with affiliate links will appear here.</td></tr>';
+  }
+
+  $('owner-login')?.addEventListener('click', async () => {
+    const v = $('owner-token').value.trim();
+    if (!v) {
+      $('gate-msg').textContent = 'Enter your owner token.';
+      $('gate-msg').className = 'msg err';
+      return;
+    }
+    setToken(v);
+    await load();
+  });
+
+  $('owner-logout')?.addEventListener('click', () => {
+    setToken('');
+    showGate('Locked.');
+    $('gate-msg').className = 'msg';
+  });
+  $('owner-refresh')?.addEventListener('click', load);
+
+  $('create-btn')?.addEventListener('click', async () => {
+    const email = $('create-email').value.trim();
+    const password = $('create-pass').value.trim();
+    const data = await api('admin_create', { email, password: password || undefined });
+    const el = $('create-msg');
+    if (!data.ok) {
+      el.textContent = data.msg || 'Failed';
+      el.className = 'msg err';
+      return;
+    }
+    el.textContent = `${data.msg} Email: ${data.user.email} · Code: ${data.user.code} · Temp password: ${data.temporaryPassword}`;
+    el.className = 'msg ok';
+    $('create-email').value = '';
+    $('create-pass').value = '';
+    await load();
+  });
+
+  document.addEventListener('click', async (e) => {
+    const resetEmail = e.target?.getAttribute?.('data-reset');
+    if (resetEmail) {
+      const data = await api('admin_reset_link', { email: resetEmail });
+      if (data.ok) {
+        prompt('Send this reset link to the affiliate (1 hour):', data.resetUrl);
+      } else {
+        alert(data.msg || 'Failed');
+      }
+      return;
+    }
+    const paidId = e.target?.getAttribute?.('data-paid');
+    if (paidId) {
+      const data = await api('admin_mark_paid', { payoutId: paidId });
+      if (!data.ok) alert(data.msg || 'Failed');
+      await load();
+    }
+  });
+
+  if (token()) load();
+})();
+</script>
+</body>
+</html>

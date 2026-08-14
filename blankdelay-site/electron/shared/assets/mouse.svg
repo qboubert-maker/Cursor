@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" fill="none">
+  <path d="M100 20 C145 20 165 70 165 130 C165 190 145 240 100 255 C55 240 35 190 35 130 C35 70 55 20 100 20 Z" stroke="rgba(87,242,135,0.6)" stroke-width="2.5" fill="rgba(87,242,135,0.06)"/>
+  <line x1="100" y1="28" x2="100" y2="110" stroke="rgba(87,242,135,0.45)" stroke-width="1.5"/>
+  <path d="M38 55 Q100 30 162 55" stroke="rgba(87,242,135,0.35)" stroke-width="1.5" fill="none"/>
+  <rect x="42" y="55" width="56" height="58" rx="4" stroke="rgba(87,242,135,0.5)" stroke-width="1.5"/>
+  <rect x="102" y="55" width="56" height="58" rx="4" stroke="rgba(87,242,135,0.5)" stroke-width="1.5"/>
+  <rect x="88" y="95" width="24" height="36" rx="6" stroke="rgba(87,242,135,0.5)" stroke-width="1.5"/>
+  <text x="100" y="272" text-anchor="middle" fill="rgba(87,242,135,0.7)" font-size="12" font-family="monospace">MOUSE</text>
+</svg>

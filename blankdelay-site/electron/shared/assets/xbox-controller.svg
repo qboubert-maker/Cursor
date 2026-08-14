@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 300" fill="none">
+  <defs><linearGradient id="holo" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#57f287"/><stop offset="100%" stop-color="#fff" stop-opacity="0.5"/></linearGradient></defs>
+  <path d="M260 40 C340 40 400 70 420 110 C435 140 430 175 405 205 C380 232 340 250 300 258 L280 266 C270 270 265 272 260 272 C255 272 250 270 240 266 L220 258 C180 250 140 232 115 205 C90 175 85 140 100 110 C120 70 180 40 260 40 Z" stroke="url(#holo)" stroke-width="3" fill="rgba(87,242,135,0.08)"/>
+  <circle cx="185" cy="165" r="26" stroke="rgba(87,242,135,0.6)" stroke-width="2" fill="rgba(87,242,135,0.05)"/>
+  <circle cx="335" cy="165" r="26" stroke="rgba(87,242,135,0.6)" stroke-width="2" fill="rgba(87,242,135,0.05)"/>
+  <circle cx="365" cy="135" r="11" stroke="rgba(87,242,135,0.7)" stroke-width="1.5" fill="rgba(87,242,135,0.12)"/>
+  <circle cx="390" cy="160" r="11" stroke="rgba(87,242,135,0.7)" stroke-width="1.5"/>
+  <circle cx="365" cy="185" r="11" stroke="rgba(87,242,135,0.7)" stroke-width="1.5"/>
+  <circle cx="340" cy="160" r="11" stroke="rgba(87,242,135,0.7)" stroke-width="1.5"/>
+  <rect x="120" y="128" width="50" height="50" rx="4" stroke="rgba(87,242,135,0.5)" stroke-width="1.5"/>
+  <circle cx="260" cy="118" r="10" stroke="rgba(87,242,135,0.5)" stroke-width="1.5"/>
+  <text x="260" y="292" text-anchor="middle" fill="rgba(87,242,135,0.7)" font-size="13" font-family="monospace">XBOX CONTROLLER</text>
+</svg>

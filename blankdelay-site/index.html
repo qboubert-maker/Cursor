@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BlankDelay — statistically proven zero delay gaming optimization for PC, Xbox, PlayStation, Nintendo and mobile. Instant results.">
+    <meta name="keywords" content="gaming tweaks, zero delay, FPS boost, BlankDelay, latency fix">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://blankdelay.com/">
+    <meta property="og:title" content="BlankDelay — Zero Delay. Every Platform.">
+    <meta property="og:description" content="Leave delay blank. Proven optimization for every game and platform.">
+    <meta property="og:image" content="https://blankdelay.com/assets/og-image.png?v=7">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:site_name" content="BlankDelay">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="BlankDelay — Zero Delay. Every Platform.">
+    <meta name="twitter:description" content="Leave delay blank. Proven optimization for every game and platform.">
+    <meta name="twitter:image" content="https://blankdelay.com/assets/og-image.png?v=7">
+    <link rel="icon" type="image/png" href="assets/og-image.png">
+    <title>BlankDelay — Zero Delay. Every Platform.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="checkout.css">
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+</head>
+<body class="loading">
+    <div class="page-loader" id="page-loader">
+        <span class="mark mark--hero"><svg><use href="#speed-mark"/></svg></span>
+        <span class="loader-text mono">BLANKDELAY</span>
+    </div>
+    <div class="sticky-cta" id="sticky-cta">
+        <span>Blank Premium Utility — <strong>Most Popular</strong></span>
+        <a href="https://buy.stripe.com/9B628kdDc7jQdyL4Ih9bO0d" class="btn btn-primary btn-sm" data-buy-slug="premium">Get Now · $29.99</a>
+    </div>
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+        <symbol id="speed-mark" viewBox="0 0 32 32">
+            <circle cx="8" cy="16" r="3.5" fill="currentColor"/>
+            <path fill="currentColor" d="M11 16h4l14-6-3 6 3 6-14-6z"/>
+        </symbol>
+    </svg>
+
+    <canvas id="bg-canvas"></canvas>
+    <div class="cursor-mark" id="cursor-mark"><svg viewBox="0 0 32 32"><use href="#speed-mark"/></svg></div>
+    <div class="cursor-glow" id="cursor"></div>
+
+    <div class="exit-modal" id="exit-modal" hidden>
+        <div class="exit-modal-inner card">
+            <button class="exit-close" id="exit-close" aria-label="Close">×</button>
+            <h3>Wait — take 15% off Blank Premium</h3>
+            <p>Use code <strong class="mono">BLANK15</strong> before you go. Instant delivery.</p>
+            <button type="button" class="btn btn-primary" id="claim-discount-btn">Claim 15% Off</button>
+        </div>
+    </div>
+
+    <a href="#faq" class="float-support" title="BlankDelay AI Support">
+        <span class="support-dot"></span> Support
+    </a>
+
+    <div class="mobile-bar" id="mobile-bar">
+        <a href="#products" class="btn btn-primary btn-sm">Buy Now</a>
+        <a href="#faq" class="btn btn-ghost btn-sm">AI Support</a>
+    </div>
+
+    <nav id="nav">
+        <div class="nav-shell">
+            <a href="#home" class="nav-logo">
+                <span class="mark"><svg><use href="#speed-mark"/></svg></span>
+                <span class="brand-name">BlankDelay</span>
+            </a>
+            <div class="nav-links">
+                <a href="#home" class="active">Home</a>
+                <a href="#products">Products</a>
+                <a href="#compatibility">Compatibility</a>
+                <a href="#reviews">Reviews</a>
+                <a href="#about">About</a>
+                <a href="#specials">Specials</a>
+                <a href="#faq">FAQ</a>
+            </div>
+            <div class="nav-right">
+                <div class="nav-tools">
+                    <button class="theme-toggle" id="theme-toggle" title="Switch to light mode">☾</button>
+                    <select class="lang-select" id="lang-select" aria-label="Language">
+                        <option value="en">EN</option>
+                        <option value="es">ES</option>
+                        <option value="fr">FR</option>
+                    </select>
+                </div>
+                <span class="nav-latency mono" id="nav-latency-badge">0ms</span>
+                <span class="api-status mono" title="All systems operational">● Online</span>
+                <button type="button" class="cart-btn" id="cart-btn" aria-label="Open cart">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M6 6L5 3H2"/></svg>
+                    <span class="cart-badge" id="cart-badge" hidden aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HOME -->
+    <section class="hero" id="home">
+        <h1 class="hero-title">
+            <span class="dim">Delay? We Left</span><br>
+            <span class="hit">That BLANK.</span>
+        </h1>
+        <div class="hero-brand-row">
+            <span class="mark mark--hero"><svg><use href="#speed-mark"/></svg></span>
+            <p class="hero-brand">Blank Delay</p>
+        </div>
+        <div class="proven-block">
+            <span class="proven-tag mono">STATISTICALLY PROVEN</span>
+            <p class="hero-desc">
+                Lab-tested optimization for competitive play — BlankDelay delivers
+                lower input delay and higher FPS through professional-grade system tuning,
+                not placebo tweaks.
+            </p>
+        </div>
+        <div class="hero-cta">
+            <a href="#products" class="btn btn-primary btn-lg">Buy Products Now</a>
+            <a href="#faq" class="btn btn-ghost btn-lg">Get Support</a>
+        </div>
+
+        <div class="hero-showcase">
+            <div class="showcase-bar mono">
+                <span>BLANKDELAY LIVE METRICS</span>
+                <span id="showcase-latency" class="flash">0ms LIVE</span>
+            </div>
+            <div class="showcase-body">
+                <div class="showcase-metric"><div class="num mono">0ms</div><div class="lbl">Input Delay</div></div>
+                <div class="showcase-metric"><div class="num">FPS</div><div class="lbl">Boost Ready</div></div>
+                <div class="showcase-metric"><div class="num">Ping</div><div class="lbl">Optimized</div></div>
+            </div>
+        </div>
+        <div class="stat-row">
+            <div class="stat-pill card"><div class="val mono">0ms</div><div class="lbl">Target Delay</div></div>
+            <div class="stat-pill card"><div class="val">1000+</div><div class="lbl">Games</div></div>
+            <div class="stat-pill card"><div class="val mono">24/7</div><div class="lbl">Support</div></div>
+            <div class="stat-pill card"><div class="val">Safe</div><div class="lbl">Tweaks Only</div></div>
+        </div>
+        <div class="trust-bar wrap">
+            <span>🔒 Secure Checkout</span>
+            <span>⚡ Instant Delivery</span>
+            <span>✓ 14-Day Refund</span>
+            <span>🛡️ 100% Safe</span>
+            <span class="mono"><a href="#faq" style="color:inherit">AI Support</a></span>
+        </div>
+    </section>
+
+    <div class="meta-banner wrap">
+        <span class="meta-pulse">● LIVE</span>
+        <span>Chapter / Season ready — BlankDelay updated for latest game patches</span>
+    </div>
+
+    <section class="section products-section" id="products">
+        <canvas id="matrix-canvas" class="matrix-canvas"></canvas>
+        <div class="wrap">
+            <div class="section-head center">
+                <div class="section-tag">Products</div>
+                <h2 class="section-title">Choose Your Edge</h2>
+                <p class="section-desc">Premium optimization tools crafted for serious gamers who demand the best performance.</p>
+            </div>
+
+            <!-- System Tweaks -->
+            <div class="product-category">
+                <div class="category-head">
+                    <div>
+                        <h3 class="category-title">System Tweaks</h3>
+                        <p class="category-desc">Optimize your PC for maximum gaming performance</p>
+                    </div>
+                    <span class="category-badge mono">Updated</span>
+                </div>
+                <div class="product-grid">
+
+                    <article class="product-card featured card holo-card">
+                        <div class="product-badges">
+                            <span class="badge-pop">🔥 Most Popular</span>
+                            <span class="badge-value">Best Value</span>
+                        </div>
+                        <div class="product-media media-premium">
+                            <canvas class="premium-media-canvas" aria-hidden="true"></canvas>
+                            <div class="premium-logo-wrap">
+                                <span class="mark mark--premium"><svg><use href="#speed-mark"/></svg></span>
+                                <span class="premium-pulse"></span>
+                            </div>
+                            <div class="premium-speed-lines" aria-hidden="true"></div>
+                            <div class="product-media-overlay"><span class="live-dot"></span>Live · BlankDelay Suite</div>
+                        </div>
+                        <div class="product-body">
+                            <span class="product-tag">V4 · ALL IN ONE TWEAKING PACK</span>
+                            <h3 class="product-name">Blank Premium Utility</h3>
+                            <p class="product-desc">The ultimate all-in-one optimization suite. Includes FPS boost, input optimization, network tweaks, and more.</p>
+                            <div class="product-price"><span class="now">$29.99</span><span class="was">$124.95</span><span class="price-note">one-time</span></div>
+                            <a href="https://buy.stripe.com/9B628kdDc7jQdyL4Ih9bO0d" class="btn btn-primary btn-get" data-product="Blank Premium Utility" data-slug="premium">Get Now</a>
+                            <span class="guarantee-seal">14-day money-back guarantee</span>
+                        </div>
+                    </article>
+
+                    <article class="product-card card">
+                        <div class="product-media media-live" data-theme="delay-plus">
+                            <canvas class="live-media-canvas" aria-hidden="true"></canvas>
+                            <div class="live-logo-wrap">
+                                <span class="mark mark--live"><svg><use href="#speed-mark"/></svg></span>
+                                <span class="live-pulse"></span>
+                            </div>
+                            <div class="live-speed-lines" aria-hidden="true"></div>
+                            <div class="live-stat mono" aria-live="polite"><span class="live-stat-from">18</span>ms → <span class="live-stat-to">0</span>ms</div>
+                            <div class="product-media-overlay"><span class="live-dot"></span>Live · Zero Delay Plus</div>
+                        </div>
+                        <div class="product-body">
+                            <span class="product-tag">Ultimate PC Latency &amp; FPS Optimizer</span>
+                            <h3 class="product-name">Zero Delay Plus</h3>
+                            <p class="product-desc">The enhanced zero delay experience with additional FPS optimizations and advanced latency fixes.</p>
+                            <div class="product-price"><span class="now">$14.99</span><span class="was">$74.95</span><span class="price-note">one-time</span></div>
+                            <a href="https://buy.stripe.com/9B66oAbv4aw2bqDcaJ9bO0c" class="btn btn-ghost btn-get" data-product="Zero Delay Plus" data-slug="zero-plus">Get Now</a>
+                        </div>
+                    </article>
+
+                    <article class="product-card card">
+                        <div class="product-media media-live" data-theme="delay">
+                            <canvas class="live-media-canvas" aria-hidden="true"></canvas>
+                            <div class="live-logo-wrap">
+                                <span class="mark mark--live"><svg><use href="#speed-mark"/></svg></span>
+                                <span class="live-pulse"></span>
+                            </div>
+                            <div class="live-speed-lines" aria-hidden="true"></div>
+                            <div class="live-stat mono" aria-live="polite"><span class="live-stat-from">12</span>ms → <span class="live-stat-to">0</span>ms</div>
+                            <div class="product-media-overlay"><span class="live-dot"></span>Live · Quantum Delay</div>
+                        </div>
+                        <div class="product-body">
+                            <span class="product-tag">Quantum Delay Engine</span>
+                            <h3 class="product-name">Zero Delay</h3>
+                            <p class="product-desc">Eliminate input lag completely. Advanced system optimizations for the fastest response times possible.</p>
+                            <div class="product-price"><span class="now">$9.99</span><span class="was">$49.95</span><span class="price-note">one-time</span></div>
+                            <a href="https://buy.stripe.com/4gM4gsdDc47E2U7eiR9bO0e" class="btn btn-ghost btn-get" data-product="Zero Delay" data-slug="zero">Get Now</a>
+                        </div>
+                    </article>
+
+                    <article class="product-card card">
+                        <div class="product-media media-live" data-theme="fps">
+                            <canvas class="live-media-canvas" aria-hidden="true"></canvas>
+                            <div class="live-logo-wrap">
+                                <span class="mark mark--live"><svg><use href="#speed-mark"/></svg></span>
+                                <span class="live-pulse"></span>
+                            </div>
+                            <div class="live-speed-lines" aria-hidden="true"></div>
+                            <div class="live-stat mono" aria-live="polite"><span class="live-stat-from">60</span> → <span class="live-stat-to">240+</span> FPS</div>
+                            <div class="product-media-overlay"><span class="live-dot"></span>Live · FPS boost</div>
+                        </div>
+                        <div class="product-body">
+                            <span class="product-tag">Dynamic Frame Stabilizer</span>
+                            <h3 class="product-name">FPS Boost</h3>
+                            <p class="product-desc">Maximize your frame rate. Deep system optimizations to squeeze every last frame from your hardware.</p>
+                            <div class="product-price"><span class="now">$9.99</span><span class="was">$49.95</span><span class="price-note">one-time</span></div>
+                            <a href="https://buy.stripe.com/cNi8wI0QqbA6dyLb6F9bO0b" class="btn btn-ghost btn-get" data-product="FPS Boost" data-slug="fps">Get Now</a>
+                        </div>
+                    </article>
+
+                    <article class="product-card card">
+                        <div class="product-media media-live" data-theme="ping">
+                            <canvas class="live-media-canvas" aria-hidden="true"></canvas>
+                            <div class="live-logo-wrap">
+                                <span class="mark mark--live"><svg><use href="#speed-mark"/></svg></span>
+                                <span class="live-pulse"></span>
+                            </div>
+                            <div class="live-speed-lines" aria-hidden="true"></div>
+                            <div class="live-stat mono" aria-live="polite"><span class="live-stat-from">45</span>ms → <span class="live-stat-to">28</span>ms ping</div>
+                            <div class="product-media-overlay"><span class="live-dot"></span>Live · Ping optimize</div>
+                        </div>
+                        <div class="product-body">
+                            <span class="product-tag">Quantum Ping Optimizer</span>
+                            <h3 class="product-name">Ping Optimizer</h3>
+                            <p class="product-desc">Lower your ping and reduce network jitter. Optimized routing and connection tweaks for smoother gameplay.</p>
+                            <div class="product-price"><span class="now">$9.99</span><span class="was">$49.95</span><span class="price-note">one-time</span></div>
+                            <a href="https://buy.stripe.com/9B66oAbv433A7an7Ut9bO0a" class="btn btn-ghost btn-get" data-product="Ping Optimizer" data-slug="ping">Get Now</a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- Macros -->
+            <div class="product-category">
+                <div class="category-head">
+                    <div>
+                        <h3 class="category-title">Macros</h3>
+                        <p class="category-desc">Advanced input automation for competitive edge</p>
+                    </div>
+                    <span class="category-badge mono">UPDATED!</span>
+                </div>
+                <div class="product-grid">
+
+                    <article class="product-card card">
+                        <div class="product-media media-live" data-theme="controller">
+                            <canvas class="live-media-canvas" aria-hidden="true"></canvas>
+                            <div class="live-logo-wrap">
+                                <span class="mark mark--live"><svg><use href="#speed-mark"/></svg></span>
+                                <span class="live-pulse"></span>
+                            </div>
+                            <div class="live-speed-lines" aria-hidden="true"></div>
+                            <div class="live-stat mono" aria-live="polite"><span class="live-stat-from">8</span>ms → <span class="live-stat-to">1</span>ms input</div>
+                            <div class="product-media-overlay"><span class="live-dot"></span>Live · Controller macro</div>
+                        </div>
+                        <div class="product-body">
+                            <span class="product-tag">V2.00</span>
+                            <h3 class="product-name">Controller Macro</h3>
+                            <p class="product-desc">Advanced controller macros for competitive play. Optimized timing and input sequences for maximum advantage.</p>
+                            <div class="product-price"><span class="now">$19.99</span><span class="was">$99.95</span><span class="price-note">one-time</span></div>
+                            <a href="https://buy.stripe.com/6oUbIU1Uu47EfGTcaJ9bO09" class="btn btn-ghost btn-get" data-product="Controller Macro" data-slug="controller">Get Now</a>
+                        </div>
+                    </article>
+
+                    <article class="product-card card">
+                        <div class="product-media media-live" data-theme="keyboard">
+                            <canvas class="live-media-canvas" aria-hidden="true"></canvas>
+                            <div class="live-logo-wrap">
+                                <span class="mark mark--live"><svg><use href="#speed-mark"/></svg></span>
+                                <span class="live-pulse"></span>
+                            </div>
+                            <div class="live-speed-lines" aria-hidden="true"></div>
+                            <div class="live-stat mono" aria-live="polite"><span class="live-stat-from">12</span>ms → <span class="live-stat-to">0</span>ms edits</div>
+                            <div class="product-media-overlay"><span class="live-dot"></span>Live · Keyboard macro</div>
+                        </div>
+                        <div class="product-body">
+                            <span class="product-tag">V2.0</span>
+                            <h3 class="product-name">Keyboard Macro</h3>
+                            <p class="product-desc">Professional keyboard macros for serious gamers. Lightning-fast input sequences for building and editing.</p>
+                            <div class="product-price"><span class="now">$19.99</span><span class="was">$99.95</span><span class="price-note">one-time</span></div>
+                            <a href="https://buy.stripe.com/8x2bIU1UugUq0LZeiR9bO08" class="btn btn-ghost btn-get" data-product="Keyboard Macro" data-slug="keyboard">Get Now</a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- Aim Training -->
+            <div class="product-category">
+                <div class="category-head">
+                    <div>
+                        <h3 class="category-title">Aim Training</h3>
+                        <p class="category-desc">Precision training tools to improve your accuracy</p>
+                    </div>
+                </div>
+                <div class="product-grid">
+
+                    <article class="product-card card">
+                        <div class="product-media media-live" data-theme="aim">
+                            <canvas class="live-media-canvas" aria-hidden="true"></canvas>
+                            <div class="live-logo-wrap">
+                                <span class="mark mark--live"><svg><use href="#speed-mark"/></svg></span>
+                                <span class="live-pulse"></span>
+                            </div>
+                            <div class="live-speed-lines" aria-hidden="true"></div>
+                            <div class="live-stat mono" aria-live="polite">AIM <span class="live-stat-from">72</span>% → <span class="live-stat-to">94</span>%</div>
+                            <div class="product-media-overlay"><span class="live-dot"></span>Live · Aim tracking</div>
+                        </div>
+                        <div class="product-body">
+                            <span class="product-tag">AIM TWEAKS</span>
+                            <h3 class="product-name">Aim Bundle</h3>
+                            <p class="product-desc">Precision aim training with controller tweaks. 3D arena, Fortnite-accurate sensitivity, and professional aim optimization.</p>
+                            <div class="product-price"><span class="now">$14.99</span><span class="was">$74.95</span><span class="price-note">one-time</span></div>
+                            <a href="https://buy.stripe.com/8x28wI7eObA666j7Ut9bO07" class="btn btn-ghost btn-get" data-product="Aim Bundle" data-slug="aim">Get Now</a>
+                        </div>
+                    </article>
+
+                    <article class="product-card card">
+                        <div class="product-media media-live" data-theme="shotgun">
+                            <canvas class="live-media-canvas" aria-hidden="true"></canvas>
+                            <div class="live-logo-wrap">
+                                <span class="mark mark--live"><svg><use href="#speed-mark"/></svg></span>
+                                <span class="live-pulse"></span>
+                            </div>
+                            <div class="live-speed-lines" aria-hidden="true"></div>
+                            <div class="live-stat mono" aria-live="polite">Close range <span class="live-stat-from">65</span>% → <span class="live-stat-to">92</span>%</div>
+                            <div class="product-media-overlay"><span class="live-dot"></span>Live · Shotgun pack</div>
+                        </div>
+                        <div class="product-body">
+                            <span class="product-tag">Aim Enhancer</span>
+                            <h3 class="product-name">Shotgun Pack</h3>
+                            <p class="product-desc">Close-range domination. Specialized shotgun training with human targets, flick shots, and box fight modes.</p>
+                            <div class="product-price"><span class="now">$9.99</span><span class="was">$49.95</span><span class="price-note">one-time</span></div>
+                            <a href="https://buy.stripe.com/dRm28k56GgUq0LZ5Ml9bO06" class="btn btn-ghost btn-get" data-product="Shotgun Pack" data-slug="shotgun">Get Now</a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPARISON -->
+    <section class="section section-tight">
+        <div class="wrap">
+            <div class="section-head center">
+                <div class="section-tag">Why we're different</div>
+                <h2 class="section-title">BlankDelay vs The World</h2>
+            </div>
+            <div class="compare-table card">
+                <div class="compare-row compare-head"><span>Feature</span><span>BlankDelay</span><span>Everyone else</span></div>
+                <div class="compare-row"><span>0ms latency focus</span><span class="yes">✓</span><span class="no">Partial</span></div>
+                <div class="compare-row"><span>Statistical proof</span><span class="yes">✓</span><span class="no">Rare</span></div>
+                <div class="compare-row"><span>Every platform</span><span class="yes">✓</span><span class="no">PC only</span></div>
+                <div class="compare-row"><span>Instant results</span><span class="yes">✓</span><span class="no">Varies</span></div>
+                <div class="compare-row"><span>One-click apply</span><span class="yes">✓</span><span class="yes">✓</span></div>
+                <div class="compare-row"><span>1000+ games</span><span class="yes">✓</span><span class="no">Limited</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MULTIVERSAL COMPATIBILITY -->
+    <section class="orbit-section" id="compatibility">
+        <div class="wrap section-head center">
+            <div class="section-tag">1000+ Supported Games</div>
+            <h2 class="section-title">Multiversal Compatibility</h2>
+            <p class="section-desc">Every title orbits BlankDelay — hover a logo as it spins.</p>
+        </div>
+        <div class="orbit-stage">
+            <canvas id="constellation-canvas" class="constellation-canvas"></canvas>
+            <div class="orbit-ring orbit-ring-1"></div>
+            <div class="orbit-ring orbit-ring-2"></div>
+            <div class="orbit-core"><span class="mark mark--sm"><svg><use href="#speed-mark"/></svg></span>Blank<br>Delay</div>
+            <div id="game-orbit">
+                <div class="orbit-item card" data-glow="#6BBAFF"><div class="logo-wrap"><img class="game-logo" data-bd-img="fortnite" src="assets/logos/fortnite.png" alt="Fortnite"></div><span>Fortnite</span></div>
+                <div class="orbit-item card" data-glow="#FF4655"><div class="logo-wrap"><img class="game-logo" data-bd-img="valorant" src="assets/logos/valorant.png" alt="Valorant"></div><span>Valorant</span></div>
+                <div class="orbit-item card" data-glow="#00FF00"><div class="logo-wrap"><img class="game-logo" data-bd-img="gta5" src="assets/logos/gta5.png" alt="GTA V"></div><span>GTA V</span></div>
+                <div class="orbit-item card" data-glow="#F5C518"><div class="logo-wrap"><img class="game-logo" data-bd-img="warzone" src="assets/logos/warzone.png" alt="Warzone"></div><span>Warzone</span></div>
+                <div class="orbit-item card" data-glow="#DA292A"><div class="logo-wrap"><img class="game-logo" data-bd-img="apex" src="assets/logos/apex.png" alt="Apex"></div><span>Apex</span></div>
+                <div class="orbit-item card" data-glow="#DE9B35"><div class="logo-wrap"><img class="game-logo" data-bd-img="cs2" src="assets/logos/cs2.png" alt="CS2"></div><span>CS2</span></div>
+                <div class="orbit-item card" data-glow="#62B47A"><div class="logo-wrap"><img class="game-logo" data-bd-img="minecraft" src="assets/logos/minecraft.png" alt="Minecraft"></div><span>Minecraft</span></div>
+                <div class="orbit-item card" data-glow="#FFFFFF"><div class="logo-wrap"><img class="game-logo" data-bd-img="roblox" src="assets/logos/roblox.png" alt="Roblox"></div><span>Roblox</span></div>
+                <div class="orbit-item card" data-glow="#0075EB"><div class="logo-wrap"><img class="game-logo" data-bd-img="rocketleague" src="assets/logos/rocketleague.png" alt="Rocket League"></div><span>Rocket League</span></div>
+                <div class="orbit-item card" data-glow="#C89B3C"><div class="logo-wrap"><img class="game-logo" data-bd-img="league" src="assets/logos/league.png" alt="League"></div><span>League</span></div>
+                <div class="orbit-item card" data-glow="#FA9C1E"><div class="logo-wrap"><img class="game-logo" data-bd-img="overwatch" src="assets/logos/overwatch.png" alt="Overwatch"></div><span>Overwatch</span></div>
+                <div class="orbit-item card" data-glow="#00FF87"><div class="logo-wrap"><img class="game-logo" data-bd-img="fc25" src="assets/logos/fc25.png" alt="FC 25"></div><span>FC 25</span></div>
+            </div>
+        </div>
+        <div class="wrap" style="margin-top:60px">
+            <div class="section-head center">
+                <div class="section-tag">Platforms</div>
+                <h2 class="section-title">Every Platform Approved</h2>
+                <p class="section-desc">Official platform support — full color, full optimization. One brand, every device.</p>
+            </div>
+            <div class="platform-showcase">
+                <article class="platform-card card" data-platform="pc">
+                    <img class="platform-logo" data-bd-img="windows" src="assets/platforms/windows.png" alt="Windows PC">
+                    <span class="platform-name">PC</span>
+                    <span class="platform-sub">Windows · Full suite</span>
+                </article>
+                <article class="platform-card card" data-platform="xbox">
+                    <img class="platform-logo" data-bd-img="xbox" src="assets/platforms/xbox.png" alt="Xbox">
+                    <span class="platform-name">Xbox</span>
+                    <span class="platform-sub">One · Series S/X</span>
+                </article>
+                <article class="platform-card card" data-platform="ps">
+                    <img class="platform-logo" data-bd-img="playstation" src="assets/platforms/playstation.png" alt="PlayStation">
+                    <span class="platform-name">PlayStation</span>
+                    <span class="platform-sub">PS4 · PS5</span>
+                </article>
+                <article class="platform-card card" data-platform="nintendo">
+                    <img class="platform-logo" data-bd-img="nintendo-svg" src="assets/platforms/nintendo.svg" alt="Nintendo">
+                    <span class="platform-name">Nintendo</span>
+                    <span class="platform-sub">Switch · Handheld</span>
+                </article>
+                <article class="platform-card card" data-platform="mobile">
+                    <div class="platform-duo">
+                        <img class="platform-logo platform-logo--sm" referrerpolicy="no-referrer" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/120px-Apple_logo_black.svg.png" alt="iOS">
+                        <img class="platform-logo platform-logo--sm" referrerpolicy="no-referrer" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Android_robot.svg/120px-Android_robot.svg.png" alt="Android">
+                    </div>
+                    <span class="platform-name">Mobile</span>
+                    <span class="platform-sub">iOS · Android</span>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section" id="about">
+        <div class="wrap">
+            <div class="section-head center">
+                <div class="section-tag">About</div>
+                <h2 class="section-title">Designed For The Best. Founded By Blank.</h2>
+                <p class="section-desc about-lead">Founded by <strong>Blank</strong> — BlankDelay exists because competitive players shouldn't lose fights to input lag, stutters, or gatekept configs.</p>
+            </div>
+            <div class="about-timeline card">
+                <div class="timeline-step"><span>Before</span><p>Lag, stutter, lost trades</p></div>
+                <div class="timeline-arrow">→</div>
+                <div class="timeline-step active"><span>BlankDelay</span><p>One-click optimize</p></div>
+                <div class="timeline-arrow">→</div>
+                <div class="timeline-step"><span>After</span><p>0ms · locked FPS</p></div>
+            </div>
+            <div class="about-grid">
+                <article class="about-card card">
+                    <span class="about-icon">⚠</span>
+                    <h3>The Issue</h3>
+                    <p>Pro-level optimization was locked behind private Discord configs, expensive coaches, and sketchy downloads. Most players felt delay every fight — and had no trusted way to fix it.</p>
+                </article>
+                <article class="about-card card">
+                    <span class="about-icon">◎</span>
+                    <h3>The Task</h3>
+                    <p>Make statistically proven, zero-delay performance one click away — on PC, console, and mobile. No tech degree. No guesswork. Leave delay blank.</p>
+                </article>
+                <article class="about-card card">
+                    <span class="about-icon">✓</span>
+                    <h3>The Payoff</h3>
+                    <p>Built for competitive players who want zero input lag, higher FPS, and lower ping — with safe, reversible system tweaks.</p>
+                </article>
+            </div>
+            <div class="integrity-pledge card">
+                <h3>Competitive Integrity Pledge</h3>
+                <p>No cheats. No injections. No memory editing. Config and registry tweaks only — fully reversible, 100% safe.</p>
+            </div>
+            <div class="about-founder card">
+                <span class="mark mark--hero"><svg><use href="#speed-mark"/></svg></span>
+                <div>
+                    <h3>Founded by Blank</h3>
+                    <p>Competitive gamer turned optimizer. Built BlankDelay after losing one too many 50/50s to input delay — then proving the fix with data, not hype.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+        <!-- REVIEWS — dual-row scrolling marquee -->
+    <section class="section reviews-section" id="reviews">
+        <div class="section-head center wrap">
+            <div class="section-tag">Reviews</div>
+            <h2 class="section-title">Players feel the blank</h2>
+            <p class="section-desc">Zero delay isn't a slogan — it's what they notice in the first match.</p>
+        </div>
+        <div class="review-marquee" aria-label="Customer reviews">
+            <div class="review-track track-left">
+                <article class="review-card"><div class="stars">★★★★★</div><p class="review-text">"Blank Delay — edits same frame I press. Insane."</p><div class="review-meta"><span class="review-name">Zane H., Pro</span><span class="verified">✓ Verified purchase</span></div></article>
+                <article class="review-card"><div class="stars">★★★★★</div><p class="review-text">"Blank Premium = 240 locked FPS. Worth every cent."</p><div class="review-meta"><span class="review-name">Priya L., Streamer</span><span class="verified">✓ Verified purchase</span></div></article>
+                <article class="review-card"><div class="stars">★★★★★</div><p class="review-text">"Mouse fix + monitor = clicks before I think."</p><div class="review-meta"><span class="review-name">Owen T., Arena</span><span class="verified">✓ Verified purchase</span></div></article>
+                <article class="review-card"><div class="stars">★★★★★</div><p class="review-text">"Console pack on PS5 — finally zero delay."</p><div class="review-meta"><span class="review-name">Elena V., Console</span><span class="verified">✓ Verified purchase</span></div></article>
+                <article class="review-card"><div class="stars">★★★★★</div><p class="review-text">"Noticeably snappier inputs after the first session."</p><div class="review-meta"><span class="review-name">Marcus W., Comp</span><span class="verified">✓ Verified purchase</span></div></article>
+            </div>
+            <div class="review-track track-right">
+                <article class="review-card"><div class="stars">★★★★★</div><p class="review-text">"Aim bundle tracking feels locked on."</p><div class="review-meta"><span class="review-name">Jade F., Controller</span><span class="verified">✓ Verified purchase</span></div></article>
+                <article class="review-card"><div class="stars">★★★★★</div><p class="review-text">"Ping dropped 15ms. Trades feel free."</p><div class="review-meta"><span class="review-name">Derek S., Ranked</span><span class="verified">✓ Verified purchase</span></div></article>
+                <article class="review-card"><div class="stars">★★★★★</div><p class="review-text">"Best tweak site I've used. No cap."</p><div class="review-meta"><span class="review-name">Iris K., Creator</span><span class="verified">✓ Verified purchase</span></div></article>
+                <article class="review-card"><div class="stars">★★★★★</div><p class="review-text">"FPS boost saved my endgames completely."</p><div class="review-meta"><span class="review-name">Cole B., FNCS</span><span class="verified">✓ Verified purchase</span></div></article>
+                <article class="review-card"><div class="stars">★★★★★</div><p class="review-text">"Support answered in 5 min on Discord."</p><div class="review-meta"><span class="review-name">Nina R., Casual</span><span class="verified">✓ Verified purchase</span></div></article>
+            </div>
+        </div>
+    </section>
+
+    <!-- SPECIALS -->
+    <section class="section" id="specials">
+        <div class="wrap">
+            <div class="section-head center">
+                <div class="section-tag">Specials</div>
+                <h2 class="section-title">Deals, rewards & extras</h2>
+                <p class="section-desc">Bundles, referrals, creator program, and gift cards.</p>
+            </div>
+
+            <div class="specials-hero card">
+                <span class="pass-tag">LIMITED · SEASON BUNDLE</span>
+                <h3>Blank Pass — Full Kit</h3>
+                <p>Blank Premium + Blank Delay + FPS Boost + Mouse Fix. One purchase, total optimization.</p>
+                <div class="specials-hero-row">
+                    <div class="pass-price"><span class="was">$74.96</span><span class="now">$39.99</span></div>
+                    <a href="https://buy.stripe.com/cNieV66aK5bI8er8Yx9bO05" class="btn btn-primary" id="blank-pass-buy">Get Blank Pass</a>
+                </div>
+            </div>
+
+            <div class="extras-grid">
+                <div class="sub-card card" id="blank-pass-monthly-card">
+                    <h3>Blank Pass Monthly</h3>
+                    <p>All core products + auto-updates. <strong>$9.99/mo</strong></p>
+                    <p class="pass-status mono" id="pass-status" hidden></p>
+                    <button class="btn btn-primary" id="blank-pass-subscribe">Subscribe</button>
+                    <button class="btn btn-ghost btn-sm" id="blank-pass-manage" hidden style="margin-top:8px">Manage Subscription</button>
+                </div>
+                <div class="refer-card card">
+                    <h3>Refer a Friend</h3>
+                    <p>Give $5, get $5 when they buy Blank Premium.</p>
+                    <div class="form-group">
+                        <label for="refer-your-email">Your email <span class="field-hint">— so we can send your $5 reward</span></label>
+                        <input type="email" placeholder="you@email.com" id="refer-your-email">
+                    </div>
+                    <div class="form-group">
+                        <label for="refer-email">Friend's email <span class="field-hint">— who you're inviting</span></label>
+                        <input type="email" placeholder="friend@email.com" id="refer-email">
+                    </div>
+                    <p class="specials-error" id="refer-error" hidden></p>
+                    <button class="btn btn-primary" id="refer-btn">Send Invite</button>
+                    <div class="refer-success" id="refer-success" hidden><p class="mono">Share this link with your friend:</p><p class="refer-link mono" id="refer-link-out"></p></div>
+                    <button class="btn btn-ghost btn-sm" id="refer-redeem-btn" style="margin-top:10px">Redeem Earnings</button>
+                </div>
+                <div class="affiliate-card card"><h3>Creator Affiliate Program</h3><p>Keep 80% on every sale from your link. Track clicks, sales, and cash out anytime.</p><button class="btn btn-ghost" id="affiliate-btn">Apply as Creator</button></div>
+                <div class="gift-card card"><h3>Gift Cards</h3><p>Send BlankDelay credit to a friend.</p><div class="gift-opts"><span>$10</span><span>$25</span><span class="active">$50</span></div><button class="btn btn-ghost" id="gift-buy-btn">Buy Gift Card</button></div>
+            </div>
+
+            <div class="discord-feed card specials-discord">
+                <h3>Need help?</h3>
+                <ul id="discord-feed-list">
+                    <li><strong>AI Support</strong> Ask about products, cart, or checkout <span class="mono"><a href="#faq" style="color:inherit">#faq</a></span></li>
+                    <li><strong>Setup</strong> License keys delivered instantly after purchase <span class="mono">email</span></li>
+                    <li><strong>Refunds</strong> 14-day money-back on all products <span class="mono">guaranteed</span></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- PATCH NOTES -->
+    <section class="section section-tight" id="patch-notes">
+        <div class="wrap">
+            <div class="section-head center">
+                <div class="section-tag">Latest Updates</div>
+                <h2 class="section-title">Patch notes</h2>
+            </div>
+            <div class="patch-list">
+                <article class="patch-item card"><span class="patch-date mono">Jun 2026</span><h4>Season meta sync</h4><p>Blank Premium updated for latest Fortnite & Valorant patches.</p></article>
+                <article class="patch-item card"><span class="patch-date mono">May 2026</span><h4>GTA V console pack</h4><p>Multiversal Console Pack now includes GTA Online optimization.</p></article>
+                <article class="patch-item card"><span class="patch-date mono">Apr 2026</span><h4>AI Support</h4><p>Added BlankDelay AI Support chat in the FAQ section.</p></article>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ + AI Support -->
+    <section class="section" id="faq">
+        <div class="wrap">
+            <div class="section-head center">
+                <div class="section-tag">Help & Support</div>
+                <h2 class="section-title">Questions answered</h2>
+                <p class="section-desc">Browse FAQs or chat with BlankDelay AI Support for instant help.</p>
+            </div>
+            <div class="faq-support-grid">
+                <div class="faq-list faq-accordion">
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">What does "Blank Delay" mean?</button><div class="faq-a"><p>We left delay blank — zero. Every product is built to elevate your game performance now.</p></div></div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">What is Macro Pro?</button><div class="faq-a"><p>Controller and Keyboard Macro V2 include Macro Pro: map buttons/keys to combos, record timelines, Fortnite presets, 3D reactive holo, profile save/load, and F12 panic stop.</p></div></div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">How do Aim Bundle and Shotgun Pack work?</button><div class="faq-a"><p>Aim Assist Pro for Fortnite: lock-on strength, target radius, HUD weapon detection, live radar preview, keyboard + controller toggle, and per-weapon settings. Shotgun Pack is shotgun-only.</p></div></div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">Does it work with Fortnite?</button><div class="faq-a"><p>Yes. Macros use OS-level input. Aim modules detect FortniteClient-Win64-Shipping.exe. System tweaks work in all modes. No injection or memory editing.</p></div></div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">Will I get banned?</button><div class="faq-a"><p>System tweaks are 100% safe — registry and config only. Macros and aim tools use external input; use at your own discretion in tournaments.</p></div></div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">How is the product delivered?</button><div class="faq-a"><p>Instant delivery. License key on thank-you page + email within 1–2 minutes. Download BlankDelay-Setup.exe — one hub app for all products.</p></div></div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">Windows says the download is a virus — is it safe?</button><div class="faq-a"><p>Yes — this is a false positive because BlankDelay is a new publisher. Click <strong>More info</strong> → <strong>Run anyway</strong>. If your browser blocks it, click <strong>Keep</strong> or <strong>Download anyway</strong>. The app does not inject into games or steal data.</p></div></div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">What's the refund policy?</button><div class="faq-a"><p>14-day money-back guarantee on all products. No questions asked.</p></div></div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">How do I bind a controller toggle button?</button><div class="faq-a"><p>In Aim Bundle or Shotgun Pack, open Control → Controller Toggle → pick LB or any button. Press it in-game to toggle assist on/off.</p></div></div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">How does the cart work?</button><div class="faq-a"><p>Click Get Now → Add to Cart or Buy Now. Open the cart icon in the nav to review and checkout. One license key per product.</p></div></div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">Do I need technical knowledge?</button><div class="faq-a"><p>No. One-click apply for system tweaks. Macro Pro and Aim Assist have guided tabs — load Fortnite preset and arm.</p></div></div>
+                </div>
+                <div class="help-panel card">
+                    <div class="help-panel-head">
+                        <span class="help-live-dot"></span>
+                        <div>
+                            <h3>BlankDelay AI Support</h3>
+                            <p>Instant answers — Macro Pro, Aim Assist, products, cart & setup</p>
+                        </div>
+                    </div>
+                    <div class="help-chips" id="help-chips"></div>
+                    <div class="help-chat" id="help-chat"></div>
+                    <div class="help-input-row">
+                        <input type="text" id="help-input" placeholder="Ask anything…" autocomplete="off">
+                        <button type="button" class="btn btn-primary" id="help-send">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="wrap">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#home" class="nav-logo"><span class="mark"><svg><use href="#speed-mark"/></svg></span><span class="brand-name">BlankDelay</span></a>
+                    <p>Zero delay. Every platform. Statistically proven performance.</p>
+                </div>
+                <div class="footer-col"><h4>Products</h4><a href="#products">Blank Premium Utility</a><a href="#products">Zero Delay</a><a href="#products">FPS Boost</a><a href="#products">Controller Macro</a><a href="#products">Aim Bundle</a></div>
+                <div class="footer-col"><h4>Company</h4><a href="#about">About</a><a href="#specials">Specials</a><a href="#patch-notes">Updates</a></div>
+                <div class="footer-col"><h4>Support</h4><a href="#faq">AI Support</a></div>
+                <div class="footer-col"><h4>Legal</h4><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Refunds</a></div>
+            </div>
+            <div class="footer-bottom"><span>© 2026 BlankDelay</span><span class="mono">Delay? We left that blank.</span></div>
+        </div>
+    </footer>
+
+    <!-- Buy choice modal -->
+    <div class="bd-modal" id="buy-modal" hidden>
+        <div class="bd-modal-inner card buy-modal-inner">
+            <button class="exit-close" id="buy-modal-close" aria-label="Close">×</button>
+            <h3 id="buy-modal-name">Product</h3>
+            <p class="mono buy-modal-tag" id="buy-modal-tag">Tag</p>
+            <div class="buy-modal-price">
+                <span class="now mono" id="buy-modal-price">$0.00</span>
+                <span class="was" id="buy-modal-was">$0.00</span>
+            </div>
+            <p class="checkout-note">Buy now to checkout instantly, or add to cart and keep shopping.</p>
+            <div class="buy-modal-actions">
+                <button type="button" class="btn btn-primary" id="buy-now-btn">Buy Now</button>
+                <button type="button" class="btn btn-ghost" id="add-cart-btn">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart drawer -->
+    <div class="cart-overlay" id="cart-overlay" hidden></div>
+    <aside class="cart-drawer" id="cart-drawer" hidden>
+        <div class="cart-drawer-head">
+            <h3>Your Cart</h3>
+            <button type="button" class="exit-close" id="cart-close" aria-label="Close cart">×</button>
+        </div>
+        <div class="cart-body" id="cart-body">
+            <div class="cart-empty" id="cart-empty">
+                <p>Your cart is empty.</p>
+                <a href="#products" class="btn btn-ghost" id="cart-shop-btn">Browse Products</a>
+            </div>
+            <div class="cart-items" id="cart-items" hidden></div>
+        </div>
+        <div class="cart-footer" id="cart-footer" hidden>
+            <div class="cart-totals">
+                <div class="cart-total-line"><span>Subtotal</span><span class="mono" id="cart-subtotal">$0.00</span></div>
+                <div class="cart-total-line" id="cart-discount-row" hidden><span id="cart-discount-label">Discount</span><span class="mono" id="cart-discount">-$0.00</span></div>
+                <div class="cart-total-line cart-total-final"><span>Total</span><span class="mono" id="cart-total">$0.00</span></div>
+            </div>
+            <button type="button" class="btn btn-primary checkout-btn" id="cart-checkout-btn">Checkout</button>
+        </div>
+    </aside>
+
+    <!-- Modals -->
+    <div class="bd-modal" id="auth-modal" hidden>
+        <div class="bd-modal-inner card">
+            <button class="exit-close" data-close-modal="auth-modal" aria-label="Close">×</button>
+            <h3>Creator Affiliate Program</h3>
+            <p class="checkout-note" style="margin-bottom:14px;">Keep 80% of every sale from your link. BlankDelay keeps 20%. Create an account or log in for your custom link.</p>
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab active" id="auth-tab-signup">Sign Up</button>
+                <button type="button" class="auth-tab" id="auth-tab-login">Log In</button>
+            </div>
+            <p class="auth-tab-desc" id="auth-tab-desc">New creator? Enter your email and password to create your affiliate account.</p>
+            <p class="specials-error" id="auth-error" hidden></p>
+            <form id="auth-signup-form" class="checkout-form">
+                <div class="form-group"><label for="auth-signup-email">Email</label><input type="email" id="auth-signup-email" required placeholder="creator@email.com" autocomplete="email"></div>
+                <div class="form-group"><label for="auth-signup-pass">Password</label><input type="password" id="auth-signup-pass" required placeholder="Min. 6 characters" minlength="6" autocomplete="new-password"></div>
+                <button type="submit" class="btn btn-primary checkout-btn">Create Affiliate Account</button>
+            </form>
+            <form id="auth-login-form" class="checkout-form" hidden>
+                <div class="form-group"><label for="auth-login-email">Email</label><input type="email" id="auth-login-email" required placeholder="creator@email.com" autocomplete="email"></div>
+                <div class="form-group"><label for="auth-login-pass">Password</label><input type="password" id="auth-login-pass" required placeholder="Your password" autocomplete="current-password"></div>
+                <button type="submit" class="btn btn-primary checkout-btn">Log In to Dashboard</button>
+                <p class="checkout-note" style="margin-top:10px;"><a href="#" id="auth-forgot-link">Forgot password?</a></p>
+            </form>
+            <form id="auth-forgot-form" class="checkout-form" hidden>
+                <div class="form-group"><label for="auth-forgot-email">Email</label><input type="email" id="auth-forgot-email" required placeholder="creator@email.com" autocomplete="email"></div>
+                <button type="submit" class="btn btn-primary checkout-btn">Get Reset Link</button>
+            </form>
+            <form id="auth-reset-form" class="checkout-form" hidden>
+                <input type="hidden" id="auth-reset-token">
+                <div class="form-group"><label for="auth-reset-pass">New password</label><input type="password" id="auth-reset-pass" required placeholder="Min. 6 characters" minlength="6" autocomplete="new-password"></div>
+                <button type="submit" class="btn btn-primary checkout-btn">Save New Password</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="bd-modal" id="affiliate-dash-modal" hidden>
+        <div class="bd-modal-inner card">
+            <button class="exit-close" data-close-modal="affiliate-dash-modal" aria-label="Close">×</button>
+            <h3>Affiliate Dashboard</h3>
+            <p class="checkout-note">Logged in as <strong id="aff-email"></strong> · <span id="aff-rate-note">80% commission per sale · 20% cash-out fee to BlankDelay</span></p>
+            <div class="aff-stats">
+                <div class="aff-stat"><span class="lbl">Total Earnings</span><span class="val mono" id="aff-earnings">$0.00</span></div>
+                <div class="aff-stat"><span class="lbl">Available</span><span class="val mono" id="aff-balance">$0.00</span></div>
+                <div class="aff-stat"><span class="lbl">Sales</span><span class="val mono" id="aff-sales">0</span></div>
+                <div class="aff-stat"><span class="lbl">Link Clicks</span><span class="val mono" id="aff-clicks">0</span></div>
+            </div>
+            <p class="checkout-note">Your code: <strong class="mono" id="aff-code"></strong></p>
+            <div class="aff-link-box mono" id="aff-link"></div>
+            <p class="checkout-note" style="margin-top:12px;">Recent sales from your link</p>
+            <div class="aff-sales-list" id="aff-sales-list" style="max-height:160px;overflow:auto;margin-top:8px;font-size:12px;"></div>
+            <div class="form-group" style="margin-top:14px;">
+                <label for="aff-paypal">Cash out to PayPal email</label>
+                <input type="email" id="aff-paypal" placeholder="paypal@email.com">
+            </div>
+            <p class="checkout-note">Cash-out sends 80% to you and 20% to BlankDelay from your available balance (min $5).</p>
+            <p class="checkout-note" id="aff-cashout-msg" hidden></p>
+            <div class="actions" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn btn-primary" id="aff-copy-btn">Copy Link</button>
+                <button class="btn btn-primary" id="aff-cashout-btn">Cash Out</button>
+                <button class="btn btn-ghost" id="aff-logout">Log Out</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bd-modal" id="pass-modal" hidden>
+        <div class="bd-modal-inner card">
+            <button class="exit-close" data-close-modal="pass-modal" aria-label="Close">×</button>
+            <h3>Blank Pass Monthly</h3>
+            <p class="checkout-note" id="pass-modal-email"></p>
+            <div class="pass-modal-status" id="pass-modal-status"></div>
+            <div class="pass-modal-actions" id="pass-modal-actions"></div>
+        </div>
+    </div>
+
+    <div class="bd-modal" id="refer-redeem-modal" hidden>
+        <div class="bd-modal-inner card">
+            <button class="exit-close" data-close-modal="refer-redeem-modal" aria-label="Close">×</button>
+            <h3>Redeem Referral Earnings</h3>
+            <p>Balance: <strong class="mono" id="refer-balance">$0.00</strong></p>
+            <div class="form-group"><label>Redeem amount ($)</label><input type="number" id="redeem-amount" value="5" min="5" step="5"></div>
+            <button class="btn btn-primary" id="redeem-submit">Redeem to PayPal Email</button>
+            <p class="checkout-note" id="redeem-msg" style="margin-top:12px;"></p>
+        </div>
+    </div>
+
+
+    <script src="background.js"></script>
+    <script src="bd-store.js"></script>
+    <script src="bd-affiliate.js"></script>
+    <script src="logo-assets.js"></script>
+    <script src="bd-stripe-links.js"></script>
+    <script src="main.js"></script>
+    <script src="cart.js"></script>
+    <script src="help.js"></script>
+    <script src="specials.js"></script>
+</body>
+</html>
