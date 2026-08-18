@@ -20,8 +20,16 @@ function bdActivePromo() {
 
 function bdPendingAffiliateCode() {
     try {
+        if (typeof BD_STORE !== "undefined" && BD_STORE.getAffiliateAttribution) {
+            return BD_STORE.getAffiliateAttribution() || "";
+        }
         const fromSession = (sessionStorage.getItem("bd-aff-pending") || "").trim();
         if (fromSession) return fromSession;
+        const raw = localStorage.getItem("bd-aff-attr");
+        if (raw) {
+            const data = JSON.parse(raw);
+            if (data?.code && (!data.expires || Date.now() <= data.expires)) return String(data.code);
+        }
         const params = new URLSearchParams(location.search);
         return (params.get("aff") || "").trim();
     } catch {

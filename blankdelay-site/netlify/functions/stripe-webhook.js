@@ -175,134 +175,19 @@ async function sendEmailJS(order) {
   return true;
 }
 
-async function stripeForm(secretKey, path, params) {
-  const body = new URLSearchParams();
-  Object.entries(params || {}).forEach(([k, v]) => {
-    if (v === undefined || v === null || v === "") return;
-    body.append(k, String(v));
-  });
-  const res = await fetch("https://api.stripe.com/v1/" + path, {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + secretKey,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body,
-  });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(json?.error?.message || "Stripe " + path + " failed: " + res.status);
-  }
-  return json;
-}
+const { creditAffiliateSale } = require("../lib/affiliate-credit");
 
 async function creditAffiliateFromSession(session, price, productName, stripeSecret, lambdaEvent) {
   const affCode = String(session.client_reference_id || session.metadata?.aff || "").trim();
-  if (!affCode || !stripeSecret) {
-    return { ok: false, reason: "no_affiliate" };
-  }
-
-  let storeHelpers;
-  try {
-    storeHelpers = require("../lib/affiliate-store");
-  } catch (err) {
-    console.error("affiliate-store missing:", err.message);
-    return { ok: false, reason: "store_missing" };
-  }
-
-  let store;
-  try {
-    store = storeHelpers.getAffiliateStore(lambdaEvent);
-  } catch (err) {
-    console.error("affiliate blobs unavailable:", err.message);
-    return { ok: false, reason: "blobs_unavailable", detail: err.message };
-  }
-
-  const state = await storeHelpers.loadAffiliateState(store);
-  const sessionId = session.id || "";
-  if (sessionId && state.creditedSessions.includes(sessionId)) {
-    return { ok: true, reason: "already_credited" };
-  }
-
-  const user = storeHelpers.findAffiliateByCode(state, affCode);
-  if (!user) {
-    return { ok: false, reason: "affiliate_not_found", code: affCode };
-  }
-
-  const commission = +((Number(price) || 0) * 0.2).toFixed(2);
-  if (commission <= 0) return { ok: false, reason: "zero_commission" };
-
-  user.earnings = +((user.earnings || 0) + commission).toFixed(2);
-  user.sales = (user.sales || 0) + 1;
-
-  const sale = {
-    code: user.code,
-    amount: Number(price) || 0,
-    commission,
-    product: productName || "BlankDelay Product",
-    date: Date.now(),
-    sessionId,
-    payoutStatus: "pending",
-    transferId: "",
-  };
-
-  let transferError = "";
-  if (user.stripeAccountId) {
-    try {
-      const cents = Math.round(commission * 100);
-      if (cents >= 1) {
-        const transfer = await stripeForm(stripeSecret, "transfers", {
-          amount: String(cents),
-          currency: "usd",
-          destination: user.stripeAccountId,
-          description: "BlankDelay affiliate 20% · " + user.code,
-          transfer_group: sessionId || user.code,
-          "metadata[affiliate_code]": user.code,
-          "metadata[affiliate_email]": user.email,
-          "metadata[session_id]": sessionId,
-        });
-        sale.payoutStatus = "auto_paid";
-        sale.transferId = transfer.id;
-        user.paidOut = +((user.paidOut || 0) + commission).toFixed(2);
-        user.payoutsEnabled = true;
-        state.cashouts.push({
-          id: "CO-SALE-" + Date.now().toString(36).toUpperCase(),
-          email: user.email,
-          code: user.code,
-          amount: commission,
-          method: "stripe",
-          payoutTo: user.stripeAccountId,
-          status: "paid",
-          created: Date.now(),
-          paidAt: Date.now(),
-          transferId: transfer.id,
-          auto: true,
-          sessionId,
-        });
-      }
-    } catch (err) {
-      transferError = err.message || "transfer_failed";
-      sale.payoutStatus = "pending";
-      console.error("Affiliate auto-transfer failed:", transferError);
-    }
-  }
-
-  state.sales.push(sale);
-  storeHelpers.upsertAffiliateUser(state, user);
-  if (sessionId) state.creditedSessions.push(sessionId);
-  // keep list bounded
-  if (state.creditedSessions.length > 5000) {
-    state.creditedSessions = state.creditedSessions.slice(-4000);
-  }
-  await storeHelpers.saveAffiliateState(store, state);
-
-  return {
-    ok: true,
-    code: user.code,
-    commission,
-    payoutStatus: sale.payoutStatus,
-    transferError: transferError || undefined,
-  };
+  return creditAffiliateSale({
+    event: lambdaEvent,
+    affCode,
+    price,
+    productName,
+    sessionId: session.id || "",
+    stripeSecret,
+    tryTransfer: true,
+  });
 }
 
 exports.handler = async (event) => {

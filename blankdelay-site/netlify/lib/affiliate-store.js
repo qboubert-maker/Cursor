@@ -36,10 +36,11 @@ async function loadAffiliateState(store) {
         sales: Array.isArray(raw.sales) ? raw.sales : [],
         cashouts: Array.isArray(raw.cashouts) ? raw.cashouts : [],
         creditedSessions: Array.isArray(raw.creditedSessions) ? raw.creditedSessions : [],
+        pendingByCode: Array.isArray(raw.pendingByCode) ? raw.pendingByCode : [],
       };
     }
   } catch (_) {}
-  return { users: [], clicks: {}, sales: [], cashouts: [], creditedSessions: [] };
+  return { users: [], clicks: {}, sales: [], cashouts: [], creditedSessions: [], pendingByCode: [] };
 }
 
 async function saveAffiliateState(store, state) {

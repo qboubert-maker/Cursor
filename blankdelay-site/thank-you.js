@@ -129,6 +129,16 @@
 
         showLoading(false);
         $('thank-no-session')?.setAttribute('hidden', '');
+        $('thank-ready')?.removeAttribute('hidden');
+
+        // Backup: credit affiliate from this Stripe session if webhook missed it
+        if (sessionId) {
+            fetch('/.netlify/functions/affiliate-api', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'credit-from-session', session_id: sessionId })
+            }).catch(() => {});
+        }
 
         $('thank-copy-key')?.addEventListener('click', () => copyText(data.license, $('thank-copy-key'), 'Copied!'));
         $('thank-copy-key-inline')?.addEventListener('click', () => copyText(data.license, $('thank-copy-key-inline'), 'Copied!'));

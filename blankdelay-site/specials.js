@@ -430,25 +430,29 @@
     });
 
     async function showAffiliateDash(email) {
+        // Refresh LIVE clicks/sales/earnings from server before showing dashboard
+        await BD_STORE.pullRemoteAffiliates?.();
         const user = BD_STORE.getAffiliateUser(email);
         if (!user) return;
         // Keep this affiliate visible in the LIVE admin registry
-        BD_STORE.syncAffiliateRemote?.('upsert', { user: BD_STORE.publicAffiliate(user), password: user.password });
-        const branded = BD_STORE.affiliateShortLink(user.code);
+        await BD_STORE.syncAffiliateRemote?.('upsert', { user: BD_STORE.publicAffiliate(user), password: user.password });
+        await BD_STORE.pullRemoteAffiliates?.();
+        const liveUser = BD_STORE.getAffiliateUser(email) || user;
+        const branded = BD_STORE.affiliateShortLink(liveUser.code);
         $('aff-link').textContent = branded;
-        $('aff-code').textContent = user.code;
-        $('aff-earnings').textContent = formatPrice(user.earnings || 0);
+        $('aff-code').textContent = liveUser.code;
+        $('aff-earnings').textContent = formatPrice(liveUser.earnings || 0);
         if ($('aff-available')) $('aff-available').textContent = formatPrice(BD_STORE.availableBalance(email));
-        $('aff-sales').textContent = String(user.sales || 0);
-        if ($('aff-clicks')) $('aff-clicks').textContent = String(BD_STORE.getAffiliateClicks?.(user.code) || 0);
+        $('aff-sales').textContent = String(liveUser.sales || 0);
+        if ($('aff-clicks')) $('aff-clicks').textContent = String(BD_STORE.getAffiliateClicks?.(liveUser.code) || 0);
         $('aff-email').textContent = email;
         if ($('aff-cashout-amount')) $('aff-cashout-amount').value = BD_STORE.availableBalance(email) || '';
         if ($('aff-cashout-error')) $('aff-cashout-error').hidden = true;
         if ($('aff-cashout-ok')) $('aff-cashout-ok').hidden = true;
-        refreshAffiliatePayoutStatus(user);
+        refreshAffiliatePayoutStatus(liveUser);
         const list = $('aff-sales-list');
         if (list) {
-            const sales = BD_STORE.getAffiliateSales?.(user.code) || [];
+            const sales = BD_STORE.getAffiliateSales?.(liveUser.code) || [];
             list.innerHTML = sales.length
                 ? sales.slice().reverse().slice(0, 20).map(s =>
                     `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;gap:10px;">
@@ -687,19 +691,17 @@
         await showAdminDash();
     });
 
-    /* Capture affiliate/ref from URL on landing */
+    /* Capture affiliate/ref from URL on landing (live click + 30-day attribution) */
     const params = new URLSearchParams(location.search);
     let affCode = params.get('aff');
     const shortMatch = location.pathname.match(/^\/a\/([A-Za-z0-9-]+)\/?$/i);
     if (!affCode && shortMatch) affCode = shortMatch[1];
     if (affCode) {
-        sessionStorage.setItem('bd-aff-pending', affCode);
+        BD_STORE.setAffiliateAttribution?.(affCode);
         BD_STORE.trackAffiliateClick?.(affCode);
+        if (typeof bdSyncStripeLinks === 'function') bdSyncStripeLinks();
     }
     if (params.get('ref')) sessionStorage.setItem('bd-ref-pending', params.get('ref'));
-    if (/blankdelayaffiliatetweaks/i.test(location.pathname) && params.get('aff')) {
-        BD_STORE.trackAffiliateClick?.(params.get('aff'));
-    }
 
 
     // If an affiliate is already logged in on this device, push them into the LIVE registry

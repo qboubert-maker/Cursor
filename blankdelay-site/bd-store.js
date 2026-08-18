@@ -4,6 +4,7 @@ const BD_STORE = {
     /* Affiliates earn 20% of each sale; BlankDelay keeps 80%. */
     AFFILIATE_RATE: 0.20,
     OWNER_RATE: 0.80,
+    AFF_ATTR_DAYS: 30,
     REFER_BONUS: 5,
     DISCORD_INVITE: 'https://discord.gg/hH3cv8RrV',
     /* Admin login (email + SHA-256 of password). Do not put plaintext passwords in source. */
@@ -233,6 +234,38 @@ const BD_STORE = {
         return this.getUsers().map((u) => this.publicAffiliate(u));
     },
 
+    setAffiliateAttribution(code) {
+        const clean = String(code || '').trim();
+        if (!clean || clean === 'ADMIN') return;
+        try {
+            sessionStorage.setItem('bd-aff-pending', clean);
+            localStorage.setItem('bd-aff-attr', JSON.stringify({
+                code: clean,
+                at: Date.now(),
+                expires: Date.now() + this.AFF_ATTR_DAYS * 24 * 60 * 60 * 1000
+            }));
+        } catch (_) {}
+    },
+
+    getAffiliateAttribution() {
+        try {
+            const fromSession = (sessionStorage.getItem('bd-aff-pending') || '').trim();
+            if (fromSession) return fromSession;
+            const raw = localStorage.getItem('bd-aff-attr');
+            if (!raw) return '';
+            const data = JSON.parse(raw);
+            if (!data?.code) return '';
+            if (data.expires && Date.now() > data.expires) {
+                localStorage.removeItem('bd-aff-attr');
+                return '';
+            }
+            sessionStorage.setItem('bd-aff-pending', data.code);
+            return String(data.code);
+        } catch (_) {
+            return '';
+        }
+    },
+
     creditAffiliate(code, amount, productName) {
         const users = this.getUsers();
         const u = users.find((x) => x.code === code);
@@ -255,11 +288,13 @@ const BD_STORE = {
     },
 
     trackAffiliateClick(code) {
-        if (!code || code === 'ADMIN') return;
+        const clean = String(code || '').trim();
+        if (!clean || clean === 'ADMIN') return Promise.resolve(null);
+        this.setAffiliateAttribution(clean);
         const clicks = this.get('bd-aff-clicks', {});
-        clicks[code] = (clicks[code] || 0) + 1;
+        clicks[clean] = (clicks[clean] || 0) + 1;
         this.set('bd-aff-clicks', clicks);
-        this.syncAffiliateRemote('click', { code });
+        return this.syncAffiliateRemote('click', { code: clean });
     },
 
     getAffiliateClicks(code) {

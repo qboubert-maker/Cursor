@@ -9,6 +9,7 @@ const {
   findAffiliateByEmail,
   findAffiliateByCode,
 } = require("../lib/affiliate-store");
+const { applyPendingForCode, creditFromCheckoutSession } = require("../lib/affiliate-credit");
 
 const headers = {
   "Access-Control-Allow-Origin": "*",
@@ -69,16 +70,17 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({
-        ok: true,
-        live: true,
-        userCount: users.length,
-        users,
-        clicks: state.clicks || {},
-        sales: state.sales || [],
-        cashouts: state.cashouts || [],
-        creditedSessions: state.creditedSessions || [],
-      }),
+        body: JSON.stringify({
+          ok: true,
+          live: true,
+          userCount: users.length,
+          users,
+          clicks: state.clicks || {},
+          sales: state.sales || [],
+          cashouts: state.cashouts || [],
+          creditedSessions: state.creditedSessions || [],
+          pendingByCode: state.pendingByCode || [],
+        }),
     };
   }
 
@@ -113,7 +115,7 @@ exports.handler = async (event) => {
         return { statusCode: 200, headers, body: JSON.stringify({ ok: false, msg: "Email already registered." }) };
       }
       const code = body.code || makeCode(state);
-      const user = upsertAffiliateUser(state, {
+      let user = upsertAffiliateUser(state, {
         email,
         code,
         passwordHash: hashPassword(password),
@@ -123,6 +125,8 @@ exports.handler = async (event) => {
         created: Date.now(),
         lastSeen: Date.now(),
       });
+      user = applyPendingForCode(state, user);
+      upsertAffiliateUser(state, user);
       await saveAffiliateState(store, state);
       return {
         statusCode: 200,
@@ -134,11 +138,12 @@ exports.handler = async (event) => {
     if (action === "login") {
       const email = String(body.email || "").trim().toLowerCase();
       const password = String(body.password || "");
-      const user = findAffiliateByEmail(state, email);
+      let user = findAffiliateByEmail(state, email);
       if (!user || !user.passwordHash || user.passwordHash !== hashPassword(password)) {
         return { statusCode: 200, headers, body: JSON.stringify({ ok: false, msg: "Invalid email or password." }) };
       }
       user.lastSeen = Date.now();
+      user = applyPendingForCode(state, user);
       upsertAffiliateUser(state, user);
       await saveAffiliateState(store, state);
       return {
@@ -153,12 +158,42 @@ exports.handler = async (event) => {
       const incoming = { ...body.user };
       if (body.password) incoming.passwordHash = hashPassword(body.password);
       incoming.lastSeen = Date.now();
-      const user = upsertAffiliateUser(state, incoming);
+      let user = upsertAffiliateUser(state, incoming);
+      user = applyPendingForCode(state, user);
+      upsertAffiliateUser(state, user);
       await saveAffiliateState(store, state);
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({ ok: true, user: publicUser(user), userCount: state.users.length }),
+      };
+    }
+
+    if (action === "credit-from-session") {
+      const sessionId = String(body.session_id || body.sessionId || "").trim();
+      const stripeSecret = process.env.STRIPE_SECRET_KEY;
+      if (!sessionId) {
+        return { statusCode: 200, headers, body: JSON.stringify({ ok: false, msg: "session_id required" }) };
+      }
+      if (!stripeSecret) {
+        return { statusCode: 200, headers, body: JSON.stringify({ ok: false, msg: "STRIPE_SECRET_KEY missing" }) };
+      }
+      const result = await creditFromCheckoutSession(event, sessionId, stripeSecret);
+      return { statusCode: 200, headers, body: JSON.stringify(result) };
+    }
+
+    if (action === "health") {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          ok: true,
+          live: true,
+          userCount: state.users.length,
+          clickCodes: Object.keys(state.clicks || {}).length,
+          sales: (state.sales || []).length,
+          pending: (state.pendingByCode || []).length,
+        }),
       };
     }
 
@@ -210,6 +245,7 @@ exports.handler = async (event) => {
           clicks: state.clicks || {},
           sales: state.sales || [],
           cashouts: state.cashouts || [],
+          pendingByCode: state.pendingByCode || [],
         }),
       };
     }
