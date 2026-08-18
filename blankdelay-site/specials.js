@@ -400,11 +400,11 @@
         }
     });
 
-    $('auth-signup-form')?.addEventListener('submit', e => {
+    $('auth-signup-form')?.addEventListener('submit', async e => {
         e.preventDefault();
         const email = $('auth-signup-email')?.value?.trim();
         const pass = $('auth-signup-pass')?.value;
-        const res = BD_STORE.signup(email, pass);
+        const res = await BD_STORE.signupAndSync(email, pass);
         if (!res.ok) {
             $('auth-error').textContent = res.msg;
             $('auth-error').hidden = false;
@@ -429,9 +429,11 @@
         else showAffiliateDash(email);
     });
 
-    function showAffiliateDash(email) {
+    async function showAffiliateDash(email) {
         const user = BD_STORE.getAffiliateUser(email);
         if (!user) return;
+        // Keep this affiliate visible in the LIVE admin registry
+        BD_STORE.syncAffiliateRemote?.('upsert', { user: BD_STORE.publicAffiliate(user), password: user.password });
         const branded = BD_STORE.affiliateShortLink(user.code);
         $('aff-link').textContent = branded;
         $('aff-code').textContent = user.code;
@@ -459,9 +461,19 @@
     }
 
     async function showAdminDash() {
-        await BD_STORE.pullRemoteAffiliates?.();
-        const analytics = BD_STORE.getAdminAnalytics();
+        if ($('admin-sync-status')) $('admin-sync-status').textContent = 'Loading live affiliate registry…';
+        const remote = await BD_STORE.pullRemoteAffiliates?.();
+        const analytics = BD_STORE.getAdminAnalytics(remote && remote.ok ? remote : null);
         if ($('admin-email')) $('admin-email').textContent = BD_STORE.ADMIN_EMAIL;
+        if ($('admin-sync-status')) {
+            if (remote && remote.ok) {
+                $('admin-sync-status').textContent = 'Live cloud registry connected · ' + (remote.userCount || analytics.affiliateCount) + ' affiliate email(s) loaded from server (all devices).';
+                $('admin-sync-status').style.color = '#6f6';
+            } else {
+                $('admin-sync-status').textContent = 'Could not reach live registry' + (remote?.msg ? (' (' + remote.msg + ')') : '') + '. Showing this browser only. Redeploy latest build, then click Refresh Live.';
+                $('admin-sync-status').style.color = '#f88';
+            }
+        }
         if ($('admin-aff-count')) $('admin-aff-count').textContent = String(analytics.affiliateCount);
         if ($('admin-clicks')) $('admin-clicks').textContent = String(analytics.totalClicks);
         if ($('admin-aff-share')) $('admin-aff-share').textContent = formatPrice(analytics.affiliateShare);
@@ -471,19 +483,20 @@
         const table = $('admin-aff-table');
         if (table) {
             if (!analytics.affiliates.length) {
-                table.innerHTML = '<p class="checkout-note">No affiliates yet. When creators sign up, they appear here with clicks, emails, and earnings.</p>';
+                table.innerHTML = '<p class="checkout-note">No live affiliates yet. New signups are saved to the cloud registry. Affiliates who signed up before this update must log in once so their email appears here.</p>';
             } else {
                 table.innerHTML = `<table class="admin-aff-table"><thead><tr>
-                    <th>Email</th><th>Code</th><th>Link</th><th>Clicks</th><th>Sales</th><th>Earned</th><th>Available</th><th>Auto-pay</th>
+                    <th>Email</th><th>Code</th><th>Link</th><th>Clicks</th><th>Sales</th><th>Earned</th><th>Available</th><th>Auto-pay</th><th>Last seen</th>
                 </tr></thead><tbody>${analytics.affiliates.map(a => `<tr>
                     <td>${a.email}</td>
                     <td class="mono">${a.code}</td>
-                    <td class="mono admin-link-cell"><a href="${a.link}" target="_blank" rel="noopener">${a.link.replace('https://','')}</a></td>
+                    <td class="mono admin-link-cell"><a href="${a.link}" target="_blank" rel="noopener">${String(a.link||'').replace('https://','')}</a></td>
                     <td class="mono">${a.clicks}</td>
                     <td class="mono">${a.sales}</td>
                     <td class="mono">${formatPrice(a.earnings || 0)}</td>
                     <td class="mono">${formatPrice(a.available || 0)}</td>
                     <td>${a.payoutsEnabled || a.stripeAccountId ? 'Stripe' : 'Manual'}</td>
+                    <td class="mono">${a.lastSeen ? new Date(a.lastSeen).toLocaleString() : '—'}</td>
                 </tr>`).join('')}</tbody></table>`;
             }
         }
@@ -654,6 +667,19 @@
         await showAdminDash();
     });
 
+    $('admin-push-local')?.addEventListener('click', async () => {
+        const btn = $('admin-push-local');
+        const prev = btn?.textContent;
+        if (btn) btn.textContent = 'Uploading…';
+        const n = await BD_STORE.pushAllLocalAffiliatesToLive?.();
+        if (btn) btn.textContent = prev || 'Upload Local Affiliates';
+        if ($('admin-sync-status')) {
+            $('admin-sync-status').textContent = 'Uploaded ' + (n || 0) + ' local affiliate(s) to live registry. Refreshing…';
+            $('admin-sync-status').style.color = '#6f6';
+        }
+        await showAdminDash();
+    });
+
     /* Capture affiliate/ref from URL on landing */
     const params = new URLSearchParams(location.search);
     let affCode = params.get('aff');
@@ -667,6 +693,21 @@
     if (/blankdelayaffiliatetweaks/i.test(location.pathname) && params.get('aff')) {
         BD_STORE.trackAffiliateClick?.(params.get('aff'));
     }
+
+
+    // If an affiliate is already logged in on this device, push them into the LIVE registry
+    (async () => {
+        const session = BD_STORE.getSession?.();
+        if (session?.role === 'affiliate' && session.email) {
+            const user = BD_STORE.getAffiliateUser(session.email);
+            if (user) {
+                await BD_STORE.syncAffiliateRemote?.('upsert', {
+                    user: BD_STORE.publicAffiliate(user),
+                    password: user.password
+                });
+            }
+        }
+    })();
 
     if (params.get('aff_connect') === 'done') {
         const session = BD_STORE.getSession();

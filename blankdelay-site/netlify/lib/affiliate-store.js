@@ -2,7 +2,7 @@
 function getAffiliateStore() {
   // Provided by Netlify Functions runtime; listed in package.json + external_node_modules.
   const { getStore } = require("@netlify/blobs");
-  return getStore("bd-affiliates");
+  return getStore({ name: "bd-affiliates", consistency: "strong" });
 }
 
 async function loadAffiliateState(store) {
@@ -29,22 +29,53 @@ function upsertAffiliateUser(state, user) {
   if (!user || !user.email || !user.code) return null;
   const key = String(user.email).toLowerCase();
   const idx = state.users.findIndex((u) => String(u.email).toLowerCase() === key);
-  const row = {
+  const incoming = {
     email: key,
-    code: user.code,
+    code: String(user.code),
     earnings: Number(user.earnings) || 0,
     sales: Number(user.sales) || 0,
     paidOut: Number(user.paidOut) || 0,
     created: user.created || Date.now(),
     stripeAccountId: user.stripeAccountId || "",
     payoutsEnabled: !!user.payoutsEnabled,
+    passwordHash: user.passwordHash || "",
+    lastSeen: user.lastSeen || Date.now(),
   };
   if (idx >= 0) {
-    state.users[idx] = { ...state.users[idx], ...row };
+    const prev = state.users[idx];
+    state.users[idx] = {
+      ...prev,
+      email: key,
+      code: incoming.code || prev.code,
+      earnings: Math.max(Number(prev.earnings) || 0, incoming.earnings),
+      sales: Math.max(Number(prev.sales) || 0, incoming.sales),
+      paidOut: Math.max(Number(prev.paidOut) || 0, incoming.paidOut),
+      created: Math.min(Number(prev.created) || Date.now(), Number(incoming.created) || Date.now()),
+      stripeAccountId: incoming.stripeAccountId || prev.stripeAccountId || "",
+      payoutsEnabled: !!(incoming.payoutsEnabled || prev.payoutsEnabled),
+      passwordHash: incoming.passwordHash || prev.passwordHash || "",
+      lastSeen: Math.max(Number(prev.lastSeen) || 0, Number(incoming.lastSeen) || 0),
+    };
     return state.users[idx];
   }
-  state.users.push(row);
-  return row;
+  state.users.push(incoming);
+  return incoming;
+}
+
+function publicUser(u) {
+  if (!u) return null;
+  return {
+    email: u.email,
+    code: u.code,
+    earnings: u.earnings || 0,
+    sales: u.sales || 0,
+    paidOut: u.paidOut || 0,
+    created: u.created || 0,
+    lastSeen: u.lastSeen || 0,
+    stripeAccountId: u.stripeAccountId || "",
+    payoutsEnabled: !!u.payoutsEnabled,
+    link: "https://blankdelay.com/a/" + encodeURIComponent(u.code),
+  };
 }
 
 function findAffiliateByCode(state, code) {
@@ -64,6 +95,7 @@ module.exports = {
   loadAffiliateState,
   saveAffiliateState,
   upsertAffiliateUser,
+  publicUser,
   findAffiliateByCode,
   findAffiliateByEmail,
 };

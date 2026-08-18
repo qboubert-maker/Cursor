@@ -797,6 +797,7 @@
             <h3>Affiliate Admin</h3>
             <p class="checkout-note">Signed in as <strong id="admin-email"></strong> · Split: affiliates <strong>20%</strong> / BlankDelay <strong>80%</strong></p>
             <p class="checkout-note" style="margin-top:8px;">You get paid automatically: customer pays on Stripe → <strong>80%</strong> stays in your Stripe balance / bank payouts. Affiliates who connected Stripe get their <strong>20%</strong> auto-deposited. Manual cashouts only needed if they haven’t connected yet.</p>
+            <p class="checkout-note" id="admin-sync-status" style="margin-top:8px;">Loading live affiliate registry…</p>
             <div class="aff-stats aff-stats-4" id="admin-stats">
                 <div class="aff-stat"><span class="lbl">Affiliates</span><span class="val mono" id="admin-aff-count">0</span></div>
                 <div class="aff-stat"><span class="lbl">Total Clicks</span><span class="val mono" id="admin-clicks">0</span></div>
@@ -809,7 +810,8 @@
             <h4 style="font-size:14px;margin:18px 0 8px;">Cashout requests</h4>
             <div class="admin-table-wrap" id="admin-cashout-table"></div>
             <div class="actions" style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
-                <button type="button" class="btn btn-ghost" id="admin-refresh">Refresh</button>
+                <button type="button" class="btn btn-ghost" id="admin-refresh">Refresh Live</button>
+                <button type="button" class="btn btn-ghost" id="admin-push-local">Upload Local Affiliates</button>
                 <button type="button" class="btn btn-ghost" id="admin-logout">Log Out</button>
             </div>
         </div>
