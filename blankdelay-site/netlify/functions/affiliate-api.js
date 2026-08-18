@@ -1,5 +1,10 @@
 /* BlankDelay affiliate registry for Netlify (shared across browsers when Blobs available) */
-const { getStore } = require("@netlify/blobs");
+const {
+  getAffiliateStore,
+  loadAffiliateState,
+  saveAffiliateState,
+  upsertAffiliateUser,
+} = require("./affiliate-store");
 
 const headers = {
   "Access-Control-Allow-Origin": "*",
@@ -8,41 +13,6 @@ const headers = {
   "Content-Type": "application/json",
 };
 
-async function loadState(store) {
-  try {
-    const raw = await store.get("state", { type: "json" });
-    if (raw && typeof raw === "object") {
-      return {
-        users: Array.isArray(raw.users) ? raw.users : [],
-        clicks: raw.clicks && typeof raw.clicks === "object" ? raw.clicks : {},
-        sales: Array.isArray(raw.sales) ? raw.sales : [],
-        cashouts: Array.isArray(raw.cashouts) ? raw.cashouts : [],
-      };
-    }
-  } catch (_) {}
-  return { users: [], clicks: {}, sales: [], cashouts: [] };
-}
-
-async function saveState(store, state) {
-  await store.setJSON("state", state);
-}
-
-function upsertUser(state, user) {
-  if (!user || !user.email || !user.code) return;
-  const key = String(user.email).toLowerCase();
-  const idx = state.users.findIndex((u) => String(u.email).toLowerCase() === key);
-  const row = {
-    email: key,
-    code: user.code,
-    earnings: Number(user.earnings) || 0,
-    sales: Number(user.sales) || 0,
-    paidOut: Number(user.paidOut) || 0,
-    created: user.created || Date.now(),
-  };
-  if (idx >= 0) state.users[idx] = { ...state.users[idx], ...row };
-  else state.users.push(row);
-}
-
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 204, headers, body: "" };
@@ -50,7 +20,7 @@ exports.handler = async (event) => {
 
   let store;
   try {
-    store = getStore("bd-affiliates");
+    store = getAffiliateStore();
   } catch (err) {
     return {
       statusCode: 200,
@@ -59,7 +29,7 @@ exports.handler = async (event) => {
     };
   }
 
-  const state = await loadState(store);
+  const state = await loadAffiliateState(store);
   const qs = event.queryStringParameters || {};
 
   if (event.httpMethod === "GET") {
@@ -84,13 +54,13 @@ exports.handler = async (event) => {
   const action = body.action || qs.action || "";
 
   if (action === "upsert" && body.user) {
-    upsertUser(state, body.user);
+    upsertAffiliateUser(state, body.user);
   } else if (action === "click" && body.code) {
     const code = String(body.code);
     state.clicks[code] = (state.clicks[code] || 0) + 1;
   } else if (action === "sale" && body.sale) {
     state.sales.push(body.sale);
-    if (body.user) upsertUser(state, body.user);
+    if (body.user) upsertAffiliateUser(state, body.user);
   } else if (action === "cashout" && body.cashout) {
     const id = body.cashout.id;
     const idx = state.cashouts.findIndex((c) => c.id === id);
@@ -107,6 +77,6 @@ exports.handler = async (event) => {
     return { statusCode: 400, headers, body: JSON.stringify({ ok: false, msg: "Unknown action" }) };
   }
 
-  await saveState(store, state);
+  await saveAffiliateState(store, state);
   return { statusCode: 200, headers, body: JSON.stringify({ ok: true, ...state }) };
 };

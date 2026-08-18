@@ -443,6 +443,7 @@
         if ($('aff-cashout-amount')) $('aff-cashout-amount').value = BD_STORE.availableBalance(email) || '';
         if ($('aff-cashout-error')) $('aff-cashout-error').hidden = true;
         if ($('aff-cashout-ok')) $('aff-cashout-ok').hidden = true;
+        refreshAffiliatePayoutStatus(user);
         const list = $('aff-sales-list');
         if (list) {
             const sales = BD_STORE.getAffiliateSales?.(user.code) || [];
@@ -473,7 +474,7 @@
                 table.innerHTML = '<p class="checkout-note">No affiliates yet. When creators sign up, they appear here with clicks, emails, and earnings.</p>';
             } else {
                 table.innerHTML = `<table class="admin-aff-table"><thead><tr>
-                    <th>Email</th><th>Code</th><th>Link</th><th>Clicks</th><th>Sales</th><th>Earned</th><th>Available</th>
+                    <th>Email</th><th>Code</th><th>Link</th><th>Clicks</th><th>Sales</th><th>Earned</th><th>Available</th><th>Auto-pay</th>
                 </tr></thead><tbody>${analytics.affiliates.map(a => `<tr>
                     <td>${a.email}</td>
                     <td class="mono">${a.code}</td>
@@ -482,6 +483,7 @@
                     <td class="mono">${a.sales}</td>
                     <td class="mono">${formatPrice(a.earnings || 0)}</td>
                     <td class="mono">${formatPrice(a.available || 0)}</td>
+                    <td>${a.payoutsEnabled || a.stripeAccountId ? 'Stripe' : 'Manual'}</td>
                 </tr>`).join('')}</tbody></table>`;
             }
         }
@@ -514,10 +516,106 @@
         openModal('admin-dash-modal');
     }
 
+
+    async function refreshAffiliatePayoutStatus(user) {
+        const statusEl = $('aff-payout-status');
+        const connectBtn = $('aff-connect-stripe');
+        const autoBtn = $('aff-auto-payout-btn');
+        if (!user) return;
+        try {
+            const res = await fetch('/.netlify/functions/affiliate-connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'status', email: user.email, code: user.code })
+            });
+            const data = await res.json();
+            if (!data?.ok) {
+                if (statusEl) statusEl.textContent = 'Connect Stripe once (after deploy). Then your 20% can auto-deposit on each sale.';
+                return;
+            }
+            if (data.payoutsEnabled) {
+                if (statusEl) statusEl.textContent = 'Stripe connected · auto-deposit ON. New commissions can pay out automatically. Available now: $' + Number(data.available || 0).toFixed(2);
+                if (connectBtn) connectBtn.textContent = 'Manage Stripe Payouts';
+                if (autoBtn) autoBtn.hidden = !(Number(data.available || 0) >= 5);
+            } else if (data.connected) {
+                if (statusEl) statusEl.textContent = 'Stripe started but onboarding incomplete — click Connect to finish.';
+                if (connectBtn) connectBtn.textContent = 'Finish Stripe Setup';
+                if (autoBtn) autoBtn.hidden = true;
+            } else {
+                if (statusEl) statusEl.textContent = 'Not connected yet. Connect Stripe so 20% auto-deposits to your bank. Manual cashout still works as backup.';
+                if (connectBtn) connectBtn.textContent = 'Connect Stripe for Auto-Payouts';
+                if (autoBtn) autoBtn.hidden = true;
+            }
+        } catch (_) {
+            if (statusEl) statusEl.textContent = 'Connect Stripe for auto-payouts (works after Netlify deploy with Stripe keys).';
+        }
+    }
+
     $('aff-copy-btn')?.addEventListener('click', () => {
         navigator.clipboard?.writeText($('aff-link')?.textContent || '');
         $('aff-copy-btn').textContent = 'Copied!';
         setTimeout(() => { $('aff-copy-btn').textContent = 'Copy Link'; }, 2000);
+    });
+
+
+    $('aff-connect-stripe')?.addEventListener('click', async () => {
+        const session = BD_STORE.getSession();
+        const user = session?.email ? BD_STORE.getAffiliateUser(session.email) : null;
+        if (!user) return;
+        const btn = $('aff-connect-stripe');
+        const prev = btn?.textContent;
+        if (btn) btn.textContent = 'Opening Stripe…';
+        try {
+            const res = await fetch('/.netlify/functions/affiliate-connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'onboard', email: user.email, code: user.code })
+            });
+            const data = await res.json();
+            if (!data?.ok || !data.url) {
+                alert(data?.msg || 'Could not start Stripe Connect. Make sure the site is deployed on Netlify with STRIPE_SECRET_KEY and Connect enabled.');
+                if (btn) btn.textContent = prev || 'Connect Stripe for Auto-Payouts';
+                return;
+            }
+            window.location.href = data.url;
+        } catch (err) {
+            alert('Connect failed. Deploy to Netlify and enable Stripe Connect first.');
+            if (btn) btn.textContent = prev || 'Connect Stripe for Auto-Payouts';
+        }
+    });
+
+    $('aff-auto-payout-btn')?.addEventListener('click', async () => {
+        const session = BD_STORE.getSession();
+        const user = session?.email ? BD_STORE.getAffiliateUser(session.email) : null;
+        if (!user) return;
+        const ok = $('aff-cashout-ok');
+        const err = $('aff-cashout-error');
+        try {
+            const res = await fetch('/.netlify/functions/affiliate-connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'payout-available', email: user.email, code: user.code })
+            });
+            const data = await res.json();
+            if (!data?.ok) {
+                if (err) { err.textContent = data?.msg || 'Payout failed'; err.hidden = false; }
+                if (ok) ok.hidden = true;
+                return;
+            }
+            if (err) err.hidden = true;
+            if (ok) {
+                ok.textContent = 'Auto-deposit sent: $' + Number(data.amount).toFixed(2) + ' via Stripe.';
+                ok.hidden = false;
+            }
+            // sync local paidOut best-effort
+            user.paidOut = data.paidOut;
+            const users = BD_STORE.getUsers();
+            const idx = users.findIndex(u => u.email === user.email);
+            if (idx >= 0) { users[idx].paidOut = data.paidOut; BD_STORE.saveUsers(users); }
+            showAffiliateDash(user.email);
+        } catch (_) {
+            if (err) { err.textContent = 'Payout request failed.'; err.hidden = false; }
+        }
     });
 
     $('aff-cashout-btn')?.addEventListener('click', () => {
@@ -568,6 +666,13 @@
     if (params.get('ref')) sessionStorage.setItem('bd-ref-pending', params.get('ref'));
     if (/blankdelayaffiliatetweaks/i.test(location.pathname) && params.get('aff')) {
         BD_STORE.trackAffiliateClick?.(params.get('aff'));
+    }
+
+    if (params.get('aff_connect') === 'done') {
+        const session = BD_STORE.getSession();
+        if (session?.email && session.role !== 'admin') {
+            setTimeout(() => showAffiliateDash(session.email), 300);
+        }
     }
 
 })();

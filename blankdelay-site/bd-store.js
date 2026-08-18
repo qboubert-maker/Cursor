@@ -115,7 +115,9 @@ const BD_STORE = {
             sales: u.sales || 0,
             paidOut: u.paidOut || 0,
             created: u.created || 0,
-            link: this.affiliateShortLink(u.code)
+            link: this.affiliateShortLink(u.code),
+            stripeAccountId: u.stripeAccountId || '',
+            payoutsEnabled: !!u.payoutsEnabled
         };
     },
 
@@ -294,6 +296,8 @@ const BD_STORE = {
                         existing.sales = Math.max(existing.sales || 0, remote.sales || 0);
                         existing.paidOut = Math.max(existing.paidOut || 0, remote.paidOut || 0);
                         existing.created = existing.created || remote.created || Date.now();
+                        if (remote.stripeAccountId) existing.stripeAccountId = remote.stripeAccountId;
+                        if (remote.payoutsEnabled) existing.payoutsEnabled = true;
                     } else {
                         byEmail.set(key, {
                             email: key,
@@ -302,7 +306,9 @@ const BD_STORE = {
                             earnings: remote.earnings || 0,
                             sales: remote.sales || 0,
                             paidOut: remote.paidOut || 0,
-                            created: remote.created || Date.now()
+                            created: remote.created || Date.now(),
+                            stripeAccountId: remote.stripeAccountId || '',
+                            payoutsEnabled: !!remote.payoutsEnabled
                         });
                     }
                 });

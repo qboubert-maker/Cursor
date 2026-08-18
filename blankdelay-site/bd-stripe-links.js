@@ -18,13 +18,27 @@ function bdActivePromo() {
     try { return (localStorage.getItem("bd-discount-code") || "").trim(); } catch { return ""; }
 }
 
+function bdPendingAffiliateCode() {
+    try {
+        const fromSession = (sessionStorage.getItem("bd-aff-pending") || "").trim();
+        if (fromSession) return fromSession;
+        const params = new URLSearchParams(location.search);
+        return (params.get("aff") || "").trim();
+    } catch {
+        return "";
+    }
+}
+
 function bdStripeUrl(slug) {
     const base = BD_STRIPE_LINKS[slug];
     if (!base) return null;
+    const url = new URL(base);
     const code = bdActivePromo();
-    if (!code) return base;
-    const sep = base.includes("?") ? "&" : "?";
-    return base + sep + "prefilled_promo_code=" + encodeURIComponent(code);
+    if (code) url.searchParams.set("prefilled_promo_code", code);
+    const aff = bdPendingAffiliateCode();
+    // Stripe Payment Links pass this through on checkout.session.completed
+    if (aff) url.searchParams.set("client_reference_id", aff.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 200));
+    return url.toString();
 }
 
 function bdGoStripe(slug) {

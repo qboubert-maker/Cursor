@@ -137,7 +137,7 @@
         {
             id: 'affiliate',
             keys: ['affiliate', 'creator program', 'commission', '20%', 'partner', 'earn money', 'tiktok', 'linktree'],
-            answer: '<strong>Creator Affiliate Program</strong> (Specials): you earn <strong>20%</strong> of each sale (BlankDelay keeps 80%). Short link looks like <strong>blankdelay.com/a/CODE</strong>. Cash out via PayPal, Cash App, or Venmo from your dashboard. Admin reviews payouts.'
+            answer: '<strong>Creator Affiliate Program</strong> (Specials): you earn <strong>20%</strong> of each sale (BlankDelay keeps 80%). Short link: <strong>blankdelay.com/a/CODE</strong>. Connect Stripe in your dashboard for <strong>auto-deposit</strong>, or use manual PayPal/Cash App/Venmo cashout as backup.'
         },
         {
             id: 'cart',

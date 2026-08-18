@@ -764,8 +764,12 @@
             <p class="checkout-note" style="margin-top:12px;">Recent sales from your link</p>
             <div class="aff-sales-list" id="aff-sales-list" style="max-height:140px;overflow:auto;margin-top:8px;font-size:12px;"></div>
             <div class="aff-cashout-box" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
-                <h4 style="font-size:14px;margin-bottom:8px;">Cashout</h4>
-                <p class="checkout-note" style="margin-bottom:10px;">Request payout of your available balance (min $5). Admin reviews and pays you.</p>
+                <h4 style="font-size:14px;margin-bottom:8px;">Get paid (auto-deposit)</h4>
+                <p class="checkout-note" id="aff-payout-status" style="margin-bottom:10px;">Connect Stripe once. After that, your 20% can auto-deposit when someone buys through your link.</p>
+                <button type="button" class="btn btn-primary" id="aff-connect-stripe" style="width:100%;margin-bottom:10px;">Connect Stripe for Auto-Payouts</button>
+                <button type="button" class="btn btn-ghost" id="aff-auto-payout-btn" style="width:100%;margin-bottom:14px;" hidden>Deposit available balance now</button>
+                <h4 style="font-size:14px;margin-bottom:8px;">Manual cashout (backup)</h4>
+                <p class="checkout-note" style="margin-bottom:10px;">If Stripe isn’t connected yet, request PayPal / Cash App / Venmo and admin pays you.</p>
                 <div class="form-group"><label for="aff-cashout-amount">Amount ($)</label><input type="number" id="aff-cashout-amount" min="5" step="0.01" placeholder="5.00"></div>
                 <div class="form-group"><label for="aff-cashout-method">Method</label>
                     <select id="aff-cashout-method">
@@ -778,7 +782,7 @@
                 <div class="form-group"><label for="aff-cashout-to">PayPal email / Cash Tag / handle</label><input type="text" id="aff-cashout-to" placeholder="you@email.com or $cashtag" autocomplete="off"></div>
                 <p class="specials-error" id="aff-cashout-error" hidden></p>
                 <p class="checkout-note" id="aff-cashout-ok" hidden style="color:#6f6;"></p>
-                <button type="button" class="btn btn-primary" id="aff-cashout-btn" style="width:100%;margin-top:8px;">Request Cashout</button>
+                <button type="button" class="btn btn-primary" id="aff-cashout-btn" style="width:100%;margin-top:8px;">Request Manual Cashout</button>
             </div>
             <div class="actions" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
                 <button class="btn btn-primary" id="aff-copy-btn">Copy Link</button>
@@ -792,6 +796,7 @@
             <button class="exit-close" data-close-modal="admin-dash-modal" aria-label="Close">×</button>
             <h3>Affiliate Admin</h3>
             <p class="checkout-note">Signed in as <strong id="admin-email"></strong> · Split: affiliates <strong>20%</strong> / BlankDelay <strong>80%</strong></p>
+            <p class="checkout-note" style="margin-top:8px;">You get paid automatically: customer pays on Stripe → <strong>80%</strong> stays in your Stripe balance / bank payouts. Affiliates who connected Stripe get their <strong>20%</strong> auto-deposited. Manual cashouts only needed if they haven’t connected yet.</p>
             <div class="aff-stats aff-stats-4" id="admin-stats">
                 <div class="aff-stat"><span class="lbl">Affiliates</span><span class="val mono" id="admin-aff-count">0</span></div>
                 <div class="aff-stat"><span class="lbl">Total Clicks</span><span class="val mono" id="admin-clicks">0</span></div>
