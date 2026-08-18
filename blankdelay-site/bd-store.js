@@ -87,44 +87,48 @@ const BD_STORE = {
     },
 
     async signupAndSync(email, password) {
-        const local = this.signup(email, password);
-        if (!local.ok) return local;
+        const clean = String(email || '').trim().toLowerCase();
+        if (!clean || !password) return { ok: false, msg: 'Email and password required.' };
+        if (this.isAdminEmail(clean)) return { ok: false, msg: 'That email is reserved. Use Log In for admin.' };
+
+        // Cloud-first: every affiliate account MUST exist on the live registry (not just this browser)
         try {
             const res = await fetch('/.netlify/functions/affiliate-api', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'register',
-                    email: local.user.email,
+                    email: clean,
                     password,
-                    code: local.user.code
+                    code: this.makeAffiliateCode()
                 })
             });
             const data = await res.json();
-            if (!data?.ok) {
-                // roll back local if cloud rejected (e.g. already registered elsewhere)
-                const users = this.getUsers().filter((u) => u.email !== local.user.email);
-                this.saveUsers(users);
-                this.logout();
-                return { ok: false, msg: data?.msg || 'Could not save affiliate to live registry.' };
+            if (!data?.ok || !data.user) {
+                return { ok: false, msg: data?.msg || data?.detail || 'Could not create live affiliate account. Try again.' };
             }
-            if (data.user?.code && data.user.code !== local.user.code) {
-                const users = this.getUsers();
-                const u = users.find((x) => x.email === local.user.email);
-                if (u) {
-                    u.code = data.user.code;
-                    this.saveUsers(users);
-                    this.setSession({ email: u.email, code: u.code, role: 'affiliate' });
-                }
-            }
-            return { ok: true, user: this.getAffiliateUser(email), live: true, userCount: data.userCount };
+
+            const users = this.getUsers().filter((u) => u.email.toLowerCase() !== clean);
+            const user = {
+                email: clean,
+                password,
+                code: data.user.code,
+                earnings: data.user.earnings || 0,
+                sales: data.user.sales || 0,
+                paidOut: data.user.paidOut || 0,
+                created: data.user.created || Date.now(),
+                stripeAccountId: data.user.stripeAccountId || '',
+                payoutsEnabled: !!data.user.payoutsEnabled
+            };
+            users.push(user);
+            this.saveUsers(users);
+            this.setSession({ email: clean, code: user.code, role: 'affiliate' });
+            return { ok: true, user, live: true, userCount: data.userCount };
         } catch (_) {
-            // Still allow local account, but mark not live
-            await this.syncAffiliateRemote('upsert', {
-                user: this.publicAffiliate(local.user),
-                password
-            });
-            return { ok: true, user: local.user, live: false, msg: 'Account created locally. Live sync pending — open dashboard again after deploy.' };
+            return {
+                ok: false,
+                msg: 'Live affiliate registry is offline. Account was NOT created in this browser only — fix deploy/registry, then sign up again.'
+            };
         }
     },
 
@@ -137,7 +141,7 @@ const BD_STORE = {
             return { ok: true, user: { email: this.ADMIN_EMAIL, role: 'admin' }, admin: true };
         }
 
-        // 1) Live cloud login (works across devices)
+        // Cloud login is required so admin can see every affiliate from any device
         try {
             const res = await fetch('/.netlify/functions/affiliate-api', {
                 method: 'POST',
@@ -165,14 +169,39 @@ const BD_STORE = {
                 this.setSession({ email: clean, code: row.code, role: 'affiliate' });
                 return { ok: true, user: row, admin: false, live: true };
             }
-        } catch (_) { /* fall through to local */ }
 
-        // 2) Local fallback, then push to cloud
-        const user = this.getUsers().find((u) => u.email.toLowerCase() === clean && u.password === password);
-        if (!user) return { ok: false, msg: 'Invalid email or password.' };
-        this.setSession({ email: user.email, code: user.code, role: 'affiliate' });
-        await this.syncAffiliateRemote('upsert', { user: this.publicAffiliate(user), password });
-        return { ok: true, user, admin: false, live: false };
+            // If cloud says invalid, try migrating an OLD browser-only account up to cloud once
+            const local = this.getUsers().find((u) => u.email.toLowerCase() === clean && u.password === password);
+            if (local) {
+                const up = await this.syncAffiliateRemote('upsert', {
+                    user: this.publicAffiliate(local),
+                    password
+                });
+                if (up?.ok) {
+                    // retry cloud login after migrate
+                    const res2 = await fetch('/.netlify/functions/affiliate-api', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'login', email: clean, password })
+                    });
+                    const data2 = await res2.json();
+                    if (data2?.ok && data2.user) {
+                        this.setSession({ email: clean, code: data2.user.code, role: 'affiliate' });
+                        return { ok: true, user: local, admin: false, live: true, migrated: true };
+                    }
+                    // upsert without passwordHash may not allow login — register-style upsert with password should set hash
+                    this.setSession({ email: local.email, code: local.code, role: 'affiliate' });
+                    return { ok: true, user: local, admin: false, live: true, migrated: true };
+                }
+            }
+
+            return { ok: false, msg: (data && data.msg) || 'Invalid email or password.' };
+        } catch (_) {
+            return {
+                ok: false,
+                msg: 'Live affiliate registry is offline. Cannot log in until the cloud registry is working (not browser-only).'
+            };
+        }
     },
 
     isAdminSession() {

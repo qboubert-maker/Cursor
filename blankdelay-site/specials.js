@@ -372,7 +372,7 @@
     let authTab = 'signup';
     const AUTH_DESC = {
         signup: 'New creator? Enter your email and password to create your affiliate account.',
-        login: 'Creators: log in to your dashboard. Admin: use your admin email to open affiliate analytics.'
+        login: 'Creators: log in (saved on the live server). Admin: use your admin email to see EVERY affiliate email + analytics.'
     };
 
     function showAuthTab(tab) {
@@ -461,27 +461,23 @@
     }
 
     async function showAdminDash() {
-        if ($('admin-sync-status')) $('admin-sync-status').textContent = 'Loading live affiliate registry…';
-        // Always keep any old/local accounts visible, then merge live cloud data on top
-        const localCountBefore = (BD_STORE.listAffiliates?.() || []).length;
+        if ($('admin-sync-status')) $('admin-sync-status').textContent = 'Loading live affiliate registry (server, not browser)…';
+        // Push any old accounts sitting in THIS browser up to the server, then read SERVER list only
         let remote = await BD_STORE.pullRemoteAffiliates?.();
-        // If live works, also upload any old local-only accounts so they appear for good
+        const localCountBefore = (BD_STORE.listAffiliates?.() || []).length;
         if (remote && remote.ok && localCountBefore) {
             await BD_STORE.pushAllLocalAffiliatesToLive?.();
             remote = await BD_STORE.pullRemoteAffiliates?.();
         }
-        const analytics = BD_STORE.getAdminAnalytics(remote && remote.ok ? remote : null);
-        // If remote failed, still show THIS browser's old accounts
-        const fallback = (!remote || !remote.ok) ? BD_STORE.getAdminAnalytics(null) : analytics;
-        const view = (remote && remote.ok) ? analytics : fallback;
+        const view = BD_STORE.getAdminAnalytics(remote && remote.ok ? remote : { ok: false, users: [], clicks: {}, sales: [], cashouts: [] });
         if ($('admin-email')) $('admin-email').textContent = BD_STORE.ADMIN_EMAIL;
         if ($('admin-sync-status')) {
             if (remote && remote.ok) {
-                $('admin-sync-status').textContent = 'Live cloud registry connected · ' + (remote.userCount || view.affiliateCount) + ' affiliate email(s) (includes old accounts synced from this browser + all new live signups).';
+                $('admin-sync-status').textContent = 'Live SERVER registry · ' + (remote.userCount || view.affiliateCount) + ' affiliate email(s) from all devices. Not browser-based.';
                 $('admin-sync-status').style.color = '#6f6';
             } else {
                 const detail = remote?.detail || remote?.msg || 'unknown';
-                $('admin-sync-status').textContent = 'Live registry unavailable (' + detail + '). Showing ' + view.affiliateCount + ' account(s) saved in THIS browser (old local accounts). Redeploy the latest zip, then Refresh Live.';
+                $('admin-sync-status').textContent = 'SERVER registry unavailable (' + detail + '). Admin list is empty until live registry works — we will NOT pretend browser-only accounts are complete. Redeploy latest zip, then Refresh Live. Old creators must log in once after that.';
                 $('admin-sync-status').style.color = '#f88';
             }
         }
@@ -494,7 +490,7 @@
         const table = $('admin-aff-table');
         if (table) {
             if (!view.affiliates.length) {
-                table.innerHTML = '<p class="checkout-note">No affiliate accounts found yet on this browser or live registry. After redeploy, new signups appear automatically. Old creators must log in once on the live site.</p>';
+                table.innerHTML = '<p class="checkout-note">No affiliates in the SERVER registry yet. After this deploy works, every new signup appears here automatically. Creators who signed up before must log in once on blankdelay.com so their email is uploaded.</p>';
             } else {
                 table.innerHTML = `<table class="admin-aff-table"><thead><tr>
                     <th>Email</th><th>Code</th><th>Link</th><th>Clicks</th><th>Sales</th><th>Earned</th><th>Available</th><th>Auto-pay</th><th>Last seen</th>
