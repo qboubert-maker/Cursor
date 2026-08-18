@@ -38,12 +38,16 @@ exports.handler = async (event) => {
 
   let store;
   try {
-    store = getAffiliateStore();
+    store = getAffiliateStore(event);
   } catch (err) {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ ok: false, msg: "Affiliate store unavailable", detail: String(err && err.message) }),
+      body: JSON.stringify({
+        ok: false,
+        msg: "Affiliate store unavailable",
+        detail: String(err && err.message),
+      }),
     };
   }
 

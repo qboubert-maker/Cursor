@@ -73,7 +73,7 @@ exports.handler = async (event) => {
 
   let store;
   try {
-    store = getAffiliateStore();
+    store = getAffiliateStore(event);
   } catch (err) {
     return {
       statusCode: 200,

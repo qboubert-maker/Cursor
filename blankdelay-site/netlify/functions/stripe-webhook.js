@@ -196,7 +196,7 @@ async function stripeForm(secretKey, path, params) {
   return json;
 }
 
-async function creditAffiliateFromSession(session, price, productName, stripeSecret) {
+async function creditAffiliateFromSession(session, price, productName, stripeSecret, lambdaEvent) {
   const affCode = String(session.client_reference_id || session.metadata?.aff || "").trim();
   if (!affCode || !stripeSecret) {
     return { ok: false, reason: "no_affiliate" };
@@ -212,10 +212,10 @@ async function creditAffiliateFromSession(session, price, productName, stripeSec
 
   let store;
   try {
-    store = storeHelpers.getAffiliateStore();
+    store = storeHelpers.getAffiliateStore(lambdaEvent);
   } catch (err) {
     console.error("affiliate blobs unavailable:", err.message);
-    return { ok: false, reason: "blobs_unavailable" };
+    return { ok: false, reason: "blobs_unavailable", detail: err.message };
   }
 
   const state = await storeHelpers.loadAffiliateState(store);
@@ -379,7 +379,7 @@ exports.handler = async (event) => {
 
   let affiliateResult = null;
   try {
-    affiliateResult = await creditAffiliateFromSession(session, price, productName, stripeSecret);
+    affiliateResult = await creditAffiliateFromSession(session, price, productName, stripeSecret, event);
   } catch (err) {
     console.error("Affiliate credit error:", err.message);
     affiliateResult = { ok: false, reason: err.message };

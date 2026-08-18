@@ -336,7 +336,7 @@ const BD_STORE = {
             });
             if (!res.ok) return { ok: false, msg: 'HTTP ' + res.status };
             const data = await res.json();
-            if (!data || !data.ok) return data || { ok: false, msg: 'Bad registry response' };
+            if (!data || !data.ok) return { ok: false, msg: (data && (data.detail || data.msg)) || 'Bad registry response', detail: data && data.detail };
 
             // Always hydrate local cache from LIVE registry so admin sees everyone
             const byEmail = new Map(this.getUsers().map((u) => [u.email.toLowerCase(), u]));

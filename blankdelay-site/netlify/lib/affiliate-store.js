@@ -1,8 +1,29 @@
 /* Shared BlankDelay affiliate Blobs helpers */
-function getAffiliateStore() {
-  // Provided by Netlify Functions runtime; listed in package.json + external_node_modules.
-  const { getStore } = require("@netlify/blobs");
-  return getStore({ name: "bd-affiliates", consistency: "strong" });
+function getAffiliateStore(event) {
+  const blobs = require("@netlify/blobs");
+  const { getStore, connectLambda } = blobs;
+
+  // Required when Functions run in Lambda compatibility mode (Netlify default for exports.handler)
+  if (event && typeof connectLambda === "function") {
+    try {
+      connectLambda(event);
+    } catch (err) {
+      console.warn("connectLambda warning:", err && err.message);
+    }
+  }
+
+  // Prefer simple name form after context is connected
+  try {
+    return getStore("bd-affiliates");
+  } catch (err1) {
+    try {
+      return getStore({ name: "bd-affiliates", consistency: "strong" });
+    } catch (err2) {
+      const detail = [err1 && err1.message, err2 && err2.message].filter(Boolean).join(" | ");
+      const e = new Error(detail || "getStore failed");
+      throw e;
+    }
+  }
 }
 
 async function loadAffiliateState(store) {

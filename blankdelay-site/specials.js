@@ -462,32 +462,43 @@
 
     async function showAdminDash() {
         if ($('admin-sync-status')) $('admin-sync-status').textContent = 'Loading live affiliate registry…';
-        const remote = await BD_STORE.pullRemoteAffiliates?.();
+        // Always keep any old/local accounts visible, then merge live cloud data on top
+        const localCountBefore = (BD_STORE.listAffiliates?.() || []).length;
+        let remote = await BD_STORE.pullRemoteAffiliates?.();
+        // If live works, also upload any old local-only accounts so they appear for good
+        if (remote && remote.ok && localCountBefore) {
+            await BD_STORE.pushAllLocalAffiliatesToLive?.();
+            remote = await BD_STORE.pullRemoteAffiliates?.();
+        }
         const analytics = BD_STORE.getAdminAnalytics(remote && remote.ok ? remote : null);
+        // If remote failed, still show THIS browser's old accounts
+        const fallback = (!remote || !remote.ok) ? BD_STORE.getAdminAnalytics(null) : analytics;
+        const view = (remote && remote.ok) ? analytics : fallback;
         if ($('admin-email')) $('admin-email').textContent = BD_STORE.ADMIN_EMAIL;
         if ($('admin-sync-status')) {
             if (remote && remote.ok) {
-                $('admin-sync-status').textContent = 'Live cloud registry connected · ' + (remote.userCount || analytics.affiliateCount) + ' affiliate email(s) loaded from server (all devices).';
+                $('admin-sync-status').textContent = 'Live cloud registry connected · ' + (remote.userCount || view.affiliateCount) + ' affiliate email(s) (includes old accounts synced from this browser + all new live signups).';
                 $('admin-sync-status').style.color = '#6f6';
             } else {
-                $('admin-sync-status').textContent = 'Could not reach live registry' + (remote?.msg ? (' (' + remote.msg + ')') : '') + '. Showing this browser only. Redeploy latest build, then click Refresh Live.';
+                const detail = remote?.detail || remote?.msg || 'unknown';
+                $('admin-sync-status').textContent = 'Live registry unavailable (' + detail + '). Showing ' + view.affiliateCount + ' account(s) saved in THIS browser (old local accounts). Redeploy the latest zip, then Refresh Live.';
                 $('admin-sync-status').style.color = '#f88';
             }
         }
-        if ($('admin-aff-count')) $('admin-aff-count').textContent = String(analytics.affiliateCount);
-        if ($('admin-clicks')) $('admin-clicks').textContent = String(analytics.totalClicks);
-        if ($('admin-aff-share')) $('admin-aff-share').textContent = formatPrice(analytics.affiliateShare);
-        if ($('admin-owner-share')) $('admin-owner-share').textContent = formatPrice(analytics.ownerShare);
-        if ($('admin-pending-amount')) $('admin-pending-amount').textContent = formatPrice(analytics.pendingAmount);
+        if ($('admin-aff-count')) $('admin-aff-count').textContent = String(view.affiliateCount);
+        if ($('admin-clicks')) $('admin-clicks').textContent = String(view.totalClicks);
+        if ($('admin-aff-share')) $('admin-aff-share').textContent = formatPrice(view.affiliateShare);
+        if ($('admin-owner-share')) $('admin-owner-share').textContent = formatPrice(view.ownerShare);
+        if ($('admin-pending-amount')) $('admin-pending-amount').textContent = formatPrice(view.pendingAmount);
 
         const table = $('admin-aff-table');
         if (table) {
-            if (!analytics.affiliates.length) {
-                table.innerHTML = '<p class="checkout-note">No live affiliates yet. New signups are saved to the cloud registry. Affiliates who signed up before this update must log in once so their email appears here.</p>';
+            if (!view.affiliates.length) {
+                table.innerHTML = '<p class="checkout-note">No affiliate accounts found yet on this browser or live registry. After redeploy, new signups appear automatically. Old creators must log in once on the live site.</p>';
             } else {
                 table.innerHTML = `<table class="admin-aff-table"><thead><tr>
                     <th>Email</th><th>Code</th><th>Link</th><th>Clicks</th><th>Sales</th><th>Earned</th><th>Available</th><th>Auto-pay</th><th>Last seen</th>
-                </tr></thead><tbody>${analytics.affiliates.map(a => `<tr>
+                </tr></thead><tbody>${view.affiliates.map(a => `<tr>
                     <td>${a.email}</td>
                     <td class="mono">${a.code}</td>
                     <td class="mono admin-link-cell"><a href="${a.link}" target="_blank" rel="noopener">${String(a.link||'').replace('https://','')}</a></td>
@@ -503,7 +514,7 @@
 
         const cash = $('admin-cashout-table');
         if (cash) {
-            const rows = [...analytics.pendingCashouts, ...analytics.paidCashouts].sort((a,b) => (b.created||0)-(a.created||0));
+            const rows = [...view.pendingCashouts, ...view.paidCashouts].sort((a,b) => (b.created||0)-(a.created||0));
             if (!rows.length) {
                 cash.innerHTML = '<p class="checkout-note">No cashout requests yet.</p>';
             } else {

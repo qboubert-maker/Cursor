@@ -1,7 +1,7 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  external_node_modules = ["@netlify/blobs"]
+  # Bundle @netlify/blobs into functions (do not mark external — runtime was missing it)
 
 [build]
   # Only install production deps (@netlify/blobs). Skip electron/desktop packages.
