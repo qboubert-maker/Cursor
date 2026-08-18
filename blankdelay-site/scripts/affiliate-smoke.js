@@ -13,15 +13,16 @@ const {
 } = require("../netlify/lib/affiliate-store");
 
 // Local mirror of credit math
-const RATE = 0.2;
+const RATE = 0.75;
 function commission(price) {
   return +((Number(price) || 0) * RATE).toFixed(2);
 }
 
-assert.strictEqual(commission(19.99), 4.0);
-assert.strictEqual(commission(29.99), 6.0);
-assert.strictEqual(commission(9.99), 2.0);
+assert.strictEqual(commission(19.99), 14.99);
+assert.strictEqual(commission(29.99), 22.49);
+assert.strictEqual(commission(9.99), 7.49);
 assert.strictEqual(commission(0), 0);
+assert.strictEqual(+(commission(100) + 100 * 0.25).toFixed(2), 100);
 
 assert.strictEqual(normalizeCode("ab12cd"), "AB12CD");
 assert.strictEqual(normalizeCode(" AFF-12_3 "), "AFF-12_3");

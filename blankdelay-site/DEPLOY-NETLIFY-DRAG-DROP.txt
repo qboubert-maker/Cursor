@@ -13,7 +13,7 @@ Required at the TOP LEVEL of your zip/folder (same level as index.html):
   index.html
   netlify.toml
   package.json                         <-- installs @netlify/blobs for live affiliate registry
-  netlify/functions/stripe-webhook.js   <-- Stripe → license key → EmailJS + affiliate 20%
+  netlify/functions/stripe-webhook.js   <-- Stripe → license key → EmailJS + affiliate 75%
   netlify/functions/affiliate-api.js    <-- live clicks, earnings, admin list
   netlify/functions/affiliate-connect.js
   netlify/lib/affiliate-store.js

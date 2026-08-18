@@ -8,7 +8,7 @@ const {
   normalizeCode,
 } = require("./affiliate-store");
 
-const AFFILIATE_RATE = 0.2;
+const AFFILIATE_RATE = 0.75;
 
 async function stripeGet(secretKey, path) {
   const res = await fetch("https://api.stripe.com/v1/" + path, {
@@ -130,7 +130,7 @@ async function creditAffiliateSale({
           amount: String(cents),
           currency: "usd",
           destination: user.stripeAccountId,
-          description: "BlankDelay affiliate 20% · " + user.code,
+          description: "BlankDelay affiliate 75% · " + user.code,
           transfer_group: sessionId || user.code,
           "metadata[affiliate_code]": user.code,
           "metadata[affiliate_email]": user.email,

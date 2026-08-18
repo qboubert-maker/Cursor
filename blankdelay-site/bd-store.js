@@ -1,9 +1,9 @@
 /* BlankDelay client-side store (demo — connect Stripe for real payments) */
 const BD_STORE = {
     DISCOUNTS: { BLANK15: 0.15, BLANK10: 0.10, CREATOR20: 0.20 },
-    /* Affiliates earn 20% of each sale; BlankDelay keeps 80%. */
-    AFFILIATE_RATE: 0.20,
-    OWNER_RATE: 0.80,
+    /* Affiliates earn 75% of each referred sale; BlankDelay keeps 25%. */
+    AFFILIATE_RATE: 0.75,
+    OWNER_RATE: 0.25,
     AFF_ATTR_DAYS: 30,
     REFER_BONUS: 5,
     DISCORD_INVITE: 'https://discord.gg/hH3cv8RrV',

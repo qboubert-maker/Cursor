@@ -554,7 +554,7 @@
             });
             const data = await res.json();
             if (!data?.ok) {
-                if (statusEl) statusEl.textContent = 'Connect Stripe once (after deploy). Then your 20% can auto-deposit on each sale.';
+                if (statusEl) statusEl.textContent = 'Connect Stripe once (after deploy). Then your 75% can auto-deposit on each sale.';
                 return;
             }
             if (data.payoutsEnabled) {
@@ -566,7 +566,7 @@
                 if (connectBtn) connectBtn.textContent = 'Finish Stripe Setup';
                 if (autoBtn) autoBtn.hidden = true;
             } else {
-                if (statusEl) statusEl.textContent = 'Not connected yet. Connect Stripe so 20% auto-deposits to your bank. Manual cashout still works as backup.';
+                if (statusEl) statusEl.textContent = 'Not connected yet. Connect Stripe so 75% auto-deposits to your bank. Manual cashout still works as backup.';
                 if (connectBtn) connectBtn.textContent = 'Connect Stripe for Auto-Payouts';
                 if (autoBtn) autoBtn.hidden = true;
             }

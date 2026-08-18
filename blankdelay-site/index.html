@@ -589,7 +589,7 @@
                     <div class="refer-success" id="refer-success" hidden><p class="mono">Share this link with your friend:</p><p class="refer-link mono" id="refer-link-out"></p></div>
                     <button class="btn btn-ghost btn-sm" id="refer-redeem-btn" style="margin-top:10px">Redeem Earnings</button>
                 </div>
-                <div class="affiliate-card card"><h3>Creator Affiliate Program</h3><p>Earn 20% on every sale. Dashboard + custom link.</p><button class="btn btn-ghost" id="affiliate-btn">Apply as Creator</button></div>
+                <div class="affiliate-card card"><h3>Creator Affiliate Program</h3><p>Earn 75% on every sale you refer. BlankDelay keeps 25%. Dashboard + custom link.</p><button class="btn btn-ghost" id="affiliate-btn">Apply as Creator</button></div>
                 <div class="gift-card card"><h3>Gift Cards</h3><p>Send BlankDelay credit to a friend.</p><div class="gift-opts"><span>$10</span><span>$25</span><span class="active">$50</span></div><button class="btn btn-ghost" id="gift-buy-btn">Buy Gift Card</button></div>
             </div>
 
@@ -728,7 +728,7 @@
         <div class="bd-modal-inner card">
             <button class="exit-close" data-close-modal="auth-modal" aria-label="Close">×</button>
             <h3>Creator Affiliate Program</h3>
-            <p class="checkout-note" style="margin-bottom:14px;">Earn 20% on every sale (BlankDelay keeps 80%). Accounts are saved to the <strong>live cloud registry</strong> (not just your browser) so admin can see every affiliate.</p>
+            <p class="checkout-note" style="margin-bottom:14px;">Earn <strong>75%</strong> of every sale you refer (BlankDelay keeps <strong>25%</strong>). Accounts are saved to the <strong>live cloud registry</strong> (not just your browser) so admin can see every affiliate.</p>
             <div class="auth-tabs">
                 <button type="button" class="auth-tab active" id="auth-tab-signup">Sign Up</button>
                 <button type="button" class="auth-tab" id="auth-tab-login">Log In</button>
@@ -752,7 +752,7 @@
         <div class="bd-modal-inner card">
             <button class="exit-close" data-close-modal="affiliate-dash-modal" aria-label="Close">×</button>
             <h3>Affiliate Dashboard</h3>
-            <p class="checkout-note">Logged in as <strong id="aff-email"></strong> · You earn <strong>20%</strong> of each sale (BlankDelay keeps 80%)</p>
+            <p class="checkout-note">Logged in as <strong id="aff-email"></strong> · You earn <strong>75%</strong> of each sale (BlankDelay keeps <strong>25%</strong>)</p>
             <div class="aff-stats aff-stats-4">
                 <div class="aff-stat"><span class="lbl">Total Earnings</span><span class="val mono" id="aff-earnings">$0.00</span></div>
                 <div class="aff-stat"><span class="lbl">Available</span><span class="val mono" id="aff-available">$0.00</span></div>
@@ -765,7 +765,7 @@
             <div class="aff-sales-list" id="aff-sales-list" style="max-height:140px;overflow:auto;margin-top:8px;font-size:12px;"></div>
             <div class="aff-cashout-box" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
                 <h4 style="font-size:14px;margin-bottom:8px;">Get paid (auto-deposit)</h4>
-                <p class="checkout-note" id="aff-payout-status" style="margin-bottom:10px;">Connect Stripe once. After that, your 20% can auto-deposit when someone buys through your link.</p>
+                <p class="checkout-note" id="aff-payout-status" style="margin-bottom:10px;">Connect Stripe once. After that, your 75% can auto-deposit when someone buys through your link.</p>
                 <button type="button" class="btn btn-primary" id="aff-connect-stripe" style="width:100%;margin-bottom:10px;">Connect Stripe for Auto-Payouts</button>
                 <button type="button" class="btn btn-ghost" id="aff-auto-payout-btn" style="width:100%;margin-bottom:14px;" hidden>Deposit available balance now</button>
                 <h4 style="font-size:14px;margin-bottom:8px;">Manual cashout (backup)</h4>
@@ -795,14 +795,14 @@
         <div class="bd-modal-inner card aff-admin-wide">
             <button class="exit-close" data-close-modal="admin-dash-modal" aria-label="Close">×</button>
             <h3>Affiliate Admin</h3>
-            <p class="checkout-note">Signed in as <strong id="admin-email"></strong> · Split: affiliates <strong>20%</strong> / BlankDelay <strong>80%</strong></p>
-            <p class="checkout-note" style="margin-top:8px;">You get paid automatically: customer pays on Stripe → <strong>80%</strong> stays in your Stripe balance / bank payouts. Affiliates who connected Stripe get their <strong>20%</strong> auto-deposited. Manual cashouts only needed if they haven’t connected yet.</p>
+            <p class="checkout-note">Signed in as <strong id="admin-email"></strong> · Split: affiliates <strong>75%</strong> / BlankDelay <strong>25%</strong></p>
+            <p class="checkout-note" style="margin-top:8px;">You get paid automatically: customer pays on Stripe → <strong>25%</strong> stays in your Stripe balance / bank payouts. Affiliates who connected Stripe get their <strong>75%</strong> auto-deposited. Manual cashouts only needed if they haven’t connected yet.</p>
             <p class="checkout-note" id="admin-sync-status" style="margin-top:8px;">Loading live affiliate registry…</p>
             <div class="aff-stats aff-stats-4" id="admin-stats">
                 <div class="aff-stat"><span class="lbl">Affiliates</span><span class="val mono" id="admin-aff-count">0</span></div>
                 <div class="aff-stat"><span class="lbl">Total Clicks</span><span class="val mono" id="admin-clicks">0</span></div>
-                <div class="aff-stat"><span class="lbl">Affiliate 20%</span><span class="val mono" id="admin-aff-share">$0.00</span></div>
-                <div class="aff-stat"><span class="lbl">Your 80%</span><span class="val mono" id="admin-owner-share">$0.00</span></div>
+                <div class="aff-stat"><span class="lbl">Affiliate 75%</span><span class="val mono" id="admin-aff-share">$0.00</span></div>
+                <div class="aff-stat"><span class="lbl">Your 25%</span><span class="val mono" id="admin-owner-share">$0.00</span></div>
             </div>
             <p class="checkout-note">Pending cashouts: <strong class="mono" id="admin-pending-amount">$0.00</strong></p>
             <h4 style="font-size:14px;margin:16px 0 8px;">All affiliates</h4>

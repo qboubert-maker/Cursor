@@ -55,7 +55,7 @@ function bdStripeUrl(slug) {
     const code = bdActivePromo();
     if (code) url.searchParams.set("prefilled_promo_code", code);
     const aff = bdPendingAffiliateCode();
-    // Stripe Payment Links pass this through on checkout.session.completed → webhook credits 20%
+    // Stripe Payment Links pass this through on checkout.session.completed → webhook credits 75%
     if (aff) url.searchParams.set("client_reference_id", aff.slice(0, 200));
     return url.toString();
 }
