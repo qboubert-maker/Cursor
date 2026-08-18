@@ -369,208 +369,205 @@
 
 
     /* ── Affiliate auth ── */
-
     let authTab = 'signup';
-
     const AUTH_DESC = {
-
         signup: 'New creator? Enter your email and password to create your affiliate account.',
-
-        login: 'Already registered? Log in with your email and password to open your dashboard.'
-
+        login: 'Creators: log in to your dashboard. Admin: use your admin email to open affiliate analytics.'
     };
 
-
-
     function showAuthTab(tab) {
-
         authTab = tab;
-
         $('auth-tab-signup')?.classList.toggle('active', tab === 'signup');
-
         $('auth-tab-login')?.classList.toggle('active', tab === 'login');
-
         if ($('auth-signup-form')) $('auth-signup-form').hidden = tab !== 'signup';
-
         if ($('auth-login-form')) $('auth-login-form').hidden = tab !== 'login';
-
         const desc = $('auth-tab-desc');
-
         if (desc) desc.textContent = AUTH_DESC[tab] || '';
-
         if ($('auth-error')) $('auth-error').hidden = true;
-
     }
-
     $('auth-tab-signup')?.addEventListener('click', () => showAuthTab('signup'));
-
     $('auth-tab-login')?.addEventListener('click', () => showAuthTab('login'));
 
-
-
-    $('affiliate-btn')?.addEventListener('click', () => {
-
+    $('affiliate-btn')?.addEventListener('click', async () => {
         const session = BD_STORE.getSession();
-
-        if (session) showAffiliateDash(session.email);
-
-        else { showAuthTab('signup'); openModal('auth-modal'); }
-
+        if (session?.role === 'admin' || BD_STORE.isAdminSession?.()) {
+            await showAdminDash();
+        } else if (session?.email) {
+            showAffiliateDash(session.email);
+        } else {
+            showAuthTab('signup');
+            openModal('auth-modal');
+        }
     });
-
-
 
     $('auth-signup-form')?.addEventListener('submit', e => {
-
         e.preventDefault();
-
         const email = $('auth-signup-email')?.value?.trim();
-
         const pass = $('auth-signup-pass')?.value;
-
         const res = BD_STORE.signup(email, pass);
-
         if (!res.ok) {
-
             $('auth-error').textContent = res.msg;
-
             $('auth-error').hidden = false;
-
             return;
-
         }
-
         closeModal('auth-modal');
-
         showAffiliateDash(email);
-
     });
 
-
-
-    $('auth-login-form')?.addEventListener('submit', e => {
-
+    $('auth-login-form')?.addEventListener('submit', async e => {
         e.preventDefault();
-
         const email = $('auth-login-email')?.value?.trim();
-
         const pass = $('auth-login-pass')?.value;
-
-        const res = BD_STORE.login(email, pass);
-
+        const res = await BD_STORE.login(email, pass);
         if (!res.ok) {
-
             $('auth-error').textContent = res.msg;
-
             $('auth-error').hidden = false;
-
             return;
-
         }
-
         closeModal('auth-modal');
-
-        showAffiliateDash(email);
-
+        if (res.admin) await showAdminDash();
+        else showAffiliateDash(email);
     });
-
-
 
     function showAffiliateDash(email) {
-
         const user = BD_STORE.getAffiliateUser(email);
-
         if (!user) return;
-
-        const base = (location.origin + location.pathname).replace(/index\.html$/i, '');
-
-        const link = `${base}?aff=${encodeURIComponent(user.code)}#products`.replace('?#', '?').replace(/([^:])\/{2,}/g, '$1/');
-
-        const branded = `https://blankdelay.com/blankdelayaffiliatetweaks?aff=${encodeURIComponent(user.code)}`;
-
+        const branded = BD_STORE.affiliateShortLink(user.code);
         $('aff-link').textContent = branded;
-
         $('aff-code').textContent = user.code;
-
         $('aff-earnings').textContent = formatPrice(user.earnings || 0);
-
+        if ($('aff-available')) $('aff-available').textContent = formatPrice(BD_STORE.availableBalance(email));
         $('aff-sales').textContent = String(user.sales || 0);
-
         if ($('aff-clicks')) $('aff-clicks').textContent = String(BD_STORE.getAffiliateClicks?.(user.code) || 0);
-
         $('aff-email').textContent = email;
-
+        if ($('aff-cashout-amount')) $('aff-cashout-amount').value = BD_STORE.availableBalance(email) || '';
+        if ($('aff-cashout-error')) $('aff-cashout-error').hidden = true;
+        if ($('aff-cashout-ok')) $('aff-cashout-ok').hidden = true;
         const list = $('aff-sales-list');
-
         if (list) {
-
             const sales = BD_STORE.getAffiliateSales?.(user.code) || [];
-
             list.innerHTML = sales.length
-
                 ? sales.slice().reverse().slice(0, 20).map(s =>
-
                     `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;gap:10px;">
-
                         <span>${s.product || 'Product'} · ${new Date(s.date).toLocaleDateString()}</span>
-
                         <strong class="mono">${formatPrice(s.commission || 0)}</strong>
-
                     </div>`).join('')
+                : '<p class="checkout-note">No sales yet — share your short affiliate link.</p>';
+        }
+        openModal('affiliate-dash-modal');
+    }
 
-                : '<p class="checkout-note">No sales yet — share your BlankDelay Affiliate Tweaks link.</p>';
+    async function showAdminDash() {
+        await BD_STORE.pullRemoteAffiliates?.();
+        const analytics = BD_STORE.getAdminAnalytics();
+        if ($('admin-email')) $('admin-email').textContent = BD_STORE.ADMIN_EMAIL;
+        if ($('admin-aff-count')) $('admin-aff-count').textContent = String(analytics.affiliateCount);
+        if ($('admin-clicks')) $('admin-clicks').textContent = String(analytics.totalClicks);
+        if ($('admin-aff-share')) $('admin-aff-share').textContent = formatPrice(analytics.affiliateShare);
+        if ($('admin-owner-share')) $('admin-owner-share').textContent = formatPrice(analytics.ownerShare);
+        if ($('admin-pending-amount')) $('admin-pending-amount').textContent = formatPrice(analytics.pendingAmount);
 
+        const table = $('admin-aff-table');
+        if (table) {
+            if (!analytics.affiliates.length) {
+                table.innerHTML = '<p class="checkout-note">No affiliates yet. When creators sign up, they appear here with clicks, emails, and earnings.</p>';
+            } else {
+                table.innerHTML = `<table class="admin-aff-table"><thead><tr>
+                    <th>Email</th><th>Code</th><th>Link</th><th>Clicks</th><th>Sales</th><th>Earned</th><th>Available</th>
+                </tr></thead><tbody>${analytics.affiliates.map(a => `<tr>
+                    <td>${a.email}</td>
+                    <td class="mono">${a.code}</td>
+                    <td class="mono admin-link-cell"><a href="${a.link}" target="_blank" rel="noopener">${a.link.replace('https://','')}</a></td>
+                    <td class="mono">${a.clicks}</td>
+                    <td class="mono">${a.sales}</td>
+                    <td class="mono">${formatPrice(a.earnings || 0)}</td>
+                    <td class="mono">${formatPrice(a.available || 0)}</td>
+                </tr>`).join('')}</tbody></table>`;
+            }
         }
 
-        openModal('affiliate-dash-modal');
-
+        const cash = $('admin-cashout-table');
+        if (cash) {
+            const rows = [...analytics.pendingCashouts, ...analytics.paidCashouts].sort((a,b) => (b.created||0)-(a.created||0));
+            if (!rows.length) {
+                cash.innerHTML = '<p class="checkout-note">No cashout requests yet.</p>';
+            } else {
+                cash.innerHTML = `<table class="admin-aff-table"><thead><tr>
+                    <th>When</th><th>Email</th><th>Amount</th><th>Method</th><th>Pay to</th><th>Status</th><th></th>
+                </tr></thead><tbody>${rows.map(c => `<tr>
+                    <td>${new Date(c.created).toLocaleString()}</td>
+                    <td>${c.email}</td>
+                    <td class="mono">${formatPrice(c.amount || 0)}</td>
+                    <td>${c.method || '—'}</td>
+                    <td class="mono">${c.payoutTo || '—'}</td>
+                    <td>${c.status}</td>
+                    <td>${c.status === 'pending' ? `<button type="button" class="btn btn-primary btn-sm admin-mark-paid" data-id="${c.id}">Mark paid</button>` : '✓'}</td>
+                </tr>`).join('')}</tbody></table>`;
+                cash.querySelectorAll('.admin-mark-paid').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        BD_STORE.markCashoutPaid(btn.dataset.id);
+                        await showAdminDash();
+                    });
+                });
+            }
+        }
+        openModal('admin-dash-modal');
     }
-
-
 
     $('aff-copy-btn')?.addEventListener('click', () => {
-
         navigator.clipboard?.writeText($('aff-link')?.textContent || '');
-
         $('aff-copy-btn').textContent = 'Copied!';
-
         setTimeout(() => { $('aff-copy-btn').textContent = 'Copy Link'; }, 2000);
-
     });
 
-
+    $('aff-cashout-btn')?.addEventListener('click', () => {
+        const session = BD_STORE.getSession();
+        if (!session?.email) return;
+        const amount = parseFloat($('aff-cashout-amount')?.value || '0');
+        const method = $('aff-cashout-method')?.value;
+        const payoutTo = $('aff-cashout-to')?.value?.trim();
+        const res = BD_STORE.requestCashout(session.email, amount, method, payoutTo);
+        const err = $('aff-cashout-error');
+        const ok = $('aff-cashout-ok');
+        if (!res.ok) {
+            if (err) { err.textContent = res.msg; err.hidden = false; }
+            if (ok) ok.hidden = true;
+            return;
+        }
+        if (err) err.hidden = true;
+        if (ok) {
+            ok.textContent = 'Cashout requested — admin will pay you via ' + method + '.';
+            ok.hidden = false;
+        }
+        showAffiliateDash(session.email);
+    });
 
     $('aff-logout')?.addEventListener('click', () => {
-
         BD_STORE.logout();
-
         closeModal('affiliate-dash-modal');
-
     });
 
+    $('admin-logout')?.addEventListener('click', () => {
+        BD_STORE.logout();
+        closeModal('admin-dash-modal');
+    });
 
+    $('admin-refresh')?.addEventListener('click', async () => {
+        await showAdminDash();
+    });
 
     /* Capture affiliate/ref from URL on landing */
-
     const params = new URLSearchParams(location.search);
-
-    if (params.get('aff')) {
-
-        sessionStorage.setItem('bd-aff-pending', params.get('aff'));
-
-        BD_STORE.trackAffiliateClick?.(params.get('aff'));
-
+    let affCode = params.get('aff');
+    const shortMatch = location.pathname.match(/^\/a\/([A-Za-z0-9-]+)\/?$/i);
+    if (!affCode && shortMatch) affCode = shortMatch[1];
+    if (affCode) {
+        sessionStorage.setItem('bd-aff-pending', affCode);
+        BD_STORE.trackAffiliateClick?.(affCode);
     }
-
     if (params.get('ref')) sessionStorage.setItem('bd-ref-pending', params.get('ref'));
-
-    // Pretty path support: /blankdelayaffiliatetweaks?aff=CODE
-
     if (/blankdelayaffiliatetweaks/i.test(location.pathname) && params.get('aff')) {
-
         BD_STORE.trackAffiliateClick?.(params.get('aff'));
-
     }
 
 })();
-

@@ -1,8 +1,14 @@
 /* BlankDelay client-side store (demo — connect Stripe for real payments) */
 const BD_STORE = {
     DISCOUNTS: { BLANK15: 0.15, BLANK10: 0.10, CREATOR20: 0.20 },
+    /* Affiliates earn 20% of each sale; BlankDelay keeps 80%. */
     AFFILIATE_RATE: 0.20,
+    OWNER_RATE: 0.80,
     REFER_BONUS: 5,
+    DISCORD_INVITE: 'https://discord.gg/hH3cv8RrV',
+    /* Admin login (email + SHA-256 of password). Do not put plaintext passwords in source. */
+    ADMIN_EMAIL: 'qboubert@gmail.com',
+    ADMIN_PASS_HASH: '392f20ddf686371e7d82fe552b0f8de510f7349c05e6904a74544cb0af3faf92',
 
     CATALOG: {
         premium: { name: 'Blank Premium Utility', tag: 'V4 · ALL IN ONE TWEAKING PACK', price: 29.99, was: 124.95, perks: ['FPS boost + input optimization', 'Network & OS tweaks', 'All future updates included', 'Instant email delivery'] },
@@ -34,46 +40,161 @@ const BD_STORE = {
     getUsers() { return this.get('bd-users', []); },
     saveUsers(users) { this.set('bd-users', users); },
 
-    signup(email, password) {
+    async hashPassword(password) {
+        const data = new TextEncoder().encode(String(password || ''));
+        const hash = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, '0')).join('');
+    },
+
+    isAdminEmail(email) {
+        return String(email || '').trim().toLowerCase() === this.ADMIN_EMAIL;
+    },
+
+    makeAffiliateCode() {
+        const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let code = '';
+        for (let i = 0; i < 6; i++) code += alphabet[Math.floor(Math.random() * alphabet.length)];
         const users = this.getUsers();
-        if (users.find(u => u.email === email)) return { ok: false, msg: 'Email already registered.' };
-        const code = 'AFF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-        const user = { email, password, code, earnings: 0, sales: 0, created: Date.now() };
+        if (users.some((u) => u.code === code)) return this.makeAffiliateCode();
+        return code;
+    },
+
+    affiliateShortLink(code) {
+        const c = encodeURIComponent(String(code || '').trim());
+        return `https://blankdelay.com/a/${c}`;
+    },
+
+    signup(email, password) {
+        const clean = String(email || '').trim().toLowerCase();
+        if (!clean || !password) return { ok: false, msg: 'Email and password required.' };
+        if (this.isAdminEmail(clean)) return { ok: false, msg: 'That email is reserved. Use Log In for admin.' };
+        const users = this.getUsers();
+        if (users.find((u) => u.email.toLowerCase() === clean)) return { ok: false, msg: 'Email already registered.' };
+        const code = this.makeAffiliateCode();
+        const user = {
+            email: clean,
+            password,
+            code,
+            earnings: 0,
+            sales: 0,
+            paidOut: 0,
+            created: Date.now()
+        };
         users.push(user);
         this.saveUsers(users);
-        this.setSession({ email, code });
+        this.setSession({ email: clean, code, role: 'affiliate' });
+        this.syncAffiliateRemote('upsert', { user: this.publicAffiliate(user) });
         return { ok: true, user };
     },
 
-    login(email, password) {
-        const user = this.getUsers().find(u => u.email === email && u.password === password);
+    async login(email, password) {
+        const clean = String(email || '').trim().toLowerCase();
+        if (this.isAdminEmail(clean)) {
+            const hash = await this.hashPassword(password);
+            if (hash !== this.ADMIN_PASS_HASH) return { ok: false, msg: 'Invalid email or password.' };
+            this.setSession({ email: this.ADMIN_EMAIL, role: 'admin', code: 'ADMIN' });
+            return { ok: true, user: { email: this.ADMIN_EMAIL, role: 'admin' }, admin: true };
+        }
+        const user = this.getUsers().find((u) => u.email.toLowerCase() === clean && u.password === password);
         if (!user) return { ok: false, msg: 'Invalid email or password.' };
-        this.setSession({ email: user.email, code: user.code });
-        return { ok: true, user };
+        this.setSession({ email: user.email, code: user.code, role: 'affiliate' });
+        return { ok: true, user, admin: false };
+    },
+
+    isAdminSession() {
+        const s = this.getSession();
+        return !!(s && s.role === 'admin' && this.isAdminEmail(s.email));
+    },
+
+    publicAffiliate(u) {
+        if (!u) return null;
+        return {
+            email: u.email,
+            code: u.code,
+            earnings: u.earnings || 0,
+            sales: u.sales || 0,
+            paidOut: u.paidOut || 0,
+            created: u.created || 0,
+            link: this.affiliateShortLink(u.code)
+        };
     },
 
     getAffiliateUser(email) {
-        return this.getUsers().find(u => u.email === email);
+        const clean = String(email || '').trim().toLowerCase();
+        return this.getUsers().find((u) => u.email.toLowerCase() === clean);
+    },
+
+    listAffiliates() {
+        return this.getUsers().map((u) => this.publicAffiliate(u));
+    },
+
+    getAdminAnalytics() {
+        const affiliates = this.listAffiliates();
+        const clicksMap = this.get('bd-aff-clicks', {});
+        const sales = this.get('bd-aff-sales', []);
+        const cashouts = this.getCashouts();
+        let totalClicks = 0;
+        let totalCommission = 0;
+        let totalSalesAmount = 0;
+        affiliates.forEach((a) => {
+            totalClicks += clicksMap[a.code] || 0;
+            totalCommission += a.earnings || 0;
+        });
+        sales.forEach((s) => {
+            totalSalesAmount += s.amount || 0;
+        });
+        const pendingCashouts = cashouts.filter((c) => c.status === 'pending');
+        const paidCashouts = cashouts.filter((c) => c.status === 'paid');
+        const pendingAmount = pendingCashouts.reduce((n, c) => n + (c.amount || 0), 0);
+        const paidAmount = paidCashouts.reduce((n, c) => n + (c.amount || 0), 0);
+        return {
+            affiliateCount: affiliates.length,
+            totalClicks,
+            totalSales: sales.length,
+            totalSalesAmount: +totalSalesAmount.toFixed(2),
+            affiliateShare: +totalCommission.toFixed(2),
+            ownerShare: +(totalSalesAmount * this.OWNER_RATE).toFixed(2),
+            commissionRate: this.AFFILIATE_RATE,
+            ownerRate: this.OWNER_RATE,
+            pendingCashouts,
+            paidCashouts,
+            pendingAmount: +pendingAmount.toFixed(2),
+            paidAmount: +paidAmount.toFixed(2),
+            affiliates: affiliates.map((a) => ({
+                ...a,
+                clicks: clicksMap[a.code] || 0,
+                available: +Math.max(0, (a.earnings || 0) - (a.paidOut || 0)).toFixed(2)
+            }))
+        };
     },
 
     creditAffiliate(code, amount, productName) {
         const users = this.getUsers();
-        const u = users.find(x => x.code === code);
+        const u = users.find((x) => x.code === code);
         if (!u) return;
         const commission = +(amount * this.AFFILIATE_RATE).toFixed(2);
         u.earnings = +(u.earnings + commission).toFixed(2);
         u.sales += 1;
         this.saveUsers(users);
         const sales = this.get('bd-aff-sales', []);
-        sales.push({ code, amount, commission, product: productName || 'BlankDelay Product', date: Date.now() });
+        const row = {
+            code,
+            amount,
+            commission,
+            product: productName || 'BlankDelay Product',
+            date: Date.now()
+        };
+        sales.push(row);
         this.set('bd-aff-sales', sales);
+        this.syncAffiliateRemote('sale', { sale: row, user: this.publicAffiliate(u) });
     },
 
     trackAffiliateClick(code) {
-        if (!code) return;
+        if (!code || code === 'ADMIN') return;
         const clicks = this.get('bd-aff-clicks', {});
         clicks[code] = (clicks[code] || 0) + 1;
         this.set('bd-aff-clicks', clicks);
+        this.syncAffiliateRemote('click', { code });
     },
 
     getAffiliateClicks(code) {
@@ -82,7 +203,139 @@ const BD_STORE = {
     },
 
     getAffiliateSales(code) {
-        return this.get('bd-aff-sales', []).filter(s => s.code === code);
+        return this.get('bd-aff-sales', []).filter((s) => s.code === code);
+    },
+
+    getCashouts() {
+        return this.get('bd-aff-cashouts', []);
+    },
+
+    saveCashouts(list) {
+        this.set('bd-aff-cashouts', list);
+    },
+
+    requestCashout(email, amount, method, payoutTo) {
+        const user = this.getAffiliateUser(email);
+        if (!user) return { ok: false, msg: 'Affiliate not found.' };
+        const available = +Math.max(0, (user.earnings || 0) - (user.paidOut || 0)).toFixed(2);
+        const amt = +Number(amount).toFixed(2);
+        if (!(amt >= 5)) return { ok: false, msg: 'Minimum cashout is $5.00.' };
+        if (amt > available) return { ok: false, msg: 'Amount exceeds available balance.' };
+        if (!method || !payoutTo) return { ok: false, msg: 'Choose a cashout method and payout details.' };
+        const pending = this.getCashouts().some((c) => c.email === user.email && c.status === 'pending');
+        if (pending) return { ok: false, msg: 'You already have a pending cashout request.' };
+        const row = {
+            id: 'CO-' + Date.now().toString(36).toUpperCase(),
+            email: user.email,
+            code: user.code,
+            amount: amt,
+            method: String(method),
+            payoutTo: String(payoutTo).trim(),
+            status: 'pending',
+            created: Date.now()
+        };
+        const list = this.getCashouts();
+        list.push(row);
+        this.saveCashouts(list);
+        this.syncAffiliateRemote('cashout', { cashout: row });
+        return { ok: true, cashout: row };
+    },
+
+    markCashoutPaid(cashoutId) {
+        const list = this.getCashouts();
+        const row = list.find((c) => c.id === cashoutId);
+        if (!row || row.status === 'paid') return { ok: false, msg: 'Cashout not found.' };
+        row.status = 'paid';
+        row.paidAt = Date.now();
+        this.saveCashouts(list);
+        const users = this.getUsers();
+        const u = users.find((x) => x.email === row.email);
+        if (u) {
+            u.paidOut = +((u.paidOut || 0) + row.amount).toFixed(2);
+            this.saveUsers(users);
+            this.syncAffiliateRemote('upsert', { user: this.publicAffiliate(u) });
+        }
+        this.syncAffiliateRemote('cashout-paid', { cashout: row });
+        return { ok: true, cashout: row };
+    },
+
+    availableBalance(email) {
+        const u = this.getAffiliateUser(email);
+        if (!u) return 0;
+        return +Math.max(0, (u.earnings || 0) - (u.paidOut || 0)).toFixed(2);
+    },
+
+    async syncAffiliateRemote(action, payload) {
+        try {
+            await fetch('/.netlify/functions/affiliate-api', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, ...payload })
+            });
+        } catch (_) { /* offline / local preview */ }
+    },
+
+    async pullRemoteAffiliates() {
+        try {
+            const res = await fetch('/.netlify/functions/affiliate-api?action=snapshot');
+            if (!res.ok) return null;
+            const data = await res.json();
+            if (!data || !data.ok) return null;
+            if (Array.isArray(data.users) && data.users.length) {
+                const local = this.getUsers();
+                const byEmail = new Map(local.map((u) => [u.email.toLowerCase(), u]));
+                data.users.forEach((remote) => {
+                    const key = String(remote.email || '').toLowerCase();
+                    if (!key) return;
+                    const existing = byEmail.get(key);
+                    if (existing) {
+                        existing.code = remote.code || existing.code;
+                        existing.earnings = Math.max(existing.earnings || 0, remote.earnings || 0);
+                        existing.sales = Math.max(existing.sales || 0, remote.sales || 0);
+                        existing.paidOut = Math.max(existing.paidOut || 0, remote.paidOut || 0);
+                        existing.created = existing.created || remote.created || Date.now();
+                    } else {
+                        byEmail.set(key, {
+                            email: key,
+                            password: '',
+                            code: remote.code,
+                            earnings: remote.earnings || 0,
+                            sales: remote.sales || 0,
+                            paidOut: remote.paidOut || 0,
+                            created: remote.created || Date.now()
+                        });
+                    }
+                });
+                this.saveUsers([...byEmail.values()]);
+            }
+            if (data.clicks && typeof data.clicks === 'object') {
+                const clicks = this.get('bd-aff-clicks', {});
+                Object.keys(data.clicks).forEach((code) => {
+                    clicks[code] = Math.max(clicks[code] || 0, data.clicks[code] || 0);
+                });
+                this.set('bd-aff-clicks', clicks);
+            }
+            if (Array.isArray(data.cashouts) && data.cashouts.length) {
+                const local = this.getCashouts();
+                const byId = new Map(local.map((c) => [c.id, c]));
+                data.cashouts.forEach((c) => {
+                    if (c && c.id) byId.set(c.id, { ...(byId.get(c.id) || {}), ...c });
+                });
+                this.saveCashouts([...byId.values()]);
+            }
+            if (Array.isArray(data.sales) && data.sales.length) {
+                const local = this.get('bd-aff-sales', []);
+                const keys = new Set(local.map((s) => `${s.code}|${s.date}|${s.commission}`));
+                data.sales.forEach((s) => {
+                    const k = `${s.code}|${s.date}|${s.commission}`;
+                    if (!keys.has(k)) local.push(s);
+                });
+                this.set('bd-aff-sales', local);
+            }
+            return data;
+        } catch (_) {
+            return null;
+        }
     },
 
     getReferrals() { return this.get('bd-referrals', []); },

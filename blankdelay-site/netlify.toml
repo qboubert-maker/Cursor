@@ -16,7 +16,7 @@
   status = 301
   force = true
 
-# Pretty affiliate landing URL
+# Pretty affiliate landing URL (legacy long path)
 [[redirects]]
   from = "/blankdelayaffiliatetweaks"
   to = "/index.html"
@@ -25,6 +25,18 @@
   from = "/blankdelayaffiliatetweaks/"
   to = "/index.html"
   status = 200
+
+# Short affiliate links: blankdelay.com/a/CODE
+[[redirects]]
+  from = "/a/:code"
+  to = "/index.html?aff=:code"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/a/:code/"
+  to = "/index.html?aff=:code"
+  status = 200
+  force = true
 
 # Large desktop builds live on GitHub Releases (Netlify file size limit)
 [[redirects]]

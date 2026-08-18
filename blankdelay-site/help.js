@@ -137,7 +137,7 @@
         {
             id: 'affiliate',
             keys: ['affiliate', 'creator program', 'commission', '20%', 'partner', 'earn money', 'tiktok', 'linktree'],
-            answer: '<strong>Creator Affiliate Program</strong> (Specials): 20% commission per sale. If TikTok blocks in-app links, tell viewers to tap <strong>Open in browser</strong> or paste <strong>blankdelay.com</strong> directly.'
+            answer: '<strong>Creator Affiliate Program</strong> (Specials): you earn <strong>20%</strong> of each sale (BlankDelay keeps 80%). Short link looks like <strong>blankdelay.com/a/CODE</strong>. Cash out via PayPal, Cash App, or Venmo from your dashboard. Admin reviews payouts.'
         },
         {
             id: 'cart',
@@ -192,7 +192,7 @@
         {
             id: 'discord',
             keys: ['discord', 'join discord', 'community', 'live support', 'human support', 'contact', 'email'],
-            answer: 'For instant help use this <strong>AI Support chat</strong> or the floating Support button. FAQ section covers products, setup, and troubleshooting. Purchase support: check thank-you page and email delivery first.'
+            answer: 'Join the BlankDelay Discord for setup help: <a href="https://discord.gg/hH3cv8RrV" target="_blank" rel="noopener">discord.gg/hH3cv8RrV</a>. You can also use this <strong>AI Support chat</strong> or the floating Support button. Purchase support: check thank-you page and email delivery first.'
         },
         {
             id: 'compare',
