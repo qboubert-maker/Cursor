@@ -167,7 +167,7 @@
         {
             id: 'virus-warning',
             keys: ['virus', 'malware', 'unsafe', 'smartscreen', 'windows protected', 'blocked', 'defender', 'false positive', 'not a virus', 'download blocked', 'run anyway', 'more info'],
-            answer: '<strong>This is NOT a virus</strong> — it is a false positive because BlankDelay is a new publisher and the app is not code-signed yet.<br><br><strong>If Windows says "Windows protected your PC":</strong><br>1. Click <strong>More info</strong><br>2. Click <strong>Run anyway</strong><br><br><strong>If your browser blocks the download:</strong> Click <strong>Keep</strong> or <strong>Download anyway</strong><br><br><strong>If Windows Defender blocks it:</strong> Windows Security → Protection history → <strong>Allow</strong> on the file<br><br>BlankDelay does not inject into games or steal data. 14-day money-back guarantee.'
+            answer: '<strong>This is NOT a virus</strong> — it is a false positive because BlankDelay is a new publisher and the app is not code-signed yet.<br><br><strong>If Windows says "Windows protected your PC":</strong><br>1. Click <strong>More info</strong><br>2. Click <strong>Run anyway</strong><br><br><strong>If your browser blocks the download:</strong> Click <strong>Keep</strong> or <strong>Download anyway</strong><br><br><strong>If Windows Defender blocks it:</strong> Windows Security → Protection history → <strong>Allow</strong> on the file<br><br>BlankDelay does not inject into games or steal data. All sales are final.'
         },
         {
             id: 'safe',
@@ -176,8 +176,8 @@
         },
         {
             id: 'refund',
-            keys: ['refund', 'money back', 'return', 'cancel order', 'guarantee'],
-            answer: '<strong>14-day money-back guarantee</strong> on all paid products. Contact support via FAQ chat or email within 14 days.'
+            keys: ['refund', 'money back', 'return', 'cancel order', 'guarantee', 'no refund'],
+            answer: '<strong>All sales are final — no refunds.</strong> Digital products are non-refundable once a license key is issued or the download is accessed. If you were charged but never received your key or download, contact us on Discord with your Stripe receipt and we will fulfill or fix the order.'
         },
         {
             id: 'requirements',
