@@ -369,208 +369,360 @@
 
 
     /* ── Affiliate auth ── */
-
     let authTab = 'signup';
-
     const AUTH_DESC = {
-
         signup: 'New creator? Enter your email and password to create your affiliate account.',
-
-        login: 'Already registered? Log in with your email and password to open your dashboard.'
-
+        login: 'Creators: log in (saved on the live server). Admin: use your admin email to see EVERY affiliate email + analytics.'
     };
 
-
-
     function showAuthTab(tab) {
-
         authTab = tab;
-
         $('auth-tab-signup')?.classList.toggle('active', tab === 'signup');
-
         $('auth-tab-login')?.classList.toggle('active', tab === 'login');
-
         if ($('auth-signup-form')) $('auth-signup-form').hidden = tab !== 'signup';
-
         if ($('auth-login-form')) $('auth-login-form').hidden = tab !== 'login';
-
         const desc = $('auth-tab-desc');
-
         if (desc) desc.textContent = AUTH_DESC[tab] || '';
-
         if ($('auth-error')) $('auth-error').hidden = true;
-
     }
-
     $('auth-tab-signup')?.addEventListener('click', () => showAuthTab('signup'));
-
     $('auth-tab-login')?.addEventListener('click', () => showAuthTab('login'));
 
-
-
-    $('affiliate-btn')?.addEventListener('click', () => {
-
+    $('affiliate-btn')?.addEventListener('click', async () => {
         const session = BD_STORE.getSession();
-
-        if (session) showAffiliateDash(session.email);
-
-        else { showAuthTab('signup'); openModal('auth-modal'); }
-
+        if (session?.role === 'admin' || BD_STORE.isAdminSession?.()) {
+            await showAdminDash();
+        } else if (session?.email) {
+            showAffiliateDash(session.email);
+        } else {
+            showAuthTab('signup');
+            openModal('auth-modal');
+        }
     });
 
-
-
-    $('auth-signup-form')?.addEventListener('submit', e => {
-
+    $('auth-signup-form')?.addEventListener('submit', async e => {
         e.preventDefault();
-
         const email = $('auth-signup-email')?.value?.trim();
-
         const pass = $('auth-signup-pass')?.value;
-
-        const res = BD_STORE.signup(email, pass);
-
+        const res = await BD_STORE.signupAndSync(email, pass);
         if (!res.ok) {
-
             $('auth-error').textContent = res.msg;
-
             $('auth-error').hidden = false;
-
             return;
-
         }
-
         closeModal('auth-modal');
-
         showAffiliateDash(email);
-
     });
 
-
-
-    $('auth-login-form')?.addEventListener('submit', e => {
-
+    $('auth-login-form')?.addEventListener('submit', async e => {
         e.preventDefault();
-
         const email = $('auth-login-email')?.value?.trim();
-
         const pass = $('auth-login-pass')?.value;
-
-        const res = BD_STORE.login(email, pass);
-
+        const res = await BD_STORE.login(email, pass);
         if (!res.ok) {
-
             $('auth-error').textContent = res.msg;
-
             $('auth-error').hidden = false;
-
             return;
-
         }
-
         closeModal('auth-modal');
-
-        showAffiliateDash(email);
-
+        if (res.admin) await showAdminDash();
+        else showAffiliateDash(email);
     });
 
-
-
-    function showAffiliateDash(email) {
-
+    async function showAffiliateDash(email) {
+        // Refresh LIVE clicks/sales/earnings from server before showing dashboard
+        await BD_STORE.pullRemoteAffiliates?.();
         const user = BD_STORE.getAffiliateUser(email);
-
         if (!user) return;
-
-        const base = (location.origin + location.pathname).replace(/index\.html$/i, '');
-
-        const link = `${base}?aff=${encodeURIComponent(user.code)}#products`.replace('?#', '?').replace(/([^:])\/{2,}/g, '$1/');
-
-        const branded = `https://blankdelay.com/blankdelayaffiliatetweaks?aff=${encodeURIComponent(user.code)}`;
-
+        // Keep this affiliate visible in the LIVE admin registry
+        await BD_STORE.syncAffiliateRemote?.('upsert', { user: BD_STORE.publicAffiliate(user), password: user.password });
+        await BD_STORE.pullRemoteAffiliates?.();
+        const liveUser = BD_STORE.getAffiliateUser(email) || user;
+        const branded = BD_STORE.affiliateShortLink(liveUser.code);
         $('aff-link').textContent = branded;
-
-        $('aff-code').textContent = user.code;
-
-        $('aff-earnings').textContent = formatPrice(user.earnings || 0);
-
-        $('aff-sales').textContent = String(user.sales || 0);
-
-        if ($('aff-clicks')) $('aff-clicks').textContent = String(BD_STORE.getAffiliateClicks?.(user.code) || 0);
-
+        $('aff-code').textContent = liveUser.code;
+        $('aff-earnings').textContent = formatPrice(liveUser.earnings || 0);
+        if ($('aff-available')) $('aff-available').textContent = formatPrice(BD_STORE.availableBalance(email));
+        $('aff-sales').textContent = String(liveUser.sales || 0);
+        if ($('aff-clicks')) $('aff-clicks').textContent = String(BD_STORE.getAffiliateClicks?.(liveUser.code) || 0);
         $('aff-email').textContent = email;
-
+        if ($('aff-cashout-amount')) $('aff-cashout-amount').value = BD_STORE.availableBalance(email) || '';
+        if ($('aff-cashout-error')) $('aff-cashout-error').hidden = true;
+        if ($('aff-cashout-ok')) $('aff-cashout-ok').hidden = true;
+        refreshAffiliatePayoutStatus(liveUser);
         const list = $('aff-sales-list');
-
         if (list) {
-
-            const sales = BD_STORE.getAffiliateSales?.(user.code) || [];
-
+            const sales = BD_STORE.getAffiliateSales?.(liveUser.code) || [];
             list.innerHTML = sales.length
-
                 ? sales.slice().reverse().slice(0, 20).map(s =>
-
                     `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;gap:10px;">
-
                         <span>${s.product || 'Product'} · ${new Date(s.date).toLocaleDateString()}</span>
-
                         <strong class="mono">${formatPrice(s.commission || 0)}</strong>
-
                     </div>`).join('')
+                : '<p class="checkout-note">No sales yet — share your short affiliate link.</p>';
+        }
+        openModal('affiliate-dash-modal');
+    }
 
-                : '<p class="checkout-note">No sales yet — share your BlankDelay Affiliate Tweaks link.</p>';
+    async function showAdminDash() {
+        if ($('admin-sync-status')) $('admin-sync-status').textContent = 'Loading live affiliate registry (server, not browser)…';
+        // Push any old accounts sitting in THIS browser up to the server, then read SERVER list only
+        let remote = await BD_STORE.pullRemoteAffiliates?.();
+        const localCountBefore = (BD_STORE.listAffiliates?.() || []).length;
+        if (remote && remote.ok && localCountBefore) {
+            await BD_STORE.pushAllLocalAffiliatesToLive?.();
+            remote = await BD_STORE.pullRemoteAffiliates?.();
+        }
+        const view = BD_STORE.getAdminAnalytics(remote && remote.ok ? remote : { ok: false, users: [], clicks: {}, sales: [], cashouts: [] });
+        if ($('admin-email')) $('admin-email').textContent = BD_STORE.ADMIN_EMAIL;
+        if ($('admin-sync-status')) {
+            if (remote && remote.ok) {
+                $('admin-sync-status').textContent = 'Live SERVER registry · ' + (remote.userCount || view.affiliateCount) + ' affiliate email(s) from all devices. Not browser-based.';
+                $('admin-sync-status').style.color = '#6f6';
+            } else {
+                const detail = remote?.detail || remote?.msg || 'unknown';
+                $('admin-sync-status').textContent = 'SERVER registry unavailable (' + detail + '). Admin list is empty until live registry works — we will NOT pretend browser-only accounts are complete. Redeploy latest zip, then Refresh Live. Old creators must log in once after that.';
+                $('admin-sync-status').style.color = '#f88';
+            }
+        }
+        if ($('admin-aff-count')) $('admin-aff-count').textContent = String(view.affiliateCount);
+        if ($('admin-clicks')) $('admin-clicks').textContent = String(view.totalClicks);
+        if ($('admin-aff-share')) $('admin-aff-share').textContent = formatPrice(view.affiliateShare);
+        if ($('admin-owner-share')) $('admin-owner-share').textContent = formatPrice(view.ownerShare);
+        if ($('admin-pending-amount')) $('admin-pending-amount').textContent = formatPrice(view.pendingAmount);
 
+        const table = $('admin-aff-table');
+        if (table) {
+            if (!view.affiliates.length) {
+                table.innerHTML = '<p class="checkout-note">No affiliates in the SERVER registry yet. After this deploy works, every new signup appears here automatically. Creators who signed up before must log in once on blankdelay.com so their email is uploaded.</p>';
+            } else {
+                table.innerHTML = `<table class="admin-aff-table"><thead><tr>
+                    <th>Email</th><th>Code</th><th>Link</th><th>Clicks</th><th>Sales</th><th>Earned</th><th>Available</th><th>Auto-pay</th><th>Last seen</th>
+                </tr></thead><tbody>${view.affiliates.map(a => `<tr>
+                    <td>${a.email}</td>
+                    <td class="mono">${a.code}</td>
+                    <td class="mono admin-link-cell"><a href="${a.link}" target="_blank" rel="noopener">${String(a.link||'').replace('https://','')}</a></td>
+                    <td class="mono">${a.clicks}</td>
+                    <td class="mono">${a.sales}</td>
+                    <td class="mono">${formatPrice(a.earnings || 0)}</td>
+                    <td class="mono">${formatPrice(a.available || 0)}</td>
+                    <td>${a.payoutsEnabled || a.stripeAccountId ? 'Stripe' : 'Manual'}</td>
+                    <td class="mono">${a.lastSeen ? new Date(a.lastSeen).toLocaleString() : '—'}</td>
+                </tr>`).join('')}</tbody></table>`;
+            }
         }
 
-        openModal('affiliate-dash-modal');
-
+        const cash = $('admin-cashout-table');
+        if (cash) {
+            const rows = [...view.pendingCashouts, ...view.paidCashouts].sort((a,b) => (b.created||0)-(a.created||0));
+            if (!rows.length) {
+                cash.innerHTML = '<p class="checkout-note">No cashout requests yet.</p>';
+            } else {
+                cash.innerHTML = `<table class="admin-aff-table"><thead><tr>
+                    <th>When</th><th>Email</th><th>Amount</th><th>Method</th><th>Pay to</th><th>Status</th><th></th>
+                </tr></thead><tbody>${rows.map(c => `<tr>
+                    <td>${new Date(c.created).toLocaleString()}</td>
+                    <td>${c.email}</td>
+                    <td class="mono">${formatPrice(c.amount || 0)}</td>
+                    <td>${c.method || '—'}</td>
+                    <td class="mono">${c.payoutTo || '—'}</td>
+                    <td>${c.status}</td>
+                    <td>${c.status === 'pending' ? `<button type="button" class="btn btn-primary btn-sm admin-mark-paid" data-id="${c.id}">Mark paid</button>` : '✓'}</td>
+                </tr>`).join('')}</tbody></table>`;
+                cash.querySelectorAll('.admin-mark-paid').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        BD_STORE.markCashoutPaid(btn.dataset.id);
+                        await showAdminDash();
+                    });
+                });
+            }
+        }
+        openModal('admin-dash-modal');
     }
 
 
+    async function refreshAffiliatePayoutStatus(user) {
+        const statusEl = $('aff-payout-status');
+        const connectBtn = $('aff-connect-stripe');
+        const autoBtn = $('aff-auto-payout-btn');
+        if (!user) return;
+        try {
+            const res = await fetch('/.netlify/functions/affiliate-connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'status', email: user.email, code: user.code })
+            });
+            const data = await res.json();
+            if (!data?.ok) {
+                if (statusEl) statusEl.textContent = 'Connect Stripe once (after deploy). Then your 75% can auto-deposit on each sale.';
+                return;
+            }
+            if (data.payoutsEnabled) {
+                if (statusEl) statusEl.textContent = 'Stripe connected · auto-deposit ON. New commissions can pay out automatically. Available now: $' + Number(data.available || 0).toFixed(2);
+                if (connectBtn) connectBtn.textContent = 'Manage Stripe Payouts';
+                if (autoBtn) autoBtn.hidden = !(Number(data.available || 0) >= 5);
+            } else if (data.connected) {
+                if (statusEl) statusEl.textContent = 'Stripe started but onboarding incomplete — click Connect to finish.';
+                if (connectBtn) connectBtn.textContent = 'Finish Stripe Setup';
+                if (autoBtn) autoBtn.hidden = true;
+            } else {
+                if (statusEl) statusEl.textContent = 'Not connected yet. Connect Stripe so 75% auto-deposits to your bank. Manual cashout still works as backup.';
+                if (connectBtn) connectBtn.textContent = 'Connect Stripe for Auto-Payouts';
+                if (autoBtn) autoBtn.hidden = true;
+            }
+        } catch (_) {
+            if (statusEl) statusEl.textContent = 'Connect Stripe for auto-payouts (works after Netlify deploy with Stripe keys).';
+        }
+    }
 
     $('aff-copy-btn')?.addEventListener('click', () => {
-
         navigator.clipboard?.writeText($('aff-link')?.textContent || '');
-
         $('aff-copy-btn').textContent = 'Copied!';
-
         setTimeout(() => { $('aff-copy-btn').textContent = 'Copy Link'; }, 2000);
-
     });
 
 
+    $('aff-connect-stripe')?.addEventListener('click', async () => {
+        const session = BD_STORE.getSession();
+        const user = session?.email ? BD_STORE.getAffiliateUser(session.email) : null;
+        if (!user) return;
+        const btn = $('aff-connect-stripe');
+        const prev = btn?.textContent;
+        if (btn) btn.textContent = 'Opening Stripe…';
+        try {
+            const res = await fetch('/.netlify/functions/affiliate-connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'onboard', email: user.email, code: user.code })
+            });
+            const data = await res.json();
+            if (!data?.ok || !data.url) {
+                alert(data?.msg || 'Could not start Stripe Connect. Make sure the site is deployed on Netlify with STRIPE_SECRET_KEY and Connect enabled.');
+                if (btn) btn.textContent = prev || 'Connect Stripe for Auto-Payouts';
+                return;
+            }
+            window.location.href = data.url;
+        } catch (err) {
+            alert('Connect failed. Deploy to Netlify and enable Stripe Connect first.');
+            if (btn) btn.textContent = prev || 'Connect Stripe for Auto-Payouts';
+        }
+    });
+
+    $('aff-auto-payout-btn')?.addEventListener('click', async () => {
+        const session = BD_STORE.getSession();
+        const user = session?.email ? BD_STORE.getAffiliateUser(session.email) : null;
+        if (!user) return;
+        const ok = $('aff-cashout-ok');
+        const err = $('aff-cashout-error');
+        try {
+            const res = await fetch('/.netlify/functions/affiliate-connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'payout-available', email: user.email, code: user.code })
+            });
+            const data = await res.json();
+            if (!data?.ok) {
+                if (err) { err.textContent = data?.msg || 'Payout failed'; err.hidden = false; }
+                if (ok) ok.hidden = true;
+                return;
+            }
+            if (err) err.hidden = true;
+            if (ok) {
+                ok.textContent = 'Auto-deposit sent: $' + Number(data.amount).toFixed(2) + ' via Stripe.';
+                ok.hidden = false;
+            }
+            // sync local paidOut best-effort
+            user.paidOut = data.paidOut;
+            const users = BD_STORE.getUsers();
+            const idx = users.findIndex(u => u.email === user.email);
+            if (idx >= 0) { users[idx].paidOut = data.paidOut; BD_STORE.saveUsers(users); }
+            showAffiliateDash(user.email);
+        } catch (_) {
+            if (err) { err.textContent = 'Payout request failed.'; err.hidden = false; }
+        }
+    });
+
+    $('aff-cashout-btn')?.addEventListener('click', () => {
+        const session = BD_STORE.getSession();
+        if (!session?.email) return;
+        const amount = parseFloat($('aff-cashout-amount')?.value || '0');
+        const method = $('aff-cashout-method')?.value;
+        const payoutTo = $('aff-cashout-to')?.value?.trim();
+        const res = BD_STORE.requestCashout(session.email, amount, method, payoutTo);
+        const err = $('aff-cashout-error');
+        const ok = $('aff-cashout-ok');
+        if (!res.ok) {
+            if (err) { err.textContent = res.msg; err.hidden = false; }
+            if (ok) ok.hidden = true;
+            return;
+        }
+        if (err) err.hidden = true;
+        if (ok) {
+            ok.textContent = 'Cashout requested — admin will pay you via ' + method + '.';
+            ok.hidden = false;
+        }
+        showAffiliateDash(session.email);
+    });
 
     $('aff-logout')?.addEventListener('click', () => {
-
         BD_STORE.logout();
-
         closeModal('affiliate-dash-modal');
-
     });
 
+    $('admin-logout')?.addEventListener('click', () => {
+        BD_STORE.logout();
+        closeModal('admin-dash-modal');
+    });
 
+    $('admin-refresh')?.addEventListener('click', async () => {
+        await showAdminDash();
+    });
 
-    /* Capture affiliate/ref from URL on landing */
+    $('admin-push-local')?.addEventListener('click', async () => {
+        const btn = $('admin-push-local');
+        const prev = btn?.textContent;
+        if (btn) btn.textContent = 'Uploading…';
+        const n = await BD_STORE.pushAllLocalAffiliatesToLive?.();
+        if (btn) btn.textContent = prev || 'Upload Local Affiliates';
+        if ($('admin-sync-status')) {
+            $('admin-sync-status').textContent = 'Uploaded ' + (n || 0) + ' local affiliate(s) to live registry. Refreshing…';
+            $('admin-sync-status').style.color = '#6f6';
+        }
+        await showAdminDash();
+    });
 
+    /* Capture affiliate/ref from URL on landing (live click + 30-day attribution) */
     const params = new URLSearchParams(location.search);
-
-    if (params.get('aff')) {
-
-        sessionStorage.setItem('bd-aff-pending', params.get('aff'));
-
-        BD_STORE.trackAffiliateClick?.(params.get('aff'));
-
+    let affCode = params.get('aff');
+    const shortMatch = location.pathname.match(/^\/a\/([A-Za-z0-9-]+)\/?$/i);
+    if (!affCode && shortMatch) affCode = shortMatch[1];
+    if (affCode) {
+        BD_STORE.setAffiliateAttribution?.(affCode);
+        BD_STORE.trackAffiliateClick?.(affCode);
+        if (typeof bdSyncStripeLinks === 'function') bdSyncStripeLinks();
     }
-
     if (params.get('ref')) sessionStorage.setItem('bd-ref-pending', params.get('ref'));
 
-    // Pretty path support: /blankdelayaffiliatetweaks?aff=CODE
 
-    if (/blankdelayaffiliatetweaks/i.test(location.pathname) && params.get('aff')) {
+    // If an affiliate is already logged in on this device, push them into the LIVE registry
+    (async () => {
+        const session = BD_STORE.getSession?.();
+        if (session?.role === 'affiliate' && session.email) {
+            const user = BD_STORE.getAffiliateUser(session.email);
+            if (user) {
+                await BD_STORE.syncAffiliateRemote?.('upsert', {
+                    user: BD_STORE.publicAffiliate(user),
+                    password: user.password
+                });
+            }
+        }
+    })();
 
-        BD_STORE.trackAffiliateClick?.(params.get('aff'));
-
+    if (params.get('aff_connect') === 'done') {
+        const session = BD_STORE.getSession();
+        if (session?.email && session.role !== 'admin') {
+            setTimeout(() => showAffiliateDash(session.email), 300);
+        }
     }
 
 })();
-

@@ -12,11 +12,23 @@ Required at the TOP LEVEL of your zip/folder (same level as index.html):
 
   index.html
   netlify.toml
-  netlify/functions/stripe-webhook.js   <-- Stripe → license key → EmailJS
+  package.json                         <-- installs @netlify/blobs for live affiliate registry
+  netlify/functions/stripe-webhook.js   <-- Stripe → license key → EmailJS + affiliate 75%
+  netlify/functions/affiliate-api.js    <-- live clicks, earnings, admin list
+  netlify/functions/affiliate-connect.js
+  netlify/lib/affiliate-store.js
+  netlify/lib/affiliate-credit.js
   bd-email-config.js
   email-delivery.js
   downloads/BlankDelay-Setup.exe
   (plus styles.css, main.js, assets/, etc.)
+
+AFTER DEPLOY — verify live affiliate tracking
+  Open: https://blankdelay.com/.netlify/functions/affiliate-api
+  Must return "ok": true (NOT "Affiliate store unavailable").
+  Then Admin → Refresh Live, open an /a/CODE link, confirm clicks go up.
+  Stripe webhook must stay pointed at /.netlify/functions/stripe-webhook
+  Env vars: STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET
 
 DO NOT upload only:
   - index.html alone

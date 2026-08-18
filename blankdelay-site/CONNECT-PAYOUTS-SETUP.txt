@@ -1,0 +1,42 @@
+================================================================================
+  BLANKDELAY — AFFILIATE AUTO-PAYOUTS (Stripe Connect)
+================================================================================
+
+HOW MONEY MOVES
+  Customer pays on Stripe Payment Link
+    → 100% hits YOUR Stripe account first
+    → Webhook credits affiliate 75%
+    → If affiliate connected Stripe Express: system auto-transfers their 75%
+    → You keep ~25% in Stripe (minus Stripe fees)
+    → Stripe pays YOUR bank on your normal Stripe payout schedule
+
+WHAT AFFILIATES DO
+  1. Sign up / log in to Creator Affiliate dashboard
+  2. Click "Connect Stripe for Auto-Payouts"
+  3. Finish Stripe Express onboarding (bank details)
+  4. Done — future referred sales can auto-deposit their 75%
+
+WHAT YOU MUST ENABLE ONCE (Stripe Dashboard)
+  1. stripe.com/dashboard → Settings → Connect
+  2. Get started / enable Stripe Connect (Express accounts)
+  3. Complete platform profile if Stripe asks
+  4. Netlify already needs:
+       STRIPE_SECRET_KEY
+       STRIPE_WEBHOOK_SECRET
+  5. Redeploy this site build to Netlify
+
+TRACKING
+  Affiliate links store the code in the browser, then checkout URLs add:
+    ?client_reference_id=CODE
+  Your webhook reads that and credits the right affiliate.
+
+MANUAL CASHOUT
+  Still available as backup if an affiliate has not connected Stripe yet.
+  They request PayPal/Cash App/Venmo → you pay → Mark paid in admin.
+
+TEST
+  1. Create a test affiliate + Connect Stripe (use Stripe test mode first)
+  2. Open their short link, buy a product
+  3. Confirm webhook logs show affiliate credit + transfer
+  4. Admin dashboard should show the sale / payout
+================================================================================

@@ -18,13 +18,46 @@ function bdActivePromo() {
     try { return (localStorage.getItem("bd-discount-code") || "").trim(); } catch { return ""; }
 }
 
+function bdNormalizeAff(code) {
+    return String(code || "")
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9_-]/g, "")
+        .slice(0, 32);
+}
+
+function bdPendingAffiliateCode() {
+    try {
+        if (typeof BD_STORE !== "undefined" && BD_STORE.getAffiliateAttribution) {
+            return bdNormalizeAff(BD_STORE.getAffiliateAttribution() || "");
+        }
+        const fromSession = bdNormalizeAff(sessionStorage.getItem("bd-aff-pending") || "");
+        if (fromSession) return fromSession;
+        const raw = localStorage.getItem("bd-aff-attr");
+        if (raw) {
+            const data = JSON.parse(raw);
+            if (data?.code && (!data.expires || Date.now() <= data.expires)) {
+                return bdNormalizeAff(data.code);
+            }
+        }
+        const params = new URLSearchParams(location.search);
+        const shortMatch = location.pathname.match(/^\/a\/([A-Za-z0-9_-]+)\/?$/i);
+        return bdNormalizeAff(params.get("aff") || (shortMatch && shortMatch[1]) || "");
+    } catch {
+        return "";
+    }
+}
+
 function bdStripeUrl(slug) {
     const base = BD_STRIPE_LINKS[slug];
     if (!base) return null;
+    const url = new URL(base);
     const code = bdActivePromo();
-    if (!code) return base;
-    const sep = base.includes("?") ? "&" : "?";
-    return base + sep + "prefilled_promo_code=" + encodeURIComponent(code);
+    if (code) url.searchParams.set("prefilled_promo_code", code);
+    const aff = bdPendingAffiliateCode();
+    // Stripe Payment Links pass this through on checkout.session.completed → webhook credits 75%
+    if (aff) url.searchParams.set("client_reference_id", aff.slice(0, 200));
+    return url.toString();
 }
 
 function bdGoStripe(slug) {

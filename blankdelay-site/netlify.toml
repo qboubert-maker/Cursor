@@ -1,8 +1,17 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+  # Keep @netlify/blobs external so Node can load the ESM package via dynamic import()
+  # (bundling it as CJS crashes live: "require() of ES Module @netlify/runtime-utils")
+  external_node_modules = ["@netlify/blobs"]
 
 [build]
+  # Only install production deps (@netlify/blobs). Skip electron/desktop packages.
+  command = "npm install --omit=dev --no-audit --no-fund"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--omit=dev"
 
 [[redirects]]
   from = "https://www.blankdelay.com/*"
@@ -16,7 +25,7 @@
   status = 301
   force = true
 
-# Pretty affiliate landing URL
+# Pretty affiliate landing URL (legacy long path)
 [[redirects]]
   from = "/blankdelayaffiliatetweaks"
   to = "/index.html"
@@ -25,6 +34,18 @@
   from = "/blankdelayaffiliatetweaks/"
   to = "/index.html"
   status = 200
+
+# Short affiliate links: blankdelay.com/a/CODE
+[[redirects]]
+  from = "/a/:code"
+  to = "/index.html?aff=:code"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/a/:code/"
+  to = "/index.html?aff=:code"
+  status = 200
+  force = true
 
 # Large desktop builds live on GitHub Releases (Netlify file size limit)
 [[redirects]]

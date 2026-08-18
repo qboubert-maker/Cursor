@@ -42,7 +42,7 @@
         {
             id: 'nav-specials',
             keys: ['specials', 'deals', 'bundle', 'pass', 'refer', 'affiliate', 'gift', 'extras'],
-            answer: 'The <strong>Specials</strong> tab has:<br>• <strong>Blank Pass Full Kit</strong> ($39.99) — season bundle<br>• <strong>Blank Pass Monthly</strong> ($9.99/mo) — all core products<br>• <strong>Refer a Friend</strong> — $5 credit<br>• <strong>Creator Affiliate</strong> — 20% commission<br>• <strong>Gift Cards</strong> ($10/$25/$50)'
+            answer: 'The <strong>Specials</strong> tab has:<br>• <strong>Blank Pass Full Kit</strong> ($39.99) — season bundle<br>• <strong>Blank Pass Monthly</strong> ($9.99/mo) — all core products<br>• <strong>Refer a Friend</strong> — $5 credit<br>• <strong>Creator Affiliate</strong> — 75% commission (BlankDelay keeps 25%)<br>• <strong>Gift Cards</strong> ($10/$25/$50)'
         },
         {
             id: 'nav-faq',
@@ -136,8 +136,8 @@
         },
         {
             id: 'affiliate',
-            keys: ['affiliate', 'creator program', 'commission', '20%', 'partner', 'earn money', 'tiktok', 'linktree'],
-            answer: '<strong>Creator Affiliate Program</strong> (Specials): 20% commission per sale. If TikTok blocks in-app links, tell viewers to tap <strong>Open in browser</strong> or paste <strong>blankdelay.com</strong> directly.'
+            keys: ['affiliate', 'creator program', 'commission', '75%', '25%', '20%', 'partner', 'earn money', 'tiktok', 'linktree'],
+            answer: '<strong>Creator Affiliate Program</strong> (Specials): you earn <strong>75%</strong> of each sale you refer (BlankDelay keeps <strong>25%</strong>). Short link: <strong>blankdelay.com/a/CODE</strong>. Connect Stripe in your dashboard for <strong>auto-deposit</strong>, or use manual PayPal/Cash App/Venmo cashout as backup.'
         },
         {
             id: 'cart',
@@ -192,7 +192,7 @@
         {
             id: 'discord',
             keys: ['discord', 'join discord', 'community', 'live support', 'human support', 'contact', 'email'],
-            answer: 'For instant help use this <strong>AI Support chat</strong> or the floating Support button. FAQ section covers products, setup, and troubleshooting. Purchase support: check thank-you page and email delivery first.'
+            answer: 'Join the BlankDelay Discord for setup help: <a href="https://discord.gg/hH3cv8RrV" target="_blank" rel="noopener">discord.gg/hH3cv8RrV</a>. You can also use this <strong>AI Support chat</strong> or the floating Support button. Purchase support: check thank-you page and email delivery first.'
         },
         {
             id: 'compare',

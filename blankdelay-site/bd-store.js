@@ -1,8 +1,15 @@
 /* BlankDelay client-side store (demo — connect Stripe for real payments) */
 const BD_STORE = {
     DISCOUNTS: { BLANK15: 0.15, BLANK10: 0.10, CREATOR20: 0.20 },
-    AFFILIATE_RATE: 0.20,
+    /* Affiliates earn 75% of each referred sale; BlankDelay keeps 25%. */
+    AFFILIATE_RATE: 0.75,
+    OWNER_RATE: 0.25,
+    AFF_ATTR_DAYS: 30,
     REFER_BONUS: 5,
+    DISCORD_INVITE: 'https://discord.gg/hH3cv8RrV',
+    /* Admin login (email + SHA-256 of password). Do not put plaintext passwords in source. */
+    ADMIN_EMAIL: 'qboubert@gmail.com',
+    ADMIN_PASS_HASH: '392f20ddf686371e7d82fe552b0f8de510f7349c05e6904a74544cb0af3faf92',
 
     CATALOG: {
         premium: { name: 'Blank Premium Utility', tag: 'V4 · ALL IN ONE TWEAKING PACK', price: 29.99, was: 124.95, perks: ['FPS boost + input optimization', 'Network & OS tweaks', 'All future updates included', 'Instant email delivery'] },
@@ -34,55 +41,537 @@ const BD_STORE = {
     getUsers() { return this.get('bd-users', []); },
     saveUsers(users) { this.set('bd-users', users); },
 
-    signup(email, password) {
+    async hashPassword(password) {
+        const data = new TextEncoder().encode(String(password || ''));
+        const hash = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, '0')).join('');
+    },
+
+    isAdminEmail(email) {
+        return String(email || '').trim().toLowerCase() === this.ADMIN_EMAIL;
+    },
+
+    makeAffiliateCode() {
+        const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let code = '';
+        for (let i = 0; i < 6; i++) code += alphabet[Math.floor(Math.random() * alphabet.length)];
         const users = this.getUsers();
-        if (users.find(u => u.email === email)) return { ok: false, msg: 'Email already registered.' };
-        const code = 'AFF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-        const user = { email, password, code, earnings: 0, sales: 0, created: Date.now() };
+        if (users.some((u) => u.code === code)) return this.makeAffiliateCode();
+        return code;
+    },
+
+    normalizeAffCode(code) {
+        return String(code || '')
+            .trim()
+            .toUpperCase()
+            .replace(/[^A-Z0-9_-]/g, '')
+            .slice(0, 32);
+    },
+
+    affiliateShortLink(code) {
+        const c = encodeURIComponent(this.normalizeAffCode(code) || String(code || '').trim());
+        return `https://blankdelay.com/a/${c}`;
+    },
+
+    signup(email, password) {
+        const clean = String(email || '').trim().toLowerCase();
+        if (!clean || !password) return { ok: false, msg: 'Email and password required.' };
+        if (this.isAdminEmail(clean)) return { ok: false, msg: 'That email is reserved. Use Log In for admin.' };
+        const users = this.getUsers();
+        if (users.find((u) => u.email.toLowerCase() === clean)) return { ok: false, msg: 'Email already registered.' };
+        const code = this.makeAffiliateCode();
+        const user = {
+            email: clean,
+            password,
+            code,
+            earnings: 0,
+            sales: 0,
+            paidOut: 0,
+            created: Date.now()
+        };
         users.push(user);
         this.saveUsers(users);
-        this.setSession({ email, code });
+        this.setSession({ email: clean, code, role: 'affiliate' });
         return { ok: true, user };
     },
 
-    login(email, password) {
-        const user = this.getUsers().find(u => u.email === email && u.password === password);
-        if (!user) return { ok: false, msg: 'Invalid email or password.' };
-        this.setSession({ email: user.email, code: user.code });
-        return { ok: true, user };
+    async signupAndSync(email, password) {
+        const clean = String(email || '').trim().toLowerCase();
+        if (!clean || !password) return { ok: false, msg: 'Email and password required.' };
+        if (this.isAdminEmail(clean)) return { ok: false, msg: 'That email is reserved. Use Log In for admin.' };
+
+        // Cloud-first: every affiliate account MUST exist on the live registry (not just this browser)
+        try {
+            const res = await fetch('/.netlify/functions/affiliate-api', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'register',
+                    email: clean,
+                    password,
+                    code: this.makeAffiliateCode()
+                })
+            });
+            const data = await res.json();
+            if (!data?.ok || !data.user) {
+                return { ok: false, msg: data?.msg || data?.detail || 'Could not create live affiliate account. Try again.' };
+            }
+
+            const users = this.getUsers().filter((u) => u.email.toLowerCase() !== clean);
+            const user = {
+                email: clean,
+                password,
+                code: data.user.code,
+                earnings: data.user.earnings || 0,
+                sales: data.user.sales || 0,
+                paidOut: data.user.paidOut || 0,
+                created: data.user.created || Date.now(),
+                stripeAccountId: data.user.stripeAccountId || '',
+                payoutsEnabled: !!data.user.payoutsEnabled
+            };
+            users.push(user);
+            this.saveUsers(users);
+            this.setSession({ email: clean, code: user.code, role: 'affiliate' });
+            return { ok: true, user, live: true, userCount: data.userCount };
+        } catch (_) {
+            return {
+                ok: false,
+                msg: 'Live affiliate registry is offline. Account was NOT created in this browser only — fix deploy/registry, then sign up again.'
+            };
+        }
+    },
+
+    async login(email, password) {
+        const clean = String(email || '').trim().toLowerCase();
+        if (this.isAdminEmail(clean)) {
+            const hash = await this.hashPassword(password);
+            if (hash !== this.ADMIN_PASS_HASH) return { ok: false, msg: 'Invalid email or password.' };
+            this.setSession({ email: this.ADMIN_EMAIL, role: 'admin', code: 'ADMIN' });
+            return { ok: true, user: { email: this.ADMIN_EMAIL, role: 'admin' }, admin: true };
+        }
+
+        // Cloud login is required so admin can see every affiliate from any device
+        try {
+            const res = await fetch('/.netlify/functions/affiliate-api', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'login', email: clean, password })
+            });
+            const data = await res.json();
+            if (data?.ok && data.user) {
+                const users = this.getUsers();
+                const idx = users.findIndex((u) => u.email.toLowerCase() === clean);
+                const row = {
+                    email: clean,
+                    password,
+                    code: data.user.code,
+                    earnings: data.user.earnings || 0,
+                    sales: data.user.sales || 0,
+                    paidOut: data.user.paidOut || 0,
+                    created: data.user.created || Date.now(),
+                    stripeAccountId: data.user.stripeAccountId || '',
+                    payoutsEnabled: !!data.user.payoutsEnabled
+                };
+                if (idx >= 0) users[idx] = { ...users[idx], ...row };
+                else users.push(row);
+                this.saveUsers(users);
+                this.setSession({ email: clean, code: row.code, role: 'affiliate' });
+                return { ok: true, user: row, admin: false, live: true };
+            }
+
+            // If cloud says invalid, try migrating an OLD browser-only account up to cloud once
+            const local = this.getUsers().find((u) => u.email.toLowerCase() === clean && u.password === password);
+            if (local) {
+                const up = await this.syncAffiliateRemote('upsert', {
+                    user: this.publicAffiliate(local),
+                    password
+                });
+                if (up?.ok) {
+                    // retry cloud login after migrate
+                    const res2 = await fetch('/.netlify/functions/affiliate-api', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'login', email: clean, password })
+                    });
+                    const data2 = await res2.json();
+                    if (data2?.ok && data2.user) {
+                        this.setSession({ email: clean, code: data2.user.code, role: 'affiliate' });
+                        return { ok: true, user: local, admin: false, live: true, migrated: true };
+                    }
+                    // upsert without passwordHash may not allow login — register-style upsert with password should set hash
+                    this.setSession({ email: local.email, code: local.code, role: 'affiliate' });
+                    return { ok: true, user: local, admin: false, live: true, migrated: true };
+                }
+            }
+
+            return { ok: false, msg: (data && data.msg) || 'Invalid email or password.' };
+        } catch (_) {
+            return {
+                ok: false,
+                msg: 'Live affiliate registry is offline. Cannot log in until the cloud registry is working (not browser-only).'
+            };
+        }
+    },
+
+    isAdminSession() {
+        const s = this.getSession();
+        return !!(s && s.role === 'admin' && this.isAdminEmail(s.email));
+    },
+
+    publicAffiliate(u) {
+        if (!u) return null;
+        return {
+            email: u.email,
+            code: u.code,
+            earnings: u.earnings || 0,
+            sales: u.sales || 0,
+            paidOut: u.paidOut || 0,
+            created: u.created || 0,
+            link: this.affiliateShortLink(u.code),
+            stripeAccountId: u.stripeAccountId || '',
+            payoutsEnabled: !!u.payoutsEnabled
+        };
     },
 
     getAffiliateUser(email) {
-        return this.getUsers().find(u => u.email === email);
+        const clean = String(email || '').trim().toLowerCase();
+        return this.getUsers().find((u) => u.email.toLowerCase() === clean);
+    },
+
+    listAffiliates() {
+        return this.getUsers().map((u) => this.publicAffiliate(u));
+    },
+
+    setAffiliateAttribution(code) {
+        const clean = this.normalizeAffCode(code);
+        if (!clean || clean === 'ADMIN') return;
+        try {
+            sessionStorage.setItem('bd-aff-pending', clean);
+            localStorage.setItem('bd-aff-attr', JSON.stringify({
+                code: clean,
+                at: Date.now(),
+                expires: Date.now() + this.AFF_ATTR_DAYS * 24 * 60 * 60 * 1000
+            }));
+        } catch (_) {}
+    },
+
+    getAffiliateAttribution() {
+        try {
+            const fromSession = this.normalizeAffCode(sessionStorage.getItem('bd-aff-pending') || '');
+            if (fromSession) return fromSession;
+            const raw = localStorage.getItem('bd-aff-attr');
+            if (!raw) return '';
+            const data = JSON.parse(raw);
+            if (!data?.code) return '';
+            if (data.expires && Date.now() > data.expires) {
+                localStorage.removeItem('bd-aff-attr');
+                return '';
+            }
+            const code = this.normalizeAffCode(data.code);
+            if (!code) return '';
+            sessionStorage.setItem('bd-aff-pending', code);
+            return code;
+        } catch (_) {
+            return '';
+        }
     },
 
     creditAffiliate(code, amount, productName) {
+        const clean = this.normalizeAffCode(code);
         const users = this.getUsers();
-        const u = users.find(x => x.code === code);
+        const u = users.find((x) => this.normalizeAffCode(x.code) === clean);
         if (!u) return;
         const commission = +(amount * this.AFFILIATE_RATE).toFixed(2);
         u.earnings = +(u.earnings + commission).toFixed(2);
         u.sales += 1;
         this.saveUsers(users);
         const sales = this.get('bd-aff-sales', []);
-        sales.push({ code, amount, commission, product: productName || 'BlankDelay Product', date: Date.now() });
+        const row = {
+            code: clean,
+            amount,
+            commission,
+            product: productName || 'BlankDelay Product',
+            date: Date.now()
+        };
+        sales.push(row);
         this.set('bd-aff-sales', sales);
+        this.syncAffiliateRemote('sale', { sale: row, user: this.publicAffiliate(u) });
     },
 
     trackAffiliateClick(code) {
-        if (!code) return;
+        const clean = this.normalizeAffCode(code);
+        if (!clean || clean === 'ADMIN') return Promise.resolve(null);
+        this.setAffiliateAttribution(clean);
         const clicks = this.get('bd-aff-clicks', {});
-        clicks[code] = (clicks[code] || 0) + 1;
+        // Merge any case variants into one key
+        let total = 0;
+        Object.keys(clicks).forEach((k) => {
+            if (this.normalizeAffCode(k) === clean) {
+                total += Number(clicks[k]) || 0;
+                if (k !== clean) delete clicks[k];
+            }
+        });
+        clicks[clean] = total + 1;
         this.set('bd-aff-clicks', clicks);
+        // Prefer sendBeacon so a fast bounce still records the live click
+        try {
+            const payload = JSON.stringify({ action: 'click', code: clean });
+            if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+                const blob = new Blob([payload], { type: 'application/json' });
+                const ok = navigator.sendBeacon('/.netlify/functions/affiliate-api', blob);
+                if (ok) return Promise.resolve({ ok: true, beacon: true, code: clean, clicks: clicks[clean] });
+            }
+        } catch (_) {}
+        return this.syncAffiliateRemote('click', { code: clean }, { keepalive: true });
     },
 
     getAffiliateClicks(code) {
+        const clean = this.normalizeAffCode(code);
         const clicks = this.get('bd-aff-clicks', {});
-        return clicks[code] || 0;
+        let total = 0;
+        Object.keys(clicks).forEach((k) => {
+            if (this.normalizeAffCode(k) === clean) total += Number(clicks[k]) || 0;
+        });
+        return total;
     },
 
     getAffiliateSales(code) {
-        return this.get('bd-aff-sales', []).filter(s => s.code === code);
+        const clean = this.normalizeAffCode(code);
+        return this.get('bd-aff-sales', []).filter((s) => this.normalizeAffCode(s.code) === clean);
+    },
+
+    getCashouts() {
+        return this.get('bd-aff-cashouts', []);
+    },
+
+    saveCashouts(list) {
+        this.set('bd-aff-cashouts', list);
+    },
+
+    requestCashout(email, amount, method, payoutTo) {
+        const user = this.getAffiliateUser(email);
+        if (!user) return { ok: false, msg: 'Affiliate not found.' };
+        const available = +Math.max(0, (user.earnings || 0) - (user.paidOut || 0)).toFixed(2);
+        const amt = +Number(amount).toFixed(2);
+        if (!(amt >= 5)) return { ok: false, msg: 'Minimum cashout is $5.00.' };
+        if (amt > available) return { ok: false, msg: 'Amount exceeds available balance.' };
+        if (!method || !payoutTo) return { ok: false, msg: 'Choose a cashout method and payout details.' };
+        const pending = this.getCashouts().some((c) => c.email === user.email && c.status === 'pending');
+        if (pending) return { ok: false, msg: 'You already have a pending cashout request.' };
+        const row = {
+            id: 'CO-' + Date.now().toString(36).toUpperCase(),
+            email: user.email,
+            code: user.code,
+            amount: amt,
+            method: String(method),
+            payoutTo: String(payoutTo).trim(),
+            status: 'pending',
+            created: Date.now()
+        };
+        const list = this.getCashouts();
+        list.push(row);
+        this.saveCashouts(list);
+        this.syncAffiliateRemote('cashout', { cashout: row });
+        return { ok: true, cashout: row };
+    },
+
+    markCashoutPaid(cashoutId) {
+        const list = this.getCashouts();
+        const row = list.find((c) => c.id === cashoutId);
+        if (!row || row.status === 'paid') return { ok: false, msg: 'Cashout not found.' };
+        row.status = 'paid';
+        row.paidAt = Date.now();
+        this.saveCashouts(list);
+        const users = this.getUsers();
+        const u = users.find((x) => x.email === row.email);
+        if (u) {
+            u.paidOut = +((u.paidOut || 0) + row.amount).toFixed(2);
+            this.saveUsers(users);
+            this.syncAffiliateRemote('upsert', { user: this.publicAffiliate(u) });
+        }
+        this.syncAffiliateRemote('cashout-paid', { cashout: row });
+        return { ok: true, cashout: row };
+    },
+
+    availableBalance(email) {
+        const u = this.getAffiliateUser(email);
+        if (!u) return 0;
+        return +Math.max(0, (u.earnings || 0) - (u.paidOut || 0)).toFixed(2);
+    },
+
+    async syncAffiliateRemote(action, payload, opts) {
+        try {
+            const res = await fetch('/.netlify/functions/affiliate-api', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, ...payload }),
+                keepalive: !!(opts && opts.keepalive)
+            });
+            const data = await res.json().catch(() => null);
+            return data;
+        } catch (_) {
+            return { ok: false, msg: 'offline' };
+        }
+    },
+
+    async pushAllLocalAffiliatesToLive() {
+        const users = this.getUsers();
+        let pushed = 0;
+        for (const u of users) {
+            if (!u?.email || !u?.code) continue;
+            const data = await this.syncAffiliateRemote('upsert', {
+                user: this.publicAffiliate(u),
+                password: u.password || undefined
+            });
+            if (data?.ok) pushed += 1;
+        }
+        return pushed;
+    },
+
+    async pullRemoteAffiliates() {
+        try {
+            const res = await fetch('/.netlify/functions/affiliate-api?action=list&ts=' + Date.now(), {
+                cache: 'no-store'
+            });
+            if (!res.ok) return { ok: false, msg: 'HTTP ' + res.status };
+            const data = await res.json();
+            if (!data || !data.ok) return { ok: false, msg: (data && (data.detail || data.msg)) || 'Bad registry response', detail: data && data.detail };
+
+            // Always hydrate local cache from LIVE registry so admin sees everyone
+            const byEmail = new Map(this.getUsers().map((u) => [u.email.toLowerCase(), u]));
+            (data.users || []).forEach((remote) => {
+                const key = String(remote.email || '').toLowerCase();
+                if (!key || !remote.code) return;
+                const existing = byEmail.get(key);
+                if (existing) {
+                    existing.code = remote.code || existing.code;
+                    existing.earnings = Math.max(existing.earnings || 0, remote.earnings || 0);
+                    existing.sales = Math.max(existing.sales || 0, remote.sales || 0);
+                    existing.paidOut = Math.max(existing.paidOut || 0, remote.paidOut || 0);
+                    existing.created = existing.created || remote.created || Date.now();
+                    existing.lastSeen = remote.lastSeen || existing.lastSeen || 0;
+                    if (remote.stripeAccountId) existing.stripeAccountId = remote.stripeAccountId;
+                    if (remote.payoutsEnabled) existing.payoutsEnabled = true;
+                } else {
+                    byEmail.set(key, {
+                        email: key,
+                        password: '',
+                        code: remote.code,
+                        earnings: remote.earnings || 0,
+                        sales: remote.sales || 0,
+                        paidOut: remote.paidOut || 0,
+                        created: remote.created || Date.now(),
+                        lastSeen: remote.lastSeen || 0,
+                        stripeAccountId: remote.stripeAccountId || '',
+                        payoutsEnabled: !!remote.payoutsEnabled
+                    });
+                }
+            });
+            this.saveUsers([...byEmail.values()]);
+
+            if (data.clicks && typeof data.clicks === 'object') {
+                // Live clicks are source of truth; normalize codes to uppercase
+                const merged = {};
+                const addMap = (map) => {
+                    Object.entries(map || {}).forEach(([k, v]) => {
+                        const key = this.normalizeAffCode(k);
+                        if (!key) return;
+                        merged[key] = Math.max(merged[key] || 0, Number(v) || 0);
+                    });
+                };
+                addMap(this.get('bd-aff-clicks', {}));
+                addMap(data.clicks);
+                this.set('bd-aff-clicks', merged);
+            }
+            if (Array.isArray(data.cashouts)) {
+                const local = this.getCashouts();
+                const byId = new Map(local.map((c) => [c.id, c]));
+                data.cashouts.forEach((c) => {
+                    if (c && c.id) byId.set(c.id, { ...(byId.get(c.id) || {}), ...c });
+                });
+                this.saveCashouts([...byId.values()]);
+            }
+            if (Array.isArray(data.sales)) {
+                const local = this.get('bd-aff-sales', []);
+                const keys = new Set(local.map((s) => `${s.code}|${s.date}|${s.commission}|${s.sessionId || ''}`));
+                data.sales.forEach((s) => {
+                    const k = `${s.code}|${s.date}|${s.commission}|${s.sessionId || ''}`;
+                    if (!keys.has(k)) local.push(s);
+                });
+                this.set('bd-aff-sales', local);
+            }
+
+            this.set('bd-aff-live-meta', {
+                at: Date.now(),
+                userCount: data.userCount || (data.users || []).length,
+                live: true
+            });
+            return data;
+        } catch (err) {
+            return { ok: false, msg: err.message || 'offline' };
+        }
+    },
+
+    getAdminAnalytics(remoteData) {
+        // Prefer live remote users list when provided
+        const clicksMap = {};
+        const addClicks = (map) => {
+            Object.entries(map || {}).forEach(([k, v]) => {
+                const key = this.normalizeAffCode(k);
+                if (!key) return;
+                clicksMap[key] = Math.max(clicksMap[key] || 0, Number(v) || 0);
+            });
+        };
+        addClicks(this.get('bd-aff-clicks', {}));
+        addClicks(remoteData && remoteData.clicks);
+        const remoteUsers = Array.isArray(remoteData?.users) ? remoteData.users : null;
+        const affiliates = (remoteUsers || this.listAffiliates()).map((a) => {
+            const row = remoteUsers ? { ...a, link: a.link || this.affiliateShortLink(a.code) } : a;
+            const codeKey = this.normalizeAffCode(row.code);
+            return {
+                ...row,
+                code: codeKey || row.code,
+                clicks: clicksMap[codeKey] || 0,
+                available: +Math.max(0, (row.earnings || 0) - (row.paidOut || 0)).toFixed(2)
+            };
+        });
+        const sales = Array.isArray(remoteData?.sales) && remoteData.sales.length
+            ? remoteData.sales
+            : this.get('bd-aff-sales', []);
+        const cashouts = Array.isArray(remoteData?.cashouts) && remoteData.cashouts.length
+            ? remoteData.cashouts
+            : this.getCashouts();
+
+        let totalClicks = 0;
+        let totalCommission = 0;
+        let totalSalesAmount = 0;
+        affiliates.forEach((a) => {
+            totalClicks += a.clicks || 0;
+            totalCommission += a.earnings || 0;
+        });
+        sales.forEach((s) => {
+            totalSalesAmount += s.amount || 0;
+        });
+        const pendingCashouts = cashouts.filter((c) => c.status === 'pending');
+        const paidCashouts = cashouts.filter((c) => c.status === 'paid');
+        const pendingAmount = pendingCashouts.reduce((n, c) => n + (c.amount || 0), 0);
+        const paidAmount = paidCashouts.reduce((n, c) => n + (c.amount || 0), 0);
+        return {
+            live: !!(remoteData && remoteData.ok),
+            affiliateCount: affiliates.length,
+            totalClicks,
+            totalSales: sales.length,
+            totalSalesAmount: +totalSalesAmount.toFixed(2),
+            affiliateShare: +totalCommission.toFixed(2),
+            ownerShare: +(totalSalesAmount * this.OWNER_RATE).toFixed(2),
+            commissionRate: this.AFFILIATE_RATE,
+            ownerRate: this.OWNER_RATE,
+            pendingCashouts,
+            paidCashouts,
+            pendingAmount: +pendingAmount.toFixed(2),
+            paidAmount: +paidAmount.toFixed(2),
+            affiliates: affiliates.sort((a, b) => String(a.email).localeCompare(String(b.email)))
+        };
     },
 
     getReferrals() { return this.get('bd-referrals', []); },

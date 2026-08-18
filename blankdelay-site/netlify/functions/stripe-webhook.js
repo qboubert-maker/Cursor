@@ -175,6 +175,21 @@ async function sendEmailJS(order) {
   return true;
 }
 
+const { creditAffiliateSale } = require("../lib/affiliate-credit");
+
+async function creditAffiliateFromSession(session, price, productName, stripeSecret, lambdaEvent) {
+  const affCode = session.client_reference_id || session.metadata?.aff || "";
+  return creditAffiliateSale({
+    event: lambdaEvent,
+    affCode,
+    price,
+    productName,
+    sessionId: session.id || "",
+    stripeSecret,
+    tryTransfer: true,
+  });
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method not allowed" };
@@ -225,6 +240,9 @@ exports.handler = async (event) => {
         "";
       if (!slug && productName) slug = slugFromProductName(productName);
       if (full.amount_total) price = full.amount_total / 100;
+      if (full.client_reference_id && !session.client_reference_id) {
+        session.client_reference_id = full.client_reference_id;
+      }
     } catch (err) {
       console.error("Session expand error:", err.message);
     }
@@ -244,15 +262,22 @@ exports.handler = async (event) => {
     license: bdLicenseFromSessionId(session.id),
   };
 
-  const thankYouLink =
-    "https://blankdelay.com/thank-you.html?session_id=" + encodeURIComponent(order.id);
-  const deliveryLink = thankYouLink;
+  let affiliateResult = null;
+  try {
+    affiliateResult = await creditAffiliateFromSession(session, price, productName, stripeSecret, event);
+  } catch (err) {
+    console.error("Affiliate credit error:", err.message);
+    affiliateResult = { ok: false, reason: err.message };
+  }
 
   try {
     await sendEmailJS(order);
-    return { statusCode: 200, body: JSON.stringify({ ok: true, order: order.id }) };
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ ok: true, order: order.id, affiliate: affiliateResult }),
+    };
   } catch (err) {
     console.error("Fulfillment error:", err.message);
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    return { statusCode: 500, body: JSON.stringify({ error: err.message, affiliate: affiliateResult }) };
   }
 };
