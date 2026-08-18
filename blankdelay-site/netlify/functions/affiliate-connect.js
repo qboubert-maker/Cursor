@@ -6,7 +6,7 @@ const {
   findAffiliateByCode,
   findAffiliateByEmail,
   upsertAffiliateUser,
-} = require("./affiliate-store");
+} = require("../lib/affiliate-store");
 
 const headers = {
   "Access-Control-Allow-Origin": "*",

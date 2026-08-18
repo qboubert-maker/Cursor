@@ -1,8 +1,15 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+  external_node_modules = ["@netlify/blobs"]
 
 [build]
+  # Only install production deps (@netlify/blobs). Skip electron/desktop packages.
+  command = "npm install --omit=dev --no-audit --no-fund"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--omit=dev"
 
 [[redirects]]
   from = "https://www.blankdelay.com/*"

@@ -4,7 +4,7 @@ const {
   loadAffiliateState,
   saveAffiliateState,
   upsertAffiliateUser,
-} = require("./affiliate-store");
+} = require("../lib/affiliate-store");
 
 const headers = {
   "Access-Control-Allow-Origin": "*",

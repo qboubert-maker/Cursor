@@ -204,7 +204,7 @@ async function creditAffiliateFromSession(session, price, productName, stripeSec
 
   let storeHelpers;
   try {
-    storeHelpers = require("./affiliate-store");
+    storeHelpers = require("../lib/affiliate-store");
   } catch (err) {
     console.error("affiliate-store missing:", err.message);
     return { ok: false, reason: "store_missing" };

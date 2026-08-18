@@ -6,6 +6,9 @@
   "author": "BlankDelay",
   "license": "UNLICENSED",
   "private": true,
+  "dependencies": {
+    "@netlify/blobs": "^9.1.6"
+  },
   "scripts": {
     "electron:hub": "electron . --product=hub",
     "electron:premium": "electron . --product=premium",
