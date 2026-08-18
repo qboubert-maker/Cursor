@@ -8,6 +8,9 @@ const {
   publicUser,
   findAffiliateByEmail,
   findAffiliateByCode,
+  normalizeCode,
+  bumpClick,
+  withStateRetry,
 } = require("../lib/affiliate-store");
 const { applyPendingForCode, creditFromCheckoutSession } = require("../lib/affiliate-credit");
 
@@ -32,6 +35,10 @@ function makeCode(state) {
   return "A" + Date.now().toString(36).toUpperCase().slice(-5);
 }
 
+function json(statusCode, body) {
+  return { statusCode, headers, body: JSON.stringify(body) };
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 204, headers, body: "" };
@@ -39,60 +46,52 @@ exports.handler = async (event) => {
 
   let store;
   try {
-    store = getAffiliateStore(event);
+    store = await getAffiliateStore(event);
   } catch (err) {
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
-        ok: false,
-        msg: "Affiliate store unavailable",
-        detail: String(err && err.message),
-      }),
-    };
+    return json(200, {
+      ok: false,
+      msg: "Affiliate store unavailable",
+      detail: String(err && err.message),
+    });
   }
 
   let state;
   try {
     state = await loadAffiliateState(store);
   } catch (err) {
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ ok: false, msg: "Could not read affiliate registry", detail: String(err && err.message) }),
-    };
+    return json(200, {
+      ok: false,
+      msg: "Could not read affiliate registry",
+      detail: String(err && err.message),
+    });
   }
 
   const qs = event.queryStringParameters || {};
 
   if (event.httpMethod === "GET") {
     const users = (state.users || []).map(publicUser);
-    return {
-      statusCode: 200,
-      headers,
-        body: JSON.stringify({
-          ok: true,
-          live: true,
-          userCount: users.length,
-          users,
-          clicks: state.clicks || {},
-          sales: state.sales || [],
-          cashouts: state.cashouts || [],
-          creditedSessions: state.creditedSessions || [],
-          pendingByCode: state.pendingByCode || [],
-        }),
-    };
+    return json(200, {
+      ok: true,
+      live: true,
+      userCount: users.length,
+      users,
+      clicks: state.clicks || {},
+      sales: state.sales || [],
+      cashouts: state.cashouts || [],
+      creditedSessions: state.creditedSessions || [],
+      pendingByCode: state.pendingByCode || [],
+    });
   }
 
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, headers, body: JSON.stringify({ ok: false, msg: "Method not allowed" }) };
+    return json(405, { ok: false, msg: "Method not allowed" });
   }
 
   let body = {};
   try {
     body = JSON.parse(event.body || "{}");
   } catch (_) {
-    return { statusCode: 400, headers, body: JSON.stringify({ ok: false, msg: "Invalid JSON" }) };
+    return json(400, { ok: false, msg: "Invalid JSON" });
   }
 
   const action = body.action || qs.action || "";
@@ -102,19 +101,19 @@ exports.handler = async (event) => {
       const email = String(body.email || "").trim().toLowerCase();
       const password = String(body.password || "");
       if (!email || !email.includes("@")) {
-        return { statusCode: 200, headers, body: JSON.stringify({ ok: false, msg: "Valid email required." }) };
+        return json(200, { ok: false, msg: "Valid email required." });
       }
       if (password.length < 6) {
-        return { statusCode: 200, headers, body: JSON.stringify({ ok: false, msg: "Password must be at least 6 characters." }) };
+        return json(200, { ok: false, msg: "Password must be at least 6 characters." });
       }
       if (email === "qboubert@gmail.com") {
-        return { statusCode: 200, headers, body: JSON.stringify({ ok: false, msg: "That email is reserved." }) };
+        return json(200, { ok: false, msg: "That email is reserved." });
       }
       const existing = findAffiliateByEmail(state, email);
       if (existing) {
-        return { statusCode: 200, headers, body: JSON.stringify({ ok: false, msg: "Email already registered." }) };
+        return json(200, { ok: false, msg: "Email already registered." });
       }
-      const code = body.code || makeCode(state);
+      const code = normalizeCode(body.code) || makeCode(state);
       let user = upsertAffiliateUser(state, {
         email,
         code,
@@ -128,11 +127,7 @@ exports.handler = async (event) => {
       user = applyPendingForCode(state, user);
       upsertAffiliateUser(state, user);
       await saveAffiliateState(store, state);
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ ok: true, user: publicUser(user), userCount: state.users.length }),
-      };
+      return json(200, { ok: true, user: publicUser(user), userCount: state.users.length });
     }
 
     if (action === "login") {
@@ -140,79 +135,65 @@ exports.handler = async (event) => {
       const password = String(body.password || "");
       let user = findAffiliateByEmail(state, email);
       if (!user || !user.passwordHash || user.passwordHash !== hashPassword(password)) {
-        return { statusCode: 200, headers, body: JSON.stringify({ ok: false, msg: "Invalid email or password." }) };
+        return json(200, { ok: false, msg: "Invalid email or password." });
       }
       user.lastSeen = Date.now();
       user = applyPendingForCode(state, user);
       upsertAffiliateUser(state, user);
       await saveAffiliateState(store, state);
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ ok: true, user: publicUser(user) }),
-      };
+      return json(200, { ok: true, user: publicUser(user) });
     }
 
     if (action === "upsert" && body.user) {
-      // Never wipe passwordHash / higher stats via thin client upserts
       const incoming = { ...body.user };
       if (body.password) incoming.passwordHash = hashPassword(body.password);
       incoming.lastSeen = Date.now();
+      if (incoming.code) incoming.code = normalizeCode(incoming.code) || incoming.code;
       let user = upsertAffiliateUser(state, incoming);
       user = applyPendingForCode(state, user);
       upsertAffiliateUser(state, user);
       await saveAffiliateState(store, state);
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ ok: true, user: publicUser(user), userCount: state.users.length }),
-      };
+      return json(200, { ok: true, user: publicUser(user), userCount: state.users.length });
     }
 
     if (action === "credit-from-session") {
       const sessionId = String(body.session_id || body.sessionId || "").trim();
       const stripeSecret = process.env.STRIPE_SECRET_KEY;
       if (!sessionId) {
-        return { statusCode: 200, headers, body: JSON.stringify({ ok: false, msg: "session_id required" }) };
+        return json(200, { ok: false, msg: "session_id required" });
       }
       if (!stripeSecret) {
-        return { statusCode: 200, headers, body: JSON.stringify({ ok: false, msg: "STRIPE_SECRET_KEY missing" }) };
+        return json(200, { ok: false, msg: "STRIPE_SECRET_KEY missing" });
       }
       const result = await creditFromCheckoutSession(event, sessionId, stripeSecret);
-      return { statusCode: 200, headers, body: JSON.stringify(result) };
+      return json(200, result);
     }
 
     if (action === "health") {
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          ok: true,
-          live: true,
-          userCount: state.users.length,
-          clickCodes: Object.keys(state.clicks || {}).length,
-          sales: (state.sales || []).length,
-          pending: (state.pendingByCode || []).length,
-        }),
-      };
+      return json(200, {
+        ok: true,
+        live: true,
+        userCount: state.users.length,
+        clickCodes: Object.keys(state.clicks || {}).length,
+        sales: (state.sales || []).length,
+        pending: (state.pendingByCode || []).length,
+      });
     }
 
     if (action === "click" && body.code) {
-      const code = String(body.code);
-      state.clicks[code] = (state.clicks[code] || 0) + 1;
-      await saveAffiliateState(store, state);
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ ok: true, clicks: state.clicks[code], code }),
-      };
+      const clicks = await withStateRetry(store, (s) => {
+        const n = bumpClick(s, body.code);
+        return { ok: true, clicks: n, code: normalizeCode(body.code) };
+      });
+      return json(200, clicks);
     }
 
     if (action === "sale" && body.sale) {
+      if (body.sale.code) body.sale.code = normalizeCode(body.sale.code) || body.sale.code;
       state.sales.push(body.sale);
       if (body.user) upsertAffiliateUser(state, body.user);
       await saveAffiliateState(store, state);
-      return { statusCode: 200, headers, body: JSON.stringify({ ok: true, userCount: state.users.length }) };
+      return json(200, { ok: true, userCount: state.users.length });
     }
 
     if (action === "cashout" && body.cashout) {
@@ -221,7 +202,7 @@ exports.handler = async (event) => {
       if (idx >= 0) state.cashouts[idx] = body.cashout;
       else state.cashouts.push(body.cashout);
       await saveAffiliateState(store, state);
-      return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+      return json(200, { ok: true });
     }
 
     if (action === "cashout-paid" && body.cashout) {
@@ -230,33 +211,25 @@ exports.handler = async (event) => {
       if (idx >= 0) state.cashouts[idx] = { ...state.cashouts[idx], ...body.cashout };
       else state.cashouts.push(body.cashout);
       await saveAffiliateState(store, state);
-      return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+      return json(200, { ok: true });
     }
 
     if (action === "list" || action === "snapshot") {
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          ok: true,
-          live: true,
-          userCount: state.users.length,
-          users: state.users.map(publicUser),
-          clicks: state.clicks || {},
-          sales: state.sales || [],
-          cashouts: state.cashouts || [],
-          pendingByCode: state.pendingByCode || [],
-        }),
-      };
+      return json(200, {
+        ok: true,
+        live: true,
+        userCount: state.users.length,
+        users: state.users.map(publicUser),
+        clicks: state.clicks || {},
+        sales: state.sales || [],
+        cashouts: state.cashouts || [],
+        pendingByCode: state.pendingByCode || [],
+      });
     }
 
-    return { statusCode: 400, headers, body: JSON.stringify({ ok: false, msg: "Unknown action" }) };
+    return json(400, { ok: false, msg: "Unknown action" });
   } catch (err) {
     console.error("affiliate-api error:", err);
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ ok: false, msg: err.message || "Affiliate API error" }),
-    };
+    return json(200, { ok: false, msg: err.message || "Affiliate API error" });
   }
 };

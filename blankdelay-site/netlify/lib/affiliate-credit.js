@@ -5,6 +5,7 @@ const {
   saveAffiliateState,
   upsertAffiliateUser,
   findAffiliateByCode,
+  normalizeCode,
 } = require("./affiliate-store");
 
 const AFFILIATE_RATE = 0.2;
@@ -42,8 +43,9 @@ function applyPendingForCode(state, user) {
   const pending = Array.isArray(state.pendingByCode) ? state.pendingByCode : [];
   const keep = [];
   let changed = false;
+  const userCode = normalizeCode(user.code);
   pending.forEach((p) => {
-    if (String(p.code).toUpperCase() !== String(user.code).toUpperCase()) {
+    if (normalizeCode(p.code) !== userCode) {
       keep.push(p);
       return;
     }
@@ -74,10 +76,10 @@ async function creditAffiliateSale({
   stripeSecret,
   tryTransfer,
 }) {
-  const code = String(affCode || "").trim();
+  const code = normalizeCode(affCode);
   if (!code) return { ok: false, reason: "no_affiliate" };
 
-  const store = getAffiliateStore(event);
+  const store = await getAffiliateStore(event);
   const state = await loadAffiliateState(store);
   if (!Array.isArray(state.pendingByCode)) state.pendingByCode = [];
   if (!Array.isArray(state.creditedSessions)) state.creditedSessions = [];
@@ -186,7 +188,7 @@ async function creditFromCheckoutSession(event, sessionId, stripeSecret) {
   if (full.payment_status && full.payment_status !== "paid" && full.status !== "complete") {
     return { ok: false, reason: "not_paid", status: full.payment_status || full.status };
   }
-  const affCode = String(full.client_reference_id || full.metadata?.aff || "").trim();
+  const affCode = normalizeCode(full.client_reference_id || full.metadata?.aff || "");
   const item = full.line_items?.data?.[0];
   const productName =
     item?.description || item?.price?.product?.name || item?.price?.nickname || "BlankDelay Product";

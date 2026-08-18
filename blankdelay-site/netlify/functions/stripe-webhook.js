@@ -178,7 +178,7 @@ async function sendEmailJS(order) {
 const { creditAffiliateSale } = require("../lib/affiliate-credit");
 
 async function creditAffiliateFromSession(session, price, productName, stripeSecret, lambdaEvent) {
-  const affCode = String(session.client_reference_id || session.metadata?.aff || "").trim();
+  const affCode = session.client_reference_id || session.metadata?.aff || "";
   return creditAffiliateSale({
     event: lambdaEvent,
     affCode,

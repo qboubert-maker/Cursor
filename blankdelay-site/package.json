@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@netlify/blobs": "^9.1.6"
+    "@netlify/blobs": "^8.2.0"
   },
   "scripts": {
     "electron:hub": "electron . --product=hub",

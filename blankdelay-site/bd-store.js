@@ -60,8 +60,16 @@ const BD_STORE = {
         return code;
     },
 
+    normalizeAffCode(code) {
+        return String(code || '')
+            .trim()
+            .toUpperCase()
+            .replace(/[^A-Z0-9_-]/g, '')
+            .slice(0, 32);
+    },
+
     affiliateShortLink(code) {
-        const c = encodeURIComponent(String(code || '').trim());
+        const c = encodeURIComponent(this.normalizeAffCode(code) || String(code || '').trim());
         return `https://blankdelay.com/a/${c}`;
     },
 
@@ -235,7 +243,7 @@ const BD_STORE = {
     },
 
     setAffiliateAttribution(code) {
-        const clean = String(code || '').trim();
+        const clean = this.normalizeAffCode(code);
         if (!clean || clean === 'ADMIN') return;
         try {
             sessionStorage.setItem('bd-aff-pending', clean);
@@ -249,7 +257,7 @@ const BD_STORE = {
 
     getAffiliateAttribution() {
         try {
-            const fromSession = (sessionStorage.getItem('bd-aff-pending') || '').trim();
+            const fromSession = this.normalizeAffCode(sessionStorage.getItem('bd-aff-pending') || '');
             if (fromSession) return fromSession;
             const raw = localStorage.getItem('bd-aff-attr');
             if (!raw) return '';
@@ -259,16 +267,19 @@ const BD_STORE = {
                 localStorage.removeItem('bd-aff-attr');
                 return '';
             }
-            sessionStorage.setItem('bd-aff-pending', data.code);
-            return String(data.code);
+            const code = this.normalizeAffCode(data.code);
+            if (!code) return '';
+            sessionStorage.setItem('bd-aff-pending', code);
+            return code;
         } catch (_) {
             return '';
         }
     },
 
     creditAffiliate(code, amount, productName) {
+        const clean = this.normalizeAffCode(code);
         const users = this.getUsers();
-        const u = users.find((x) => x.code === code);
+        const u = users.find((x) => this.normalizeAffCode(x.code) === clean);
         if (!u) return;
         const commission = +(amount * this.AFFILIATE_RATE).toFixed(2);
         u.earnings = +(u.earnings + commission).toFixed(2);
@@ -276,7 +287,7 @@ const BD_STORE = {
         this.saveUsers(users);
         const sales = this.get('bd-aff-sales', []);
         const row = {
-            code,
+            code: clean,
             amount,
             commission,
             product: productName || 'BlankDelay Product',
@@ -288,22 +299,45 @@ const BD_STORE = {
     },
 
     trackAffiliateClick(code) {
-        const clean = String(code || '').trim();
+        const clean = this.normalizeAffCode(code);
         if (!clean || clean === 'ADMIN') return Promise.resolve(null);
         this.setAffiliateAttribution(clean);
         const clicks = this.get('bd-aff-clicks', {});
-        clicks[clean] = (clicks[clean] || 0) + 1;
+        // Merge any case variants into one key
+        let total = 0;
+        Object.keys(clicks).forEach((k) => {
+            if (this.normalizeAffCode(k) === clean) {
+                total += Number(clicks[k]) || 0;
+                if (k !== clean) delete clicks[k];
+            }
+        });
+        clicks[clean] = total + 1;
         this.set('bd-aff-clicks', clicks);
-        return this.syncAffiliateRemote('click', { code: clean });
+        // Prefer sendBeacon so a fast bounce still records the live click
+        try {
+            const payload = JSON.stringify({ action: 'click', code: clean });
+            if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+                const blob = new Blob([payload], { type: 'application/json' });
+                const ok = navigator.sendBeacon('/.netlify/functions/affiliate-api', blob);
+                if (ok) return Promise.resolve({ ok: true, beacon: true, code: clean, clicks: clicks[clean] });
+            }
+        } catch (_) {}
+        return this.syncAffiliateRemote('click', { code: clean }, { keepalive: true });
     },
 
     getAffiliateClicks(code) {
+        const clean = this.normalizeAffCode(code);
         const clicks = this.get('bd-aff-clicks', {});
-        return clicks[code] || 0;
+        let total = 0;
+        Object.keys(clicks).forEach((k) => {
+            if (this.normalizeAffCode(k) === clean) total += Number(clicks[k]) || 0;
+        });
+        return total;
     },
 
     getAffiliateSales(code) {
-        return this.get('bd-aff-sales', []).filter((s) => s.code === code);
+        const clean = this.normalizeAffCode(code);
+        return this.get('bd-aff-sales', []).filter((s) => this.normalizeAffCode(s.code) === clean);
     },
 
     getCashouts() {
@@ -365,12 +399,13 @@ const BD_STORE = {
         return +Math.max(0, (u.earnings || 0) - (u.paidOut || 0)).toFixed(2);
     },
 
-    async syncAffiliateRemote(action, payload) {
+    async syncAffiliateRemote(action, payload, opts) {
         try {
             const res = await fetch('/.netlify/functions/affiliate-api', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action, ...payload })
+                body: JSON.stringify({ action, ...payload }),
+                keepalive: !!(opts && opts.keepalive)
             });
             const data = await res.json().catch(() => null);
             return data;
@@ -435,16 +470,18 @@ const BD_STORE = {
             this.saveUsers([...byEmail.values()]);
 
             if (data.clicks && typeof data.clicks === 'object') {
-                // Live clicks are source of truth (still take max to be safe)
-                const clicks = this.get('bd-aff-clicks', {});
-                Object.keys(data.clicks).forEach((code) => {
-                    clicks[code] = Math.max(clicks[code] || 0, data.clicks[code] || 0);
-                });
-                // Also include any codes only on remote
-                Object.assign(clicks, { ...clicks, ...Object.fromEntries(
-                    Object.entries(data.clicks).map(([k, v]) => [k, Math.max(clicks[k] || 0, v || 0)])
-                ) });
-                this.set('bd-aff-clicks', clicks);
+                // Live clicks are source of truth; normalize codes to uppercase
+                const merged = {};
+                const addMap = (map) => {
+                    Object.entries(map || {}).forEach(([k, v]) => {
+                        const key = this.normalizeAffCode(k);
+                        if (!key) return;
+                        merged[key] = Math.max(merged[key] || 0, Number(v) || 0);
+                    });
+                };
+                addMap(this.get('bd-aff-clicks', {}));
+                addMap(data.clicks);
+                this.set('bd-aff-clicks', merged);
             }
             if (Array.isArray(data.cashouts)) {
                 const local = this.getCashouts();
@@ -477,13 +514,24 @@ const BD_STORE = {
 
     getAdminAnalytics(remoteData) {
         // Prefer live remote users list when provided
-        const clicksMap = { ...(this.get('bd-aff-clicks', {}) || {}), ...((remoteData && remoteData.clicks) || {}) };
+        const clicksMap = {};
+        const addClicks = (map) => {
+            Object.entries(map || {}).forEach(([k, v]) => {
+                const key = this.normalizeAffCode(k);
+                if (!key) return;
+                clicksMap[key] = Math.max(clicksMap[key] || 0, Number(v) || 0);
+            });
+        };
+        addClicks(this.get('bd-aff-clicks', {}));
+        addClicks(remoteData && remoteData.clicks);
         const remoteUsers = Array.isArray(remoteData?.users) ? remoteData.users : null;
         const affiliates = (remoteUsers || this.listAffiliates()).map((a) => {
             const row = remoteUsers ? { ...a, link: a.link || this.affiliateShortLink(a.code) } : a;
+            const codeKey = this.normalizeAffCode(row.code);
             return {
                 ...row,
-                clicks: clicksMap[row.code] || 0,
+                code: codeKey || row.code,
+                clicks: clicksMap[codeKey] || 0,
                 available: +Math.max(0, (row.earnings || 0) - (row.paidOut || 0)).toFixed(2)
             };
         });

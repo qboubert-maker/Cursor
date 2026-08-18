@@ -1,7 +1,9 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  # Bundle @netlify/blobs into functions (do not mark external — runtime was missing it)
+  # Keep @netlify/blobs external so Node can load the ESM package via dynamic import()
+  # (bundling it as CJS crashes live: "require() of ES Module @netlify/runtime-utils")
+  external_node_modules = ["@netlify/blobs"]
 
 [build]
   # Only install production deps (@netlify/blobs). Skip electron/desktop packages.

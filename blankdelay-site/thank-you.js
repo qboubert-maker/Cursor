@@ -131,13 +131,24 @@
         $('thank-no-session')?.setAttribute('hidden', '');
         $('thank-ready')?.removeAttribute('hidden');
 
-        // Backup: credit affiliate from this Stripe session if webhook missed it
+        // Backup: credit affiliate from this Stripe session if webhook missed it (retry once)
         if (sessionId) {
-            fetch('/.netlify/functions/affiliate-api', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'credit-from-session', session_id: sessionId })
-            }).catch(() => {});
+            const creditOnce = () =>
+                fetch('/.netlify/functions/affiliate-api', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'credit-from-session', session_id: sessionId }),
+                    keepalive: true
+                }).then((r) => r.json().catch(() => null));
+            creditOnce()
+                .then((res) => {
+                    if (res && res.ok === false && res.reason !== 'no_affiliate' && res.reason !== 'already_credited') {
+                        setTimeout(() => { creditOnce().catch(() => {}); }, 2500);
+                    }
+                })
+                .catch(() => {
+                    setTimeout(() => { creditOnce().catch(() => {}); }, 2500);
+                });
         }
 
         $('thank-copy-key')?.addEventListener('click', () => copyText(data.license, $('thank-copy-key'), 'Copied!'));
