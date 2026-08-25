@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BlankDelay — Ping Optimizer</title>
+    <link rel="stylesheet" href="../shared/app.css">
+    <link rel="stylesheet" href="../shared/bd-splash.css">
+    <link rel="stylesheet" href="../shared/bd-tweaks-grid.css">
+</head>
+<body class="bd-app" data-theme="ping">
+    <script src="../shared/system-live.js"></script>
+    <canvas id="bg-canvas" class="bg-canvas"></canvas>
+    <div id="bd-splash-root"
+        data-title="PING OPTIMIZER"
+        data-short-name="Ping Optimizer"
+        data-tagline="Optimize · Accelerate · Dominate"></div>
+    <div class="bd-app-main" id="bd-app-main" hidden>
+        <div class="app" style="max-width:1180px">
+            <div class="topbar">
+                <div class="brand"><span class="mark"><svg viewBox="0 0 32 32"><circle cx="8" cy="16" r="3.5" fill="currentColor"/><path fill="currentColor" d="M11 16h4l14-6-3 6 3 6-14-6z"/></svg></span> BLANKDELAY <span style="opacity:.4;margin:0 6px">|</span> <span style="color:var(--accent)">Ping Optimizer</span></div>
+                <span class="status-pill" id="admin-status-pill">Checking…</span>
+            </div>
+            <div id="tweaks-grid-root"></div>
+            <div class="log" id="log" style="max-width:1180px;margin:18px auto 0;"><div>BlankDelay Ping Optimizer ready.</div></div>
+        </div>
+    </div>
+
+    <script src="../shared/background.js"></script>
+    <script src="../shared/bd-splash-fx.js"></script>
+<script src="../shared/bd-splash.js"></script>
+    <script src="../shared/bd-tweaks-grid.js"></script>
+    <script>
+    const CATEGORIES = [
+        {
+            name: 'DNS & Routing',
+            icon: '🌐',
+            tweaks: [
+                { id: 'dns-cloudflare', name: 'Set DNS to Cloudflare (1.1.1.1)', desc: 'Fastest public DNS — lower lookup times', apply: `$adapters = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' }; foreach ($a in $adapters) { Set-DnsClientServerAddress -InterfaceIndex $a.ifIndex -ServerAddresses ('1.1.1.1','1.0.0.1') }`, restore: `$adapters = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' }; foreach ($a in $adapters) { Set-DnsClientServerAddress -InterfaceIndex $a.ifIndex -ResetServerAddresses }` },
+                { id: 'dns-flush', name: 'Flush DNS Cache', desc: 'Clears stale DNS entries for fresh lookups', apply: `Clear-DnsClientCache`, restore: `Write-Output 'DNS cache auto-rebuilds'` },
+                { id: 'rss', name: 'Enable Receive Side Scaling', desc: 'Distributes network processing across CPU cores', apply: `netsh int tcp set global rss=enabled`, restore: `netsh int tcp set global rss=enabled` }
+            ]
+        },
+        {
+            name: 'TCP & Throughput',
+            icon: '📶',
+            tweaks: [
+                { id: 'nagle', name: "Disable Nagle's Algorithm", desc: 'Sends packets immediately — no TCP buffering delay', apply: `Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\*' | ForEach-Object { $path = $_.PSPath; Set-ItemProperty -Path $path -Name TcpAckFrequency -Value 1 -Type DWord -ErrorAction SilentlyContinue; Set-ItemProperty -Path $path -Name TCPNoDelay -Value 1 -Type DWord -ErrorAction SilentlyContinue }`, restore: `Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\*' | ForEach-Object { $path = $_.PSPath; Remove-ItemProperty -Path $path -Name TcpAckFrequency -ErrorAction SilentlyContinue; Remove-ItemProperty -Path $path -Name TCPNoDelay -ErrorAction SilentlyContinue }` },
+                { id: 'auto-tuning', name: 'Disable TCP Auto-Tuning', desc: 'Prevents Windows from dynamically sizing receive window', apply: `netsh int tcp set global autotuninglevel=disabled`, restore: `netsh int tcp set global autotuninglevel=normal` },
+                { id: 'ecn', name: 'Disable ECN Capability', desc: 'Removes congestion notification overhead', apply: `netsh int tcp set global ecncapability=disabled`, restore: `netsh int tcp set global ecncapability=default` },
+                { id: 'qos-disable', name: 'Remove QoS Bandwidth Reserve', desc: 'Windows reserves 20% bandwidth by default — reclaim it', apply: `if (!(Test-Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Psched')) { New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Psched' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Psched' -Name NonBestEffortLimit -Value 0 -Type DWord`, restore: `Remove-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Psched' -Name NonBestEffortLimit -ErrorAction SilentlyContinue` }
+            ]
+        },
+        {
+            name: 'Adapter & Power',
+            icon: '🔌',
+            tweaks: [
+                { id: 'network-throttle', name: 'Disable Network Throttling', desc: 'Removes 10Mbps throttle on multimedia streams', apply: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name NetworkThrottlingIndex -Value 0xFFFFFFFF -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name NetworkThrottlingIndex -Value 10 -Type DWord` },
+                { id: 'adapter-power', name: 'Disable Adapter Power Saving', desc: 'Prevents NIC from sleeping — always-on connection', apply: `Get-NetAdapter | Where-Object { $_.Status -eq 'Up' } | ForEach-Object { Set-NetAdapterPowerManagement -Name $_.Name -WakeOnMagicPacket Disabled -WakeOnPattern Disabled -ErrorAction SilentlyContinue; powercfg /setacvalueindex SCHEME_CURRENT SUB_NONE CONNECTIVITYINSTANDBY 1 2>$null }`, restore: `Get-NetAdapter | Where-Object { $_.Status -eq 'Up' } | ForEach-Object { Set-NetAdapterPowerManagement -Name $_.Name -WakeOnMagicPacket Enabled -WakeOnPattern Enabled -ErrorAction SilentlyContinue }` }
+            ]
+        }
+    ];
+
+    (async function () {
+        const status = document.getElementById('admin-status-pill');
+        const log = document.getElementById('log');
+        function addLog(msg, type) {
+            const line = document.createElement('div');
+            line.className = type || '';
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            log.prepend(line);
+        }
+
+        await BdSplash.init({
+            onUnlock: async () => {
+                addLog('License validated — Ping Optimizer unlocked.', 'ok');
+                BdTweaksGrid.init({
+                    mountId: 'tweaks-grid-root',
+                    productLabel: 'Ping Optimizer',
+                    variant: 'ping',
+                    subtitle: 'Lower ping, reduce jitter. Apply instantly, persist after restart.',
+                    categories: CATEGORIES,
+                    onAdminStatus: (isAdmin) => {
+                        status.textContent = isAdmin ? 'Admin ✓' : 'No Admin';
+                        status.classList.toggle('admin-ok', isAdmin);
+                        addLog(isAdmin ? 'Running as Administrator.' : 'Not running as admin — click Restart as Admin.', isAdmin ? 'ok' : 'warn');
+                    },
+                    onApplied: () => BlankSystemLive.refresh && BlankSystemLive.refresh('ping'),
+                    onReverted: () => BlankSystemLive.refresh && BlankSystemLive.refresh('ping')
+                });
+                BlankSystemLive.ensureScanPanel?.();
+                BlankSystemLive.startPolling?.('ping');
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

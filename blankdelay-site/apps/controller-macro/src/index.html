@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en" class="nova-login-pending">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'self'" />
+  <title>BlankDelay Controller Macro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css?v=dev-nav-1" />
+  <link rel="stylesheet" href="./drivers.css" />
+  <link rel="stylesheet" href="./blank-developer.css" />
+  <link rel="stylesheet" href="./socials.css" />
+  <link rel="stylesheet" href="./nova-login.css?v=sjay-splash-2" />
+  <link rel="stylesheet" href="./nova-activate.css?v=sjay-splash-2" />
+</head>
+<body>
+  
+  <div class="nova-login" id="novaLogin" aria-label="BlankDelay Controller Macro login">
+    <canvas class="nova-login__particles nova-login__particles--fullscreen" id="novaLoginParticles" aria-hidden="true"></canvas>
+    <header class="nova-login__topbar">
+      <div class="nova-login__topbar-brand" aria-hidden="true">
+        <img src="assets/blank-logo.png" alt="" class="nova-login__topbar-logo" width="20" height="20" draggable="false" />
+        <span class="nova-login__topbar-name">BlankDelay</span>
+        <span class="nova-login__topbar-div"></span>
+        <span class="nova-login__topbar-suite">Controller Macro</span>
+      </div>
+      <div class="nova-login__drag"></div>
+      <div class="nova-login__topbar-actions">
+      <div class="nova-login__window-controls" aria-label="Window controls">
+        <button type="button" class="window-btn" data-win="minimize" title="Minimize" aria-label="Minimize">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg>
+        </button>
+        <button type="button" class="window-btn" data-win="fullscreen" title="Expand (F11)" aria-label="Expand window">
+          <svg class="window-btn__icon window-btn__icon--enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4H5a1 1 0 0 0-1 1v3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M16 20h3a1 1 0 0 0 1-1v-3"/></svg>
+          <svg class="window-btn__icon window-btn__icon--exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 15 4 20M20 4l-5 5M15 4h5v5M4 20v-5h5"/></svg>
+        </button>
+        <button type="button" class="window-btn window-btn--close" data-win="close" title="Close" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>
+        </button>
+      </div>
+      </div>
+    </header>
+
+    <div class="nova-login__split">
+      <div class="nova-login__backdrop" aria-hidden="true">
+        <div class="nova-login__aurora"></div>
+        <div class="nova-login__backdrop-watermark">
+          <img src="assets/blank-logo.png" alt="" />
+        </div>
+        <div class="nova-login__beam"></div>
+        <div class="nova-login__core-glow" aria-hidden="true"></div>
+        <div class="nova-login__backdrop-overlay"></div>
+        <div class="nova-login__vignette" aria-hidden="true"></div>
+        <div class="nova-login__noise"></div>
+      </div>
+
+      <section class="nova-login__visual" aria-label="BlankDelay Controller Macro brand">
+        <div class="nova-login__orbits" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="nova-login__visual-content">
+          <div class="nova-login__brand">
+            <button type="button" class="nova-login__brand-logo-btn" id="novaLoginLogoTrigger" aria-label="Tap to unlock BlankDelay Controller Macro">
+              <span class="nova-login__pedestal" aria-hidden="true"></span>
+              <span class="nova-login__logo-halo" aria-hidden="true"></span>
+              <span class="nova-login__logo-ring" aria-hidden="true"></span>
+              <span class="nova-login__logo-ring nova-login__logo-ring--rev" aria-hidden="true"></span>
+              <img src="assets/blank-logo.png" alt="BlankDelay Controller Macro" class="nova-login__brand-logo" width="380" height="380" />
+            </button>
+            <div class="nova-login__brand-text">
+              <p class="nova-login__brand-sub">BlankDelay Controller Macro</p>
+              <p class="nova-login__brand-motto">
+                <span>Optimize</span><span class="nova-login__brand-dot" aria-hidden="true"></span><span>Accelerate</span><span class="nova-login__brand-dot" aria-hidden="true"></span><span>Dominate</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="nova-login__cta-hint">
+          <button type="button" class="nova-login__cta-hint-inner" id="novaLoginCtaHint">Tap logo to continue</button>
+        </div>
+      </section>
+
+      <footer class="nova-login__statusbar" aria-hidden="true">
+        <div class="nova-login__status-chip">
+          <span>powered by BlankDelay</span>
+        </div>
+        <div class="nova-login__status-meta">
+          <span>BlankDelay</span>
+          <span class="nova-login__status-sep"></span>
+          <span>Controller Macro</span>
+        </div>
+      </footer>
+    </div>
+
+    <div class="nova-login__modal nova-premium-modal" id="novaLoginModal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="novaLoginLicenseTitle">
+      <div class="nova-login__modal-backdrop" id="novaLoginModalBackdrop"></div>
+
+      <div class="gate-card-wrap" id="novaLoginShell">
+        <div class="glass-strong">
+          <div class="key-stripe"></div>
+          <button type="button" class="gate-close" id="novaLoginModalClose" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+
+          <div class="nova-login__step is-active" id="novaLoginStepKey" data-step="key">
+            <div class="gate-header">
+              <div class="logo-wrap">
+                <div class="key-logo-halo"></div>
+                <div class="logo-box">
+                  <img src="assets/blank-logo.png" alt="" width="40" height="40" draggable="false" />
+                </div>
+              </div>
+              <div>
+                <div class="gate-brand">BlankDelay Controller Macro</div>
+                <div class="gate-title-row">
+                  <h1 class="gate-title" id="novaLoginLicenseTitle">Activate your key</h1>
+                </div>
+              </div>
+            </div>
+
+            <p class="gate-desc" id="novaLoginLicenseLead">
+              Paste your <strong>BLANK-XXXX-XXXX</strong> Discord key (or BD- purchase key) to unlock BlankDelay Controller Macro.
+            </p>
+
+            <div class="key-row" id="novaLoginKeyRow">
+              <input
+                type="password"
+                class="nova-login__license-input-field"
+                id="novaLoginKey"
+                name="licenseKey"
+                placeholder="BLANK-XXXX-XXXX"
+                spellcheck="false"
+                autocomplete="off"
+                inputmode="text"
+                aria-describedby="novaLoginKeyTip"
+              />
+              <span class="key-chars" id="novaLoginKeyCount" aria-live="polite" hidden></span>
+              <button type="button" class="toggle-key nova-login__license-toggle" id="novaLoginKeyToggle" aria-label="Show key" title="Show key" aria-pressed="false">
+                <svg class="nova-login__license-toggle-icon nova-login__license-toggle-icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="nova-login__license-toggle-icon nova-login__license-toggle-icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
+
+            <p class="key-status" id="novaLoginKeyTip" hidden></p>
+            <p class="nova-login__error nova-login__error--license" id="novaLoginError" role="alert"></p>
+
+            <div class="gate-actions">
+              <button type="button" class="btn-primary nova-login__license-submit" id="novaLoginContinue">
+                <span id="novaLoginContinueLabel">Verify &amp; unlock</span>
+              </button>
+              <a class="btn-secondary" id="novaLoginGetKey" href="https://discord.gg/5gyVpYMY9" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Get a key
+              </a>
+            </div>
+
+            <div class="gate-footer">
+              <div class="footer-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <div><strong>Secure activation</strong><span>Verified by Blank Discord keys</span></div>
+              </div>
+              <div class="footer-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <div><strong>One-time</strong><span>BLANK-XXXX-XXXX from /generate</span></div>
+              </div>
+            </div>
+
+            <div class="gate-device">
+              <span>Device</span>
+              <code id="novaLoginDeviceId">—</code>
+            </div>
+          </div>
+
+          <div class="nova-login__step" id="novaLoginStepPasscode" data-step="passcode" hidden>
+            <div class="gate-header">
+              <div class="logo-wrap">
+                <div class="key-logo-halo"></div>
+                <div class="logo-box">
+                  <img src="assets/blank-logo.png" alt="" width="40" height="40" draggable="false" />
+                </div>
+              </div>
+              <div>
+                <div class="gate-brand">BlankDelay Controller Macro</div>
+                <div class="gate-title-row">
+                  <h1 class="gate-title" id="novaLoginPasscodeTitle">Create your access code</h1>
+                </div>
+              </div>
+            </div>
+
+            <p class="gate-desc" id="novaLoginPasscodeSub">Choose a private code. Required every time you open BlankDelay Controller Macro.</p>
+
+            <div class="nova-login__passcode-length" id="novaLoginPasscodeLength" hidden>
+              <span class="nova-login__passcode-length-label">Code length</span>
+              <div class="nova-login__passcode-length-options">
+                <button type="button" class="nova-login__passcode-length-btn" data-length="4" aria-pressed="false">4 digits</button>
+                <button type="button" class="nova-login__passcode-length-btn is-active" data-length="6" aria-pressed="true">6 digits</button>
+              </div>
+            </div>
+
+            <div class="nova-login__passcode-vault" id="novaLoginPasscodeVault">
+              <div class="nova-login__passcode-slots nova-login__passcode-slots--6" id="novaLoginPasscodeDots"></div>
+            </div>
+
+            <p class="nova-login__error nova-login__error--passcode" id="novaLoginPasscodeError" role="alert"></p>
+
+            <div class="nova-login__keypad" id="novaLoginKeypad">
+              <button type="button" class="nova-login__key" data-digit="1"><span class="nova-login__key-num">1</span></button>
+              <button type="button" class="nova-login__key" data-digit="2"><span class="nova-login__key-num">2</span></button>
+              <button type="button" class="nova-login__key" data-digit="3"><span class="nova-login__key-num">3</span></button>
+              <button type="button" class="nova-login__key" data-digit="4"><span class="nova-login__key-num">4</span></button>
+              <button type="button" class="nova-login__key" data-digit="5"><span class="nova-login__key-num">5</span></button>
+              <button type="button" class="nova-login__key" data-digit="6"><span class="nova-login__key-num">6</span></button>
+              <button type="button" class="nova-login__key" data-digit="7"><span class="nova-login__key-num">7</span></button>
+              <button type="button" class="nova-login__key" data-digit="8"><span class="nova-login__key-num">8</span></button>
+              <button type="button" class="nova-login__key" data-digit="9"><span class="nova-login__key-num">9</span></button>
+              <span class="nova-login__key nova-login__key--ghost" aria-hidden="true"></span>
+              <button type="button" class="nova-login__key" data-digit="0"><span class="nova-login__key-num">0</span></button>
+              <button type="button" class="nova-login__key nova-login__key--delete" id="novaLoginKeyDelete" aria-label="Clear digit"><span class="nova-login__key-clear">CLR</span></button>
+            </div>
+
+            <div class="nova-login__passcode-reset-wrap" id="novaLoginPasscodeResetWrap" hidden>
+              <button type="button" class="nova-login__passcode-reset" id="novaLoginPasscodeReset">Forgot access code? Verify license to reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="app">
+    <header class="topbar">
+      <div class="app-brand" aria-label="Blank Delay controller macro">
+        <img
+          src="assets/blank-logo.png?v=21"
+          alt=""
+          class="app-brand__logo"
+          width="28"
+          height="28"
+          draggable="false"
+        />
+        <div class="app-brand__copy">
+          <span class="app-brand__name">Blank Delay</span>
+          <span class="app-brand__sub">controller macro</span>
+        </div>
+      </div>
+
+      <nav class="family" id="familySwitch" role="group" aria-label="Controller family">
+        <div class="family__shell" aria-hidden="true">
+          <span class="family__shell-glow"></span>
+          <span class="family__shell-rim"></span>
+        </div>
+
+        <div class="family__group" data-family="playstation">
+          <button type="button" class="family__btn family__btn--ps is-active" data-family-btn="playstation" title="PlayStation" aria-label="PlayStation" aria-haspopup="menu" aria-expanded="false">
+            <span class="family__aura" aria-hidden="true"></span>
+            <span class="family__mark" aria-hidden="true">
+              <span class="family__bezel"></span>
+              <span class="family__face"></span>
+              <img src="assets/logo-playstation.svg" alt="" width="20" height="20" draggable="false" />
+            </span>
+            <span class="family__tag">PlayStation</span>
+          </button>
+          <div class="family__menu" id="menu-playstation" role="menu" hidden>
+            <button type="button" class="family__menu-item is-active" role="menuitem" data-model="ps5">PS5 DualSense</button>
+            <button type="button" class="family__menu-item" role="menuitem" data-model="ps4">PS4 DualShock</button>
+          </div>
+        </div>
+
+        <div class="family__divider" aria-hidden="true"></div>
+
+        <div class="family__group" data-family="xbox">
+          <button type="button" class="family__btn family__btn--xbox" data-family-btn="xbox" title="Xbox" aria-label="Xbox" aria-haspopup="menu" aria-expanded="false">
+            <span class="family__aura" aria-hidden="true"></span>
+            <span class="family__mark" aria-hidden="true">
+              <span class="family__bezel"></span>
+              <span class="family__face"></span>
+              <img src="assets/logo-xbox.svg" alt="" width="18" height="18" draggable="false" />
+            </span>
+            <span class="family__tag">Xbox</span>
+          </button>
+          <div class="family__menu" id="menu-xbox" role="menu" hidden>
+            <button type="button" class="family__menu-item" role="menuitem" data-model="xbox-series">Xbox Series</button>
+            <button type="button" class="family__menu-item" role="menuitem" data-model="xbox-one">Xbox One</button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="win" aria-label="Window controls">
+        <button type="button" class="win__btn" data-win="minimize" title="Minimize" aria-label="Minimize">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 12h12"/></svg>
+        </button>
+        <button type="button" class="win__btn" data-win="fullscreen" title="Fullscreen (F11)" aria-label="Fullscreen">
+          <svg class="win__icon--enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 4H4v4M16 4h4v4M8 20H4v-4M16 20h4v-4"/></svg>
+          <svg class="win__icon--exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" hidden><path d="M4 8h4V4M16 4h4v4M4 16h4v4M20 16h-4v4"/></svg>
+        </button>
+        <button type="button" class="win__btn win__btn--close" data-win="close" title="Close" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 7l10 10M17 7 7 17"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="stage" id="padStage" data-page="home">
+      <div class="stage__glow" aria-hidden="true"></div>
+      <div class="stage__floor" aria-hidden="true"></div>
+      <div class="stage__mount" id="padMount" aria-label="Controller visual"></div>
+    </main>
+
+    <section class="page page--macros" data-page="macros" hidden>
+      <div class="page__inner page__inner--macros">
+        <header class="macros-hero">
+          <div class="macros-hero__copy">
+            <p class="macros-hero__kicker">Blank Delay · Scripts</p>
+            <h1 class="page__title">Macros</h1>
+            <p class="page__lead">Toggle scripts and set their triggers.</p>
+          </div>
+          <div class="macros-hero__rule" aria-hidden="true"></div>
+        </header>
+
+        <div class="macros" id="macrosPanel">
+          <div class="macros__grid" id="macroGrid">
+            <article class="macro-card" data-macro-id="doubleEdit" data-grid="left-top">
+              <span class="macro-card__sheen" aria-hidden="true"></span>
+              <div class="macro-card__head">
+                <div class="macro-card__copy">
+                  <span class="macro-card__badge">Off</span>
+                  <h3 class="macro-card__title">Double Edit</h3>
+                  <p class="macro-card__desc">Hold one bind — opens, selects, confirms. Uses Edit + Select. Turn HidHide cloak on so games see the virtual pad.</p>
+                </div>
+                <button type="button" class="macro-toggle" data-macro-toggle aria-pressed="false" title="Toggle macro">
+                  <span class="macro-toggle__track" aria-hidden="true"></span>
+                  <span class="macro-toggle__knob"></span>
+                </button>
+              </div>
+              <div class="macro-card__field">
+                <span class="macro-card__label">Trigger</span>
+                <button type="button" class="macro-bind" data-macro-bind data-bind-role="trigger" data-bind-id="6">
+                  <span class="macro-bind__key">L2</span>
+                  <span class="macro-bind__name">L2</span>
+                  <span class="macro-bind__hint">Change</span>
+                </button>
+              </div>
+              <div class="macro-card__field">
+                <div class="macro-card__label-row">
+                  <span class="macro-card__label">Between edits</span>
+                  <span class="macro-card__value" data-us-label>0.0 ms</span>
+                </div>
+                <input class="macro-slider" type="range" min="0" max="12000" step="1" value="1" data-us-field="tapDelayUs" />
+              </div>
+            </article>
+
+            <article class="macro-card macro-card--center" data-macro-id="reset" data-grid="center">
+              <span class="macro-card__sheen" aria-hidden="true"></span>
+              <div class="macro-card__head">
+                <div class="macro-card__copy">
+                  <span class="macro-card__badge">Off</span>
+                  <h3 class="macro-card__title">Reset Macro</h3>
+                  <p class="macro-card__desc">One press taps Reset — clears an edit without confirming. Uses Reset bind. Cloak on.</p>
+                </div>
+                <button type="button" class="macro-toggle" data-macro-toggle aria-pressed="false" title="Toggle macro">
+                  <span class="macro-toggle__track" aria-hidden="true"></span>
+                  <span class="macro-toggle__knob"></span>
+                </button>
+              </div>
+              <div class="macro-card__field">
+                <span class="macro-card__label">Trigger</span>
+                <button type="button" class="macro-bind" data-macro-bind data-bind-role="trigger" data-bind-id="4">
+                  <span class="macro-bind__key">L1</span>
+                  <span class="macro-bind__name">L1</span>
+                  <span class="macro-bind__hint">Change</span>
+                </button>
+              </div>
+              <div class="macro-card__field">
+                <div class="macro-card__label-row">
+                  <span class="macro-card__label">Press length</span>
+                  <span class="macro-card__value" data-us-label>0.0 ms</span>
+                </div>
+                <input class="macro-slider" type="range" min="1" max="25000" step="1" value="1" data-us-field="tapDelayUs" />
+              </div>
+            </article>
+
+            <article class="macro-card" data-macro-id="drag" data-grid="right-top">
+              <span class="macro-card__sheen" aria-hidden="true"></span>
+              <div class="macro-card__head">
+                <div class="macro-card__copy">
+                  <span class="macro-card__badge">Off</span>
+                  <h3 class="macro-card__title">Drag Edit</h3>
+                  <p class="macro-card__desc">Blank drag — hold trigger to keep edit, then join select. Uses Edit + Select. Cloak on.</p>
+                </div>
+                <button type="button" class="macro-toggle" data-macro-toggle aria-pressed="false" title="Toggle macro">
+                  <span class="macro-toggle__track" aria-hidden="true"></span>
+                  <span class="macro-toggle__knob"></span>
+                </button>
+              </div>
+              <div class="macro-card__field">
+                <span class="macro-card__label">Trigger</span>
+                <button type="button" class="macro-bind" data-macro-bind data-bind-role="trigger" data-bind-id="11">
+                  <span class="macro-bind__key">R3</span>
+                  <span class="macro-bind__name">R3</span>
+                  <span class="macro-bind__hint">Change</span>
+                </button>
+              </div>
+              <div class="macro-card__field">
+                <div class="macro-card__label-row">
+                  <span class="macro-card__label">Edit → select</span>
+                  <span class="macro-card__value" data-us-label>0.0 ms</span>
+                </div>
+                <input class="macro-slider" type="range" min="1" max="25000" step="1" value="1" data-us-field="dragDelayUs" />
+              </div>
+            </article>
+
+            <article class="macro-card" data-macro-id="pickup" data-grid="left-bottom">
+              <span class="macro-card__sheen" aria-hidden="true"></span>
+              <div class="macro-card__head">
+                <div class="macro-card__copy">
+                  <span class="macro-card__badge">Off</span>
+                  <h3 class="macro-card__title">Pick Up Macro</h3>
+                  <p class="macro-card__desc">Blank pickup — spam Interact while held. Uses Pick Up + Use. Cloak on.</p>
+                </div>
+                <button type="button" class="macro-toggle" data-macro-toggle aria-pressed="false" title="Toggle macro">
+                  <span class="macro-toggle__track" aria-hidden="true"></span>
+                  <span class="macro-toggle__knob"></span>
+                </button>
+              </div>
+              <div class="macro-card__field">
+                <span class="macro-card__label">Trigger</span>
+                <button type="button" class="macro-bind" data-macro-bind data-bind-role="trigger" data-bind-id="5">
+                  <span class="macro-bind__key">R1</span>
+                  <span class="macro-bind__name">R1</span>
+                  <span class="macro-bind__hint">Change</span>
+                </button>
+              </div>
+              <div class="macro-card__field">
+                <div class="macro-card__label-row">
+                  <span class="macro-card__label">Tap speed</span>
+                  <span class="macro-card__value" data-us-label>0.0 ms</span>
+                </div>
+                <input class="macro-slider" type="range" min="0" max="10000" step="100" value="0" data-us-field="tapDelayUs" />
+              </div>
+            </article>
+
+            <article class="macro-card" data-macro-id="build" data-grid="right-bottom">
+              <span class="macro-card__sheen" aria-hidden="true"></span>
+              <div class="macro-card__head">
+                <div class="macro-card__copy">
+                  <span class="macro-card__badge">Off</span>
+                  <h3 class="macro-card__title">Build Pull Out</h3>
+                  <p class="macro-card__desc">Blank build pull-out — one press taps Build. Uses Build Pull Out + Build. Cloak on.</p>
+                </div>
+                <button type="button" class="macro-toggle" data-macro-toggle aria-pressed="false" title="Toggle macro">
+                  <span class="macro-toggle__track" aria-hidden="true"></span>
+                  <span class="macro-toggle__knob"></span>
+                </button>
+              </div>
+              <div class="macro-card__field">
+                <span class="macro-card__label">Trigger</span>
+                <button type="button" class="macro-bind" data-macro-bind data-bind-role="trigger" data-bind-id="15">
+                  <span class="macro-bind__key">→</span>
+                  <span class="macro-bind__name">D-Pad Right</span>
+                  <span class="macro-bind__hint">Change</span>
+                </button>
+              </div>
+              <div class="macro-card__field">
+                <div class="macro-card__label-row">
+                  <span class="macro-card__label">Press length</span>
+                  <span class="macro-card__value" data-us-label>0.0 ms</span>
+                </div>
+                <input class="macro-slider" type="range" min="1" max="25000" step="1" value="1" data-us-field="tapDelayUs" />
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page page--binds" data-page="binds" hidden>
+      <div class="page__inner page__inner--binds">
+        <header class="binds-hero">
+          <div class="binds-hero__copy">
+            <p class="binds-hero__kicker">Blank Delay · Game</p>
+            <h1 class="page__title">Binds</h1>
+            <p class="page__lead">Match these to your in-game controller binds.</p>
+          </div>
+          <div class="binds-hero__rule" aria-hidden="true"></div>
+        </header>
+
+        <div class="binds" id="bindsPanel">
+          <section class="binds__section">
+            <div class="binds__section-head">
+              <span class="binds__section-title">Game</span>
+              <span class="binds__section-line" aria-hidden="true"></span>
+            </div>
+            <div class="binds__grid" id="bindsGrid">
+              <div class="binds__item">
+                <span class="binds__sheen" aria-hidden="true"></span>
+                <span class="binds__label">Edit Bind</span>
+                <p class="binds__hint">Opens edit mode on builds.</p>
+                <button type="button" class="macro-bind" data-bind-role="edit" data-bind-id="11">
+                  <span class="macro-bind__key">R3</span>
+                  <span class="macro-bind__name">R3</span>
+                  <span class="macro-bind__hint">Change</span>
+                </button>
+              </div>
+              <div class="binds__item">
+                <span class="binds__sheen" aria-hidden="true"></span>
+                <span class="binds__label">Select</span>
+                <p class="binds__hint">Selects a tile while editing.</p>
+                <button type="button" class="macro-bind" data-bind-role="select" data-bind-id="7">
+                  <span class="macro-bind__key">R2</span>
+                  <span class="macro-bind__name">R2</span>
+                  <span class="macro-bind__hint">Change</span>
+                </button>
+              </div>
+              <div class="binds__item">
+                <span class="binds__sheen" aria-hidden="true"></span>
+                <span class="binds__label">Pick Up</span>
+                <p class="binds__hint">Interact / pick up items.</p>
+                <button type="button" class="macro-bind" data-bind-role="use" data-bind-id="2">
+                  <span class="macro-bind__key">â–¢</span>
+                  <span class="macro-bind__name">Square</span>
+                  <span class="macro-bind__hint">Change</span>
+                </button>
+              </div>
+              <div class="binds__item">
+                <span class="binds__sheen" aria-hidden="true"></span>
+                <span class="binds__label">Build Pull Out</span>
+                <p class="binds__hint">Pulls out builds (wall / build mode).</p>
+                <button type="button" class="macro-bind" data-bind-role="build" data-bind-id="12">
+                  <span class="macro-bind__key">↑</span>
+                  <span class="macro-bind__name">D-Pad Up</span>
+                  <span class="macro-bind__hint">Change</span>
+                </button>
+              </div>
+              <div class="binds__item">
+                <span class="binds__sheen" aria-hidden="true"></span>
+                <span class="binds__label">Reset</span>
+                <p class="binds__hint">Resets / clears an edit (usually Circle / B).</p>
+                <button type="button" class="macro-bind" data-bind-role="reset" data-bind-id="1">
+                  <span class="macro-bind__key">○</span>
+                  <span class="macro-bind__name">Circle</span>
+                  <span class="macro-bind__hint">Change</span>
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <div class="macro-bind-picker" id="macroBindPicker" hidden>
+      <div class="macro-bind-picker__veil" aria-hidden="true"></div>
+      <div class="macro-bind-picker__bloom" aria-hidden="true"></div>
+      <div class="macro-bind-picker__card" role="dialog" aria-modal="true" aria-labelledby="macroBindPickerTitle">
+        <span class="macro-bind-picker__rim" aria-hidden="true"></span>
+        <span class="macro-bind-picker__sheen" aria-hidden="true"></span>
+        <div class="macro-bind-picker__head">
+          <div class="macro-bind-picker__titles">
+            <span class="macro-bind-picker__eyebrow">Controller · Input</span>
+            <span class="macro-bind-picker__title" id="macroBindPickerTitle">Choose bind</span>
+          </div>
+          <div class="macro-bind-picker__meta">
+            <span class="macro-bind-picker__live" aria-hidden="true">
+              <i></i>
+              Listening
+            </span>
+            <span class="macro-bind-picker__tip" id="macroBindPickerTip">Press a button on your pad</span>
+          </div>
+        </div>
+        <div class="macro-bind-picker__list" id="macroBindPickerList" role="listbox" aria-label="Controller binds"></div>
+      </div>
+    </div>
+
+    <section class="page" data-page="settings" hidden>
+      <div class="drivers" id="settingsPanel">
+        <div class="drivers__atmosphere" aria-hidden="true">
+          <span class="drivers__orb drivers__orb--a"></span>
+          <span class="drivers__orb drivers__orb--b"></span>
+        </div>
+
+        <div class="drivers__panel">
+          <header class="drivers__head">
+            <div class="drivers__titles">
+              <p class="drivers__eyebrow">Required · One-time setup</p>
+              <h1 class="drivers__title">Drivers</h1>
+              <p class="drivers__sub">Everything PlayStation and Xbox players need. Install both from the app — official Nefarius packages, one Windows approval for the whole set.</p>
+            </div>
+            <button type="button" class="drivers__install-all" id="driversInstallAll">
+              Install all
+            </button>
+          </header>
+
+          <div class="drivers__platforms" aria-label="Supported platforms">
+            <div class="drivers-platform">
+              <span class="drivers-platform__tag">PlayStation</span>
+              <p class="drivers-platform__text">DualSense, DualSense Edge, DualShock 4 — ViGEmBus + HidHide.</p>
+            </div>
+            <div class="drivers-platform">
+              <span class="drivers-platform__tag">Xbox</span>
+              <p class="drivers-platform__text">Xbox One, Series, Elite — same two drivers. Windows already reads the pad.</p>
+            </div>
+          </div>
+
+          <div class="drivers__grid" id="driversGrid">
+            <article class="driver-card" data-driver="vigem" id="driverCardVigem">
+              <span class="driver-card__sheen" aria-hidden="true"></span>
+              <span class="driver-card__glow" aria-hidden="true"></span>
+              <div class="driver-card__head">
+                <div class="driver-card__copy">
+                  <div class="driver-card__tags">
+                    <span class="driver-card__tag">PlayStation</span>
+                    <span class="driver-card__tag">Xbox</span>
+                  </div>
+                  <h2 class="driver-card__title">ViGEmBus</h2>
+                  <p class="driver-card__desc">Creates the virtual pad games read — PlayStation and Xbox layouts. Required for every macro.</p>
+                </div>
+              </div>
+              <div class="driver-card__meta">
+                <div class="driver-meta">
+                  <span class="driver-meta__label">Status</span>
+                  <span class="driver-meta__value" data-driver-status>—</span>
+                </div>
+                <div class="driver-meta">
+                  <span class="driver-meta__label">Source</span>
+                  <span class="driver-meta__value" data-driver-source>—</span>
+                </div>
+              </div>
+              <div class="driver-card__progress" data-driver-progress hidden>
+                <div class="driver-card__bar"><span data-driver-bar></span></div>
+                <p class="driver-card__note" data-driver-note></p>
+              </div>
+              <div class="driver-card__actions">
+                <button type="button" class="driver-card__btn" data-driver-install>Install</button>
+              </div>
+            </article>
+
+            <article class="driver-card" data-driver="hidhide" id="driverCardHidhide">
+              <span class="driver-card__sheen" aria-hidden="true"></span>
+              <span class="driver-card__glow" aria-hidden="true"></span>
+              <div class="driver-card__head">
+                <div class="driver-card__copy">
+                  <div class="driver-card__tags">
+                    <span class="driver-card__tag">PlayStation</span>
+                    <span class="driver-card__tag">Xbox</span>
+                  </div>
+                  <h2 class="driver-card__title">HidHide</h2>
+                  <p class="driver-card__desc">Hides your physical DualSense, DualShock, or Xbox pad so games only see the virtual controller — no double input.</p>
+                </div>
+              </div>
+              <div class="driver-card__meta">
+                <div class="driver-meta">
+                  <span class="driver-meta__label">Status</span>
+                  <span class="driver-meta__value" data-driver-status>—</span>
+                </div>
+                <div class="driver-meta">
+                  <span class="driver-meta__label">Source</span>
+                  <span class="driver-meta__value" data-driver-source>—</span>
+                </div>
+              </div>
+              <div class="driver-card__cloak" id="hidhideCloakRow">
+                <div class="driver-card__cloak-copy">
+                  <span class="driver-card__cloak-eyebrow">Live control</span>
+                  <span class="driver-card__cloak-label">Cloak</span>
+                  <span class="driver-card__cloak-state" id="hidhideCloakState">Off</span>
+                </div>
+                <button type="button" class="cloak-switch" id="hidhideToggle" aria-pressed="false" aria-label="Toggle HidHide cloak" title="Turn HidHide cloak on or off" disabled>
+                  <span class="cloak-switch__glow" aria-hidden="true"></span>
+                  <span class="cloak-switch__track" aria-hidden="true"></span>
+                  <span class="cloak-switch__knob" aria-hidden="true"></span>
+                </button>
+              </div>
+                  <p class="driver-card__cloak-note" id="hidhideCloakNote">Cloak arms automatically when your pad connects so macros reach the game. Turn it off only if you want the physical pad visible.</p>
+              <div class="driver-card__progress" data-driver-progress hidden>
+                <div class="driver-card__bar"><span data-driver-bar></span></div>
+                <p class="driver-card__note" data-driver-note></p>
+              </div>
+              <div class="driver-card__actions">
+                <button type="button" class="driver-card__btn" data-driver-install>Install</button>
+              </div>
+            </article>
+          </div>
+
+          <p class="drivers__footer" id="driversFooter">Both drivers install together with a single Windows approval. No extra PlayStation or Xbox driver packs are required. A reboot is sometimes needed after HidHide.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="page page--dev" data-page="dev" hidden>
+      <div class="blank-developer">
+        <div class="blank-developer__scroll">
+          <section class="ndev-credits" aria-labelledby="ndevCreditsTitle">
+            <div class="ndev-credits__layout">
+              <div class="ndev-emblem" aria-hidden="true">
+                <div class="ndev-emblem__glow"></div>
+                <div class="ndev-emblem__particles"></div>
+                <div class="ndev-emblem__logo-wrap">
+                  <img src="assets/blank-logo.png?v=30" alt="" class="ndev-emblem__logo" width="360" height="360" draggable="false" />
+                </div>
+              </div>
+              <div class="ndev-credits__copy">
+                <div class="ndev-credits__label-row">
+                  <span class="ndev-credits__label">Developer</span>
+                  <span class="ndev-credits__rule" aria-hidden="true"></span>
+                </div>
+                <h1 class="ndev-credits__title" id="ndevCreditsTitle">Nouzen <span>studios</span></h1>
+                <p class="ndev-credits__role">Independent Developer</p>
+                <p class="ndev-credits__bio">
+                  Passionate about creating immersive and seamless gaming experiences. Blank Delay is the result of countless hours of dedication, learning and love for gaming.
+                </p>
+                <blockquote class="ndev-quote">
+                  <span class="ndev-quote__mark" aria-hidden="true">&ldquo;</span>
+                  <p>Don&rsquo;t put off until tomorrow for what can be done today.</p>
+                  <cite>&mdash; Nouzen Studios</cite>
+                </blockquote>
+              </div>
+            </div>
+          </section>
+
+          <section class="ndev-contact" aria-label="Contact and support">
+            <div class="ndev-contact__cards">
+              <a class="ndev-linkcard" href="https://discord.com/users/nouzenfym" target="_blank" rel="noopener noreferrer">
+                <span class="ndev-linkcard__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
+                </span>
+                <span class="ndev-linkcard__body">
+                  <span class="ndev-linkcard__label">Discord</span>
+                  <span class="ndev-linkcard__value">nouzenfym</span>
+                  <span class="ndev-linkcard__desc">Let&apos;s connect and build an amazing community!</span>
+                </span>
+                <span class="ndev-linkcard__chev" aria-hidden="true">&rsaquo;</span>
+              </a>
+              <a class="ndev-linkcard" href="mailto:nouzennouzen3@gmail.com">
+                <span class="ndev-linkcard__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                </span>
+                <span class="ndev-linkcard__body">
+                  <span class="ndev-linkcard__label">Business Email</span>
+                  <span class="ndev-linkcard__value">nouzennouzen3@gmail.com</span>
+                  <span class="ndev-linkcard__desc">For business inquiries and collaborations.</span>
+                </span>
+                <span class="ndev-linkcard__chev" aria-hidden="true">&rsaquo;</span>
+              </a>
+            </div>
+
+            <div class="ndev-thanks">
+              <h2 class="ndev-thanks__title">Thank You!</h2>
+              <p class="ndev-thanks__text">Thank you for using Blank Delay</p>
+              <p class="ndev-thanks__accent">Your support means the world!</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="page page--socials" data-page="socials" hidden>
+      <div class="soc soc--stage" id="blankSocials" aria-label="Socials">
+        <div class="soc__atmosphere" aria-hidden="true">
+          <span class="soc__core"></span>
+          <span class="soc__halo"></span>
+          <span class="soc__orbit soc__orbit--a"></span>
+          <span class="soc__orbit soc__orbit--b"></span>
+          <span class="soc__sparkles"></span>
+          <span class="soc__vignette"></span>
+          <span class="soc__grain"></span>
+        </div>
+
+        <div class="soc__floats" aria-label="Social links">
+          <a class="soc-float soc-float--yt" href="https://www.youtube.com/@blankdelayy" data-external="https://www.youtube.com/@blankdelayy" data-soc-particles="youtube">
+            <canvas class="soc-float__canvas" aria-hidden="true"></canvas>
+            <span class="soc-float__label">
+              <strong>YouTube</strong>
+              <em>@blankdelayy</em>
+            </span>
+          </a>
+          <a class="soc-float soc-float--tt" href="https://www.tiktok.com/@blankwym?_r=1&_t=ZP-98pNU3bvb9q" data-external="https://www.tiktok.com/@blankwym?_r=1&_t=ZP-98pNU3bvb9q" data-soc-particles="tiktok">
+            <canvas class="soc-float__canvas" aria-hidden="true"></canvas>
+            <span class="soc-float__label">
+              <strong>TikTok</strong>
+              <em>@blankwym</em>
+            </span>
+          </a>
+          <a class="soc-float soc-float--dc" href="https://discord.gg/5gyVpYMY9" data-external="https://discord.gg/5gyVpYMY9" data-soc-particles="discord">
+            <canvas class="soc-float__canvas" aria-hidden="true"></canvas>
+            <span class="soc-float__label">
+              <strong>Discord</strong>
+              <em>Join server</em>
+            </span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <p class="app-credit app-credit--left">Developed By Nouzen Studios</p>
+    <p class="app-credit app-credit--right">Developed By Nouzen Studios</p>
+
+    <div class="blank-dock" aria-label="Main navigation">
+      <div class="blank-dock__glow" aria-hidden="true"></div>
+      <nav class="blank-dock__bar">
+        <div class="blank-dock__side blank-dock__side--left">
+          <button type="button" class="blank-dock__item" data-view="macros" aria-label="Macros" title="Macros">
+            <span class="blank-dock__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3.5" y="4.5" width="17" height="4.2" rx="1.4"/>
+                <rect x="3.5" y="10" width="11.5" height="4.2" rx="1.4"/>
+                <rect x="3.5" y="15.5" width="14.5" height="4.2" rx="1.4"/>
+                <path d="M17.2 10.2 21 12.1l-3.8 1.9V10.2z" fill="currentColor" stroke="none"/>
+              </svg>
+            </span>
+            <span class="blank-dock__txt">
+              <strong>Macros</strong>
+              <em>Scripts</em>
+            </span>
+          </button>
+
+          <button type="button" class="blank-dock__item" data-view="binds" aria-label="Binds" title="Binds">
+            <span class="blank-dock__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2.5" y="7" width="19" height="10.5" rx="5.25"/>
+                <path d="M7.2 12.25h3.2M8.8 10.65v3.2"/>
+                <circle cx="15.4" cy="11.1" r="1.05" fill="currentColor" stroke="none"/>
+                <circle cx="17.9" cy="13.55" r="1.05" fill="currentColor" stroke="none"/>
+              </svg>
+            </span>
+            <span class="blank-dock__txt">
+              <strong>Binds</strong>
+              <em>Game</em>
+            </span>
+          </button>
+        </div>
+
+        <button type="button" class="blank-dock__home is-home" data-view="home" aria-label="Home" title="Home">
+          <span class="blank-dock__home-ring" aria-hidden="true"></span>
+          <span class="blank-dock__home-face" aria-hidden="true"></span>
+          <img src="assets/blank-logo.png?v=30" alt="" width="28" height="28" draggable="false" />
+        </button>
+
+        <div class="blank-dock__side blank-dock__side--right">
+          <button type="button" class="blank-dock__item" data-view="settings" aria-label="Settings" title="Settings">
+            <span class="blank-dock__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3.1"/>
+                <path d="M12 3.2v2.2M12 18.6v2.2M4.7 4.7l1.6 1.6M17.7 17.7l1.6 1.6M3.2 12h2.2M18.6 12h2.2M4.7 19.3l1.6-1.6M17.7 6.3l1.6-1.6"/>
+              </svg>
+            </span>
+            <span class="blank-dock__txt">
+              <strong>Settings</strong>
+              <em>Prefs</em>
+            </span>
+          </button>
+
+          <button type="button" class="blank-dock__item" data-view="socials" aria-label="Socials" title="Socials">
+            <span class="blank-dock__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="7.5" cy="8" r="2.4"/>
+                <circle cx="16.5" cy="8" r="2.4"/>
+                <circle cx="12" cy="16.2" r="2.4"/>
+                <path d="M9.4 9.4 14.6 9.4M9.2 9.8 11.2 14.2M14.8 9.8 12.8 14.2"/>
+              </svg>
+            </span>
+            <span class="blank-dock__txt">
+              <strong>Socials</strong>
+              <em>Links</em>
+            </span>
+          </button>
+
+          <button type="button" class="blank-dock__item" data-view="dev" aria-label="Dev" title="Dev">
+            <span class="blank-dock__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8.5 7.5 4 12l4.5 4.5"/>
+                <path d="M15.5 7.5 20 12l-4.5 4.5"/>
+                <path d="M13.2 5.5 10.8 18.5"/>
+              </svg>
+            </span>
+            <span class="blank-dock__txt">
+              <strong>Dev</strong>
+              <em>Studio</em>
+            </span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <div class="tap-delay" id="tapDelayModal" hidden>
+    <div class="tap-delay__backdrop" data-tap-delay="dismiss" aria-hidden="true"></div>
+    <div class="tap-delay__card" role="dialog" aria-modal="true" aria-labelledby="tapDelayTitle">
+      <span class="tap-delay__bloom" aria-hidden="true"></span>
+      <span class="tap-delay__orbit" aria-hidden="true"></span>
+      <span class="tap-delay__sheen" aria-hidden="true"></span>
+      <header class="tap-delay__head">
+        <div class="tap-delay__mark" aria-hidden="true">
+          <img src="assets/blank-logo.png?v=30" alt="" width="28" height="28" draggable="false" />
+        </div>
+        <div class="tap-delay__copy">
+          <span class="tap-delay__eyebrow">Blank Delay · Bind timing</span>
+          <h2 class="tap-delay__title" id="tapDelayTitle">Button</h2>
+          <p class="tap-delay__lead">Hold length sent to the game through the virtual pad. 0.00 ms passes taps through unchanged.</p>
+        </div>
+        <span class="tap-delay__chip" id="tapDelayChip" data-state="off">Off</span>
+      </header>
+      <div class="tap-delay__body">
+        <div class="tap-delay__meter">
+          <div class="tap-delay__value-block">
+            <span class="tap-delay__value" id="tapDelayValue">0.00</span>
+            <span class="tap-delay__unit">ms</span>
+          </div>
+          <div class="tap-delay__scale">
+            <span>0.00</span>
+            <span>5.00</span>
+            <span>10.00</span>
+          </div>
+        </div>
+        <div class="tap-delay__slider-wrap">
+          <div class="tap-delay__track" aria-hidden="true">
+            <span class="tap-delay__fill" id="tapDelayFill"></span>
+            <span class="tap-delay__ticks">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </span>
+          </div>
+          <input class="tap-delay__slider" id="tapDelaySlider" type="range" min="0" max="1000" step="1" value="0" aria-label="Tap delay milliseconds" />
+        </div>
+        <div class="tap-delay__hints">
+          <span><em>0.00</em> Normal feel</span>
+          <span><em>10.00</em> Maximum floor</span>
+        </div>
+      </div>
+      <div class="tap-delay__actions">
+        <button type="button" class="tap-delay__btn tap-delay__btn--ghost" data-tap-delay="dismiss">Cancel</button>
+        <button type="button" class="tap-delay__btn tap-delay__btn--apply" data-tap-delay="apply">
+          <span>Apply</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="close-chooser" id="closeChooser" hidden>
+    <div class="close-chooser__backdrop" data-close-chooser="dismiss" aria-hidden="true"></div>
+    <div class="close-chooser__card" role="dialog" aria-modal="true" aria-labelledby="closeChooserTitle">
+      <span class="close-chooser__sheen" aria-hidden="true"></span>
+      <header class="close-chooser__head">
+        <div class="close-chooser__mark" aria-hidden="true">
+          <img src="assets/blank-logo.png?v=21" alt="" width="36" height="36" draggable="false" />
+        </div>
+        <div class="close-chooser__copy">
+          <span class="close-chooser__eyebrow">Blank · Session</span>
+          <h2 class="close-chooser__title" id="closeChooserTitle">How do you want to leave?</h2>
+          <p class="close-chooser__text">Your macros can stay live in the tray, or stop with a full quit.</p>
+        </div>
+      </header>
+      <div class="close-chooser__actions">
+        <button type="button" class="close-chooser__btn close-chooser__btn--primary" data-close-chooser="hide">
+          <span class="close-chooser__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="12" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M9 11h.01M12 11h.01M15 11h.01"/></svg>
+          </span>
+          <span class="close-chooser__btn-body">
+            <span class="close-chooser__btn-label">Close</span>
+            <span class="close-chooser__btn-hint">Hide the window. Macros keep running — reopen from the tray or launch again.</span>
+          </span>
+          <span class="close-chooser__chev" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+          </span>
+        </button>
+        <button type="button" class="close-chooser__btn close-chooser__btn--danger" data-close-chooser="quit">
+          <span class="close-chooser__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9"/><path d="M7.5 6.2a7 7 0 1 0 9 0"/></svg>
+          </span>
+          <span class="close-chooser__btn-body">
+            <span class="close-chooser__btn-label">Fully close</span>
+            <span class="close-chooser__btn-hint">Quit the app completely and stop every macro.</span>
+          </span>
+          <span class="close-chooser__chev" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+          </span>
+        </button>
+      </div>
+      <button type="button" class="close-chooser__cancel" data-close-chooser="dismiss">
+        Cancel
+        <kbd>Esc</kbd>
+      </button>
+    </div>
+  </div>
+
+  <script src="./ps5-visualizer.js"></script>
+  <script src="./bind-icons.js"></script>
+  <script src="./binds.js"></script>
+  <script src="./macros.js"></script>
+  <script src="./settings.js"></script>
+  <script src="./social-particles.js"></script>
+  <script src="./app.js"></script>
+  <script src="./nova-login.js"></script>
+</body>
+</html>

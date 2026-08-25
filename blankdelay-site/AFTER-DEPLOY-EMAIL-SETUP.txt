@@ -1,0 +1,87 @@
+================================================================================
+  AFTER YOU DRAG-DROP TO NETLIFY — GET EMAILS WORKING (15 minutes)
+================================================================================
+
+When this is done, a buyer pays → Stripe webhook → license key + download link
+→ EmailJS → their inbox.
+
+--------------------------------------------------------------------------------
+STEP A — Netlify environment variables
+--------------------------------------------------------------------------------
+Netlify → your site → Site configuration → Environment variables → Add:
+
+  STRIPE_SECRET_KEY     = sk_live_...   (Stripe Dashboard → Developers → API keys)
+
+Save. Do NOT deploy yet — add webhook secret in Step B first.
+
+--------------------------------------------------------------------------------
+STEP B — Stripe webhook
+--------------------------------------------------------------------------------
+Stripe Dashboard → Developers → Webhooks → Add endpoint
+
+  URL:    https://blankdelay.com/.netlify/functions/stripe-webhook
+  Event:  checkout.session.completed
+
+Create → Reveal signing secret (whsec_...)
+
+Back to Netlify → add:
+
+  STRIPE_WEBHOOK_SECRET = whsec_...
+
+Then: Deploys → Trigger deploy → Deploy site (so functions get the secrets).
+
+--------------------------------------------------------------------------------
+STEP C — EmailJS template
+--------------------------------------------------------------------------------
+https://www.dashboard.emailjs.com
+
+  Service:  service_6e3o39a
+  Template: template_3kbh949
+
+Your email template MUST include these variables (copy/paste into the email body):
+
+  {{to_email}}
+  {{product_name}}
+  {{license_key}}
+  {{download_link}}
+  {{delivery_link}}
+
+Set "To email" field to: {{to_email}}
+
+Account → Security: allow server / non-browser requests if you see that option.
+
+Keys are already in bd-email-config.js in this upload.
+
+--------------------------------------------------------------------------------
+STEP D — Stripe Payment Links (optional but recommended)
+--------------------------------------------------------------------------------
+For each buy.stripe.com Payment Link:
+
+  After payment → Success URL:
+  https://blankdelay.com/thank-you.html?session_id={CHECKOUT_SESSION_ID}
+
+Optional metadata on the link (helps pick the right product name in email):
+  product_slug = premium | zero-plus | zero | fps | ping | controller | keyboard | aim | shotgun
+
+--------------------------------------------------------------------------------
+STEP E — Test purchase
+--------------------------------------------------------------------------------
+1. Buy with a real email you can check (or Stripe test mode on a preview site).
+2. Within 1–2 minutes: email with BD-XXXX-XXXX-XXXX and download link.
+3. If no email:
+   - Stripe → Webhooks → your endpoint → Recent deliveries (fix 400/500 errors)
+   - Netlify → Functions → stripe-webhook → Logs
+   - EmailJS → Email log
+
+4. Download the .exe from the email link → install → Product Hub → paste key.
+
+--------------------------------------------------------------------------------
+STUCK CUSTOMERS (already paid before this was set up)
+--------------------------------------------------------------------------------
+Stripe → Payments → find them → send manually:
+
+  Download: https://blankdelay.com/downloads/BlankDelay-Setup.exe
+  Key format: BD-XXXX-XXXX-XXXX (generate any matching pattern for manual send;
+  new sales get real keys from the webhook automatically)
+
+================================================================================

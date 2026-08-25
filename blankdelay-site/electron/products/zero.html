@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BlankDelay — Zero Delay</title>
+    <link rel="stylesheet" href="../shared/app.css">
+    <link rel="stylesheet" href="../shared/bd-splash.css">
+    <link rel="stylesheet" href="../shared/bd-tweaks-grid.css">
+</head>
+<body class="bd-app" data-theme="zero">
+    <script src="../shared/system-live.js"></script>
+    <canvas id="bg-canvas" class="bg-canvas"></canvas>
+    <div id="bd-splash-root"
+        data-title="ZERO DELAY"
+        data-short-name="Zero Delay"
+        data-tagline="Optimize · Accelerate · Dominate"></div>
+    <div class="bd-app-main" id="bd-app-main" hidden>
+        <div class="app" style="max-width:1180px">
+            <div class="topbar">
+                <div class="brand"><span class="mark"><svg viewBox="0 0 32 32"><circle cx="8" cy="16" r="3.5" fill="currentColor"/><path fill="currentColor" d="M11 16h4l14-6-3 6 3 6-14-6z"/></svg></span> BLANKDELAY <span style="opacity:.4;margin:0 6px">|</span> <span style="color:var(--accent)">Zero Delay</span></div>
+                <span class="status-pill" id="admin-status-pill">Checking…</span>
+            </div>
+            <div id="tweaks-grid-root"></div>
+            <div class="log" id="log" style="max-width:1180px;margin:18px auto 0;"><div>BlankDelay Zero Delay engine ready.</div></div>
+        </div>
+    </div>
+
+    <script src="../shared/background.js"></script>
+    <script src="../shared/bd-splash-fx.js"></script>
+<script src="../shared/bd-splash.js"></script>
+    <script src="../shared/bd-tweaks-grid.js"></script>
+    <script>
+    const CATEGORIES = [
+        {
+            name: 'Core Latency',
+            icon: '⚡',
+            tweaks: [
+                { id: 'nagle', name: "Disable Nagle's Algorithm", desc: 'Removes TCP buffering for instant packet delivery', apply: `Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\*' | ForEach-Object { $path = $_.PSPath; Set-ItemProperty -Path $path -Name TcpAckFrequency -Value 1 -Type DWord -ErrorAction SilentlyContinue; Set-ItemProperty -Path $path -Name TCPNoDelay -Value 1 -Type DWord -ErrorAction SilentlyContinue }`, restore: `Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\*' | ForEach-Object { $path = $_.PSPath; Remove-ItemProperty -Path $path -Name TcpAckFrequency -ErrorAction SilentlyContinue; Remove-ItemProperty -Path $path -Name TCPNoDelay -ErrorAction SilentlyContinue }` },
+                { id: 'timer-res', name: 'Force Timer Resolution (0.5ms)', desc: 'Sets system timer to 0.5ms for fastest response', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel' -Name GlobalTimerResolutionRequests -Value 1 -Type DWord -ErrorAction SilentlyContinue`, restore: `Remove-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel' -Name GlobalTimerResolutionRequests -ErrorAction SilentlyContinue` },
+                { id: 'network-throttle', name: 'Disable Network Throttling', desc: 'Removes Windows network throttle limit', apply: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name NetworkThrottlingIndex -Value 0xFFFFFFFF -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name NetworkThrottlingIndex -Value 10 -Type DWord` },
+                { id: 'system-responsiveness', name: 'System Responsiveness (0%)', desc: 'Allocates all CPU to foreground tasks', apply: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name SystemResponsiveness -Value 0 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name SystemResponsiveness -Value 20 -Type DWord` },
+                { id: 'power-throttle', name: 'Disable Power Throttling', desc: 'Prevents Windows from power-limiting apps', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling' -Name PowerThrottlingOff -Value 1 -Type DWord -ErrorAction SilentlyContinue; if (!(Test-Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling')) { New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling' -Name PowerThrottlingOff -Value 1 -Type DWord }`, restore: `Remove-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling' -Name PowerThrottlingOff -ErrorAction SilentlyContinue` },
+                { id: 'game-priority', name: 'Game Priority (Highest)', desc: 'Sets gaming processes to priority 6 (Highest)', apply: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name Priority -Value 6 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'Scheduling Category' -Value 'High' -Type String; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'SFIO Priority' -Value 'High' -Type String`, restore: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name Priority -Value 2 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'Scheduling Category' -Value 'Medium' -Type String; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'SFIO Priority' -Value 'Normal' -Type String` },
+                { id: 'dynamic-tick', name: 'Disable Dynamic Tick', desc: 'Keeps CPU timer interrupts constant — steadier input polling', apply: `bcdedit /set disabledynamictick yes`, restore: `bcdedit /deletevalue disabledynamictick` },
+                { id: 'usb-suspend', name: 'Disable USB Selective Suspend', desc: 'Stops USB devices (mouse/keyboard) from sleeping mid-game', apply: `powercfg /setacvalueindex scheme_current 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0; powercfg /setactive scheme_current`, restore: `powercfg /setacvalueindex scheme_current 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 1; powercfg /setactive scheme_current` }
+            ]
+        },
+        {
+            name: 'Keyboard & Mouse',
+            icon: '⌨',
+            tweaks: [
+                { id: 'mouse-data-queue', name: 'Mouse Data Queue Size (Min)', desc: 'Reduces mouse input buffer to 1 for instant response', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\mouclass\\Parameters' -Name MouseDataQueueSize -Value 16 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\mouclass\\Parameters' -Name MouseDataQueueSize -Value 100 -Type DWord` },
+                { id: 'keyboard-data-queue', name: 'Keyboard Data Queue Size (Min)', desc: 'Reduces keyboard input buffer for instant keystrokes', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\kbdclass\\Parameters' -Name KeyboardDataQueueSize -Value 16 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\kbdclass\\Parameters' -Name KeyboardDataQueueSize -Value 100 -Type DWord` },
+                { id: 'mouse-accel', name: 'Disable Mouse Acceleration', desc: 'Forces 1:1 linear cursor movement — no pointer smoothing', apply: `Set-ItemProperty -Path 'HKCU:\\Control Panel\\Mouse' -Name MouseSpeed -Value '0'; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Mouse' -Name MouseThreshold1 -Value '0'; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Mouse' -Name MouseThreshold2 -Value '0'`, restore: `Set-ItemProperty -Path 'HKCU:\\Control Panel\\Mouse' -Name MouseSpeed -Value '1'; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Mouse' -Name MouseThreshold1 -Value '6'; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Mouse' -Name MouseThreshold2 -Value '10'` },
+                { id: 'key-repeat-delay', name: 'Fastest Key Repeat Delay', desc: 'Shortest possible delay before keys start repeating', apply: `Set-ItemProperty -Path 'HKCU:\\Control Panel\\Keyboard' -Name KeyboardDelay -Value '0'`, restore: `Set-ItemProperty -Path 'HKCU:\\Control Panel\\Keyboard' -Name KeyboardDelay -Value '1'` }
+            ]
+        },
+        {
+            name: 'System & Debloat',
+            icon: '🖥',
+            tweaks: [
+                { id: 'sysmain', name: 'Disable SysMain (Superfetch)', desc: 'Stops background preloading that competes for disk I/O', apply: `Stop-Service -Name SysMain -Force -ErrorAction SilentlyContinue; Set-Service -Name SysMain -StartupType Disabled -ErrorAction SilentlyContinue`, restore: `Set-Service -Name SysMain -StartupType Automatic -ErrorAction SilentlyContinue; Start-Service -Name SysMain -ErrorAction SilentlyContinue` },
+                { id: 'search-indexer', name: 'Disable Windows Search Indexer', desc: 'Stops the indexer from competing for disk I/O while you play', apply: `Stop-Service -Name WSearch -Force -ErrorAction SilentlyContinue; Set-Service -Name WSearch -StartupType Disabled -ErrorAction SilentlyContinue`, restore: `Set-Service -Name WSearch -StartupType Automatic -ErrorAction SilentlyContinue; Start-Service -Name WSearch -ErrorAction SilentlyContinue` },
+                { id: 'background-apps', name: 'Disable Background Apps', desc: 'Stops UWP apps from running and using resources in the background', apply: `if (!(Test-Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\BackgroundAccessApplications')) { New-Item -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\BackgroundAccessApplications' -Force | Out-Null }; Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\BackgroundAccessApplications' -Name GlobalUserDisabled -Value 1 -Type DWord`, restore: `Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\BackgroundAccessApplications' -Name GlobalUserDisabled -Value 0 -Type DWord -ErrorAction SilentlyContinue` },
+                { id: 'ultimate-perf', name: 'Ultimate Performance Power Plan', desc: 'Activates the hidden no-throttle power plan', apply: `powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61 2>$null; if ($LASTEXITCODE -ne 0) { $out = powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61; if ($out -match '([0-9a-fA-F-]{36})') { powercfg -setactive $matches[1] } }`, restore: `powercfg -setactive 381b4222-f694-41f0-9685-ff5bb260df2e` }
+            ]
+        }
+    ];
+
+    (async function () {
+        const status = document.getElementById('admin-status-pill');
+        const log = document.getElementById('log');
+        function addLog(msg, type) {
+            const line = document.createElement('div');
+            line.className = type || '';
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            log.prepend(line);
+        }
+
+        await BdSplash.init({
+            onUnlock: async () => {
+                addLog('License validated — Zero Delay unlocked.', 'ok');
+                const grid = BdTweaksGrid.init({
+                    mountId: 'tweaks-grid-root',
+                    productLabel: 'Zero Delay',
+                    variant: 'latency',
+                    subtitle: 'Tweaks apply instantly and persist after restart.',
+                    categories: CATEGORIES,
+                    onAdminStatus: (isAdmin) => {
+                        status.textContent = isAdmin ? 'Admin ✓' : 'No Admin';
+                        status.classList.toggle('admin-ok', isAdmin);
+                        addLog(isAdmin ? 'Running as Administrator.' : 'Not running as admin — click Restart as Admin.', isAdmin ? 'ok' : 'warn');
+                    },
+                    onApplied: () => BlankSystemLive.refresh && BlankSystemLive.refresh('latency'),
+                    onReverted: () => BlankSystemLive.refresh && BlankSystemLive.refresh('latency')
+                });
+                BlankSystemLive.ensureScanPanel?.();
+                BlankSystemLive.startPolling?.('latency');
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

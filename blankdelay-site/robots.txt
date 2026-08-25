@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://blankdelay.com/sitemap.xml

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BlankDelay — Blank Premium Utility</title>
+    <link rel="stylesheet" href="../shared/app.css">
+    <link rel="stylesheet" href="../shared/bd-splash.css">
+    <link rel="stylesheet" href="../shared/bd-tweaks-grid.css">
+    <link rel="stylesheet" href="../shared/bd-dashboard-shell.css">
+</head>
+<body class="bd-app bd-dashboard-app" data-theme="premium">
+    <script src="../shared/system-live.js"></script>
+    <canvas id="bg-canvas" class="bg-canvas"></canvas>
+    <div id="bd-splash-root"
+        data-title="BLANK PREMIUM UTILITY"
+        data-short-name="Premium Utility"
+        data-tagline="Optimize · Accelerate · Dominate"></div>
+    <div class="bd-app-main" id="bd-app-main" hidden>
+        <div id="dashboard-root"></div>
+    </div>
+
+    <script src="../shared/background.js"></script>
+    <script src="../shared/bd-splash-fx.js"></script>
+<script src="../shared/bd-splash.js"></script>
+    <script src="../shared/bd-tweaks-grid.js"></script>
+    <script src="../shared/bd-dashboard-shell.js"></script>
+    <script>
+    const CATEGORIES = [
+        {
+            key: 'input-latency',
+            name: 'Input Latency',
+            icon: '⚡',
+            tweaks: [
+                { id: 'nagle', name: "Disable Nagle's Algorithm", desc: 'TCP no-delay on all interfaces', apply: `Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\*' | ForEach-Object { $p = $_.PSPath; Set-ItemProperty -Path $p -Name TcpAckFrequency -Value 1 -Type DWord -EA SilentlyContinue; Set-ItemProperty -Path $p -Name TCPNoDelay -Value 1 -Type DWord -EA SilentlyContinue }`, restore: `Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\*' | ForEach-Object { $p = $_.PSPath; Remove-ItemProperty -Path $p -Name TcpAckFrequency -EA SilentlyContinue; Remove-ItemProperty -Path $p -Name TCPNoDelay -EA SilentlyContinue }` },
+                { id: 'timer', name: 'Timer Resolution (0.5ms)', desc: 'Lowest system timer for input', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel' -Name GlobalTimerResolutionRequests -Value 1 -Type DWord -EA SilentlyContinue`, restore: `Remove-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel' -Name GlobalTimerResolutionRequests -EA SilentlyContinue` },
+                { id: 'mouse-q', name: 'Mouse Queue (Min)', desc: 'Mouse buffer → 16', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\mouclass\\Parameters' -Name MouseDataQueueSize -Value 16 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\mouclass\\Parameters' -Name MouseDataQueueSize -Value 100 -Type DWord` },
+                { id: 'kb-q', name: 'Keyboard Queue (Min)', desc: 'Keyboard buffer → 16', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\kbdclass\\Parameters' -Name KeyboardDataQueueSize -Value 16 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\kbdclass\\Parameters' -Name KeyboardDataQueueSize -Value 100 -Type DWord` },
+                { id: 'power-throttle', name: 'Disable Power Throttling', desc: 'No app power limiting', apply: `if (!(Test-Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling')) { New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling' -Name PowerThrottlingOff -Value 1 -Type DWord`, restore: `Remove-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling' -Name PowerThrottlingOff -EA SilentlyContinue` }
+            ]
+        },
+        {
+            key: 'fps-gpu',
+            name: 'FPS & GPU',
+            icon: '🎮',
+            tweaks: [
+                { id: 'gpu-sched', name: 'Hardware GPU Scheduling', desc: 'HW-accelerated GPU sched', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers' -Name HwSchMode -Value 2 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers' -Name HwSchMode -Value 1 -Type DWord` },
+                { id: 'fse', name: 'Disable Fullscreen Optimizations', desc: 'No DWM in exclusive fullscreen', apply: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehaviorMode -Value 2 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_HonorUserFSEBehaviorMode -Value 1 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehavior -Value 2 -Type DWord`, restore: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehaviorMode -Value 0 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_HonorUserFSEBehaviorMode -Value 0 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehavior -Value 0 -Type DWord` },
+                { id: 'dvr', name: 'Disable Game DVR', desc: 'No background recording', apply: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_Enabled -Value 0 -Type DWord; if (!(Test-Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR')) { New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR' -Name AllowGameDVR -Value 0 -Type DWord`, restore: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_Enabled -Value 1 -Type DWord; Remove-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR' -Name AllowGameDVR -EA SilentlyContinue` },
+                { id: 'vfx', name: 'Strip Visual Effects', desc: 'Animations off, shadows off', apply: `Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects' -Name VisualFXSetting -Value 2 -Type DWord; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Desktop' -Name UserPreferencesMask -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0x00,0x00,0x00)) -Type Binary`, restore: `Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects' -Name VisualFXSetting -Value 0 -Type DWord; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Desktop' -Name UserPreferencesMask -Value ([byte[]](0x9E,0x3E,0x07,0x80,0x12,0x00,0x00,0x00)) -Type Binary` },
+                { id: 'preempt', name: 'Disable GPU Preemption', desc: 'No mid-frame context switch', apply: `if (!(Test-Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler')) { New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler' -Name EnablePreemption -Value 0 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler' -Name EnablePreemption -Value 1 -Type DWord` },
+                { id: 'gamemode', name: 'Enable Game Mode', desc: 'Dedicate resources to games', apply: `if (!(Test-Path 'HKCU:\\Software\\Microsoft\\GameBar')) { New-Item -Path 'HKCU:\\Software\\Microsoft\\GameBar' -Force | Out-Null }; Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\GameBar' -Name AutoGameModeEnabled -Value 1 -Type DWord`, restore: `Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\GameBar' -Name AutoGameModeEnabled -Value 0 -Type DWord` }
+            ]
+        },
+        {
+            key: 'network',
+            name: 'Network',
+            icon: '🌐',
+            tweaks: [
+                { id: 'dns', name: 'Cloudflare DNS (1.1.1.1)', desc: 'Fastest public DNS resolver', apply: `$a = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' }; foreach ($x in $a) { Set-DnsClientServerAddress -InterfaceIndex $x.ifIndex -ServerAddresses ('1.1.1.1','1.0.0.1') }`, restore: `$a = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' }; foreach ($x in $a) { Set-DnsClientServerAddress -InterfaceIndex $x.ifIndex -ResetServerAddresses }` },
+                { id: 'dns-flush', name: 'Flush DNS Cache', desc: 'Clear stale entries', apply: `Clear-DnsClientCache`, restore: `Write-Output 'auto-rebuilds'` },
+                { id: 'net-throttle', name: 'Disable Network Throttling', desc: 'Remove 10Mbps cap', apply: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name NetworkThrottlingIndex -Value 0xFFFFFFFF -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name NetworkThrottlingIndex -Value 10 -Type DWord` },
+                { id: 'auto-tune', name: 'Disable Auto-Tuning', desc: 'Fixed receive window', apply: `netsh int tcp set global autotuninglevel=disabled`, restore: `netsh int tcp set global autotuninglevel=normal` },
+                { id: 'qos', name: 'Remove QoS Reserve', desc: 'Reclaim 20% bandwidth', apply: `if (!(Test-Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Psched')) { New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Psched' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Psched' -Name NonBestEffortLimit -Value 0 -Type DWord`, restore: `Remove-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Psched' -Name NonBestEffortLimit -EA SilentlyContinue` }
+            ]
+        },
+        {
+            key: 'system-cpu',
+            name: 'System & CPU',
+            icon: '🖥',
+            tweaks: [
+                { id: 'responsiveness', name: 'System Responsiveness (0%)', desc: 'All CPU to foreground', apply: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name SystemResponsiveness -Value 0 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name SystemResponsiveness -Value 20 -Type DWord` },
+                { id: 'game-pri', name: 'Game Priority (Max)', desc: 'Priority 6, High scheduling', apply: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name Priority -Value 6 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'Scheduling Category' -Value 'High' -Type String; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'SFIO Priority' -Value 'High' -Type String`, restore: `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name Priority -Value 2 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'Scheduling Category' -Value 'Medium' -Type String; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games' -Name 'SFIO Priority' -Value 'Normal' -Type String` },
+                { id: 'priority-sep', name: 'CPU Quantum (Short/Fixed)', desc: 'Max foreground quantum', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl' -Name Win32PrioritySeparation -Value 26 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl' -Name Win32PrioritySeparation -Value 2 -Type DWord` },
+                { id: 'superfetch', name: 'Disable SysMain', desc: 'Stop background preloading', apply: `Stop-Service -Name SysMain -Force -EA SilentlyContinue; Set-Service -Name SysMain -StartupType Disabled -EA SilentlyContinue`, restore: `Set-Service -Name SysMain -StartupType Automatic -EA SilentlyContinue; Start-Service -Name SysMain -EA SilentlyContinue` },
+                { id: 'large-cache', name: 'Disable Large System Cache', desc: 'Free RAM for games', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management' -Name LargeSystemCache -Value 0 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management' -Name LargeSystemCache -Value 1 -Type DWord` }
+            ]
+        }
+    ];
+
+    (async function () {
+        await BdSplash.init({
+            onUnlock: () => {
+                BdDashboardShell.init({
+                    mountId: 'dashboard-root',
+                    productName: 'Blank Premium Utility',
+                    categories: CATEGORIES
+                });
+                BlankSystemLive.startPolling?.('latency');
+            }
+        });
+    })();
+    </script>
+</body>
+</html>
