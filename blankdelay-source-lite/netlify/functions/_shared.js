@@ -10,20 +10,11 @@ const PRODUCTS = {
 }
 
 const PAYMENT_LINKS = {
-  'fps-boost': 'https://buy.stripe.com/cNi8wI0QqbA6dyLb6F9bO0b',
-  'controller-macro': 'https://buy.stripe.com/6oUbIU1Uu47EfGTcaJ9bO09',
-  'keyboard-macro': 'https://buy.stripe.com/8x2bIU1UugUq0LZeiR9bO08',
-  'zero-delay-os': 'https://buy.stripe.com/4gM4gsdDc47E2U7eiR9bO0e',
-  'premium-utility': 'https://buy.stripe.com/9B628kdDc7jQdyL4Ih9bO0d',
-  'aim-bundle': 'https://buy.stripe.com/8x28wI7eObA666j7Ut9bO07',
-}
-
-const PRICES = {
-  'fps-boost': 1599,
-  'controller-macro': 2599,
-  'keyboard-macro': 2599,
-  'zero-delay-os': 1599,
-  'premium-utility': 3299,
+  'fps-boost': 'https://buy.stripe.com/28E6oAar05bIcuHdeN9bO0k',
+  'controller-macro': 'https://buy.stripe.com/dRm8wIeHgdIe2U7eiR9bO0j',
+  'keyboard-macro': 'https://buy.stripe.com/cNi3cobv4gUqcuHeiR9bO0i',
+  'zero-delay-os': 'https://buy.stripe.com/6oU5kw56GeMigKXfmV9bO0h',
+  'premium-utility': 'https://buy.stripe.com/fZu3co8iSaw2eCP1w59bO0g',
 }
 
 const DOWNLOADS = {
@@ -77,52 +68,31 @@ async function stripeRequest(method, path, params) {
   return data
 }
 
-async function ensureReturnUrl(paymentUrl, site) {
-  if (!process.env.STRIPE_SECRET_KEY) return
-  const slug = new URL(paymentUrl).pathname.replace(/^\//, '')
-  const target = `${site}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`
-  const listed = await stripeRequest('GET', '/payment_links', { limit: '100' })
-  const link = (listed.data || []).find((item) => String(item.url || '').includes(slug))
-  if (!link) return
-  if (link.after_completion?.type === 'redirect' && link.after_completion?.redirect?.url === target) return
-  await stripeRequest('POST', `/payment_links/${link.id}`, {
-    'after_completion[type]': 'redirect',
-    'after_completion[redirect][url]': target,
-  })
-}
-
-async function createSession(productId, site) {
-  const product = PRODUCTS[productId]
-  const amount = PRICES[productId]
-  if (!product || !amount) {
+function paymentLinkFor(productId) {
+  const base = PAYMENT_LINKS[productId]
+  if (!base) {
     const error = new Error('Unknown product')
     error.status = 400
     throw error
   }
-  const session = await stripeRequest('POST', '/checkout/sessions', {
-    mode: 'payment',
-    success_url: `${site}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${site}/`,
-    client_reference_id: productId,
-    'metadata[productId]': productId,
-    'line_items[0][quantity]': '1',
-    'line_items[0][price_data][currency]': 'usd',
-    'line_items[0][price_data][unit_amount]': String(amount),
-    'line_items[0][price_data][product_data][name]': product.name,
-    'line_items[0][price_data][product_data][description]': product.name,
-  })
-  return session.url
+  const url = new URL(base)
+  url.searchParams.set('client_reference_id', productId)
+  return url.toString()
 }
 
-function productFromSession(session) {
+async function productFromSession(session) {
   const ref = String(session.client_reference_id || session.metadata?.productId || '').trim()
-  if (PRODUCTS[ref]) return PRODUCTS[ref]
-  return null
+  if (PRODUCTS[ref] && PAYMENT_LINKS[ref]) return PRODUCTS[ref]
+  if (!session.payment_link) return null
+  // Someone opened the Stripe link directly, without the reference the site adds.
+  const link = await stripeRequest('GET', `/payment_links/${encodeURIComponent(session.payment_link)}`)
+  const match = Object.keys(PAYMENT_LINKS).find((id) => PAYMENT_LINKS[id] === link.url)
+  return match ? PRODUCTS[match] : null
 }
 
 async function readSession(sessionId) {
   const session = await stripeRequest('GET', `/checkout/sessions/${encodeURIComponent(sessionId)}`)
-  const product = productFromSession(session)
+  const product = await productFromSession(session)
   const paid = session.payment_status === 'paid' && Boolean(product)
   return {
     paid,
@@ -136,6 +106,6 @@ module.exports = {
   DOWNLOADS,
   json,
   siteOrigin,
-  createSession,
+  paymentLinkFor,
   readSession,
 }

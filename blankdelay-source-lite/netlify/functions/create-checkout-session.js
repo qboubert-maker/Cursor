@@ -1,6 +1,6 @@
 'use strict'
 
-const { PRODUCTS, json, siteOrigin, createSession } = require('./_shared')
+const { PRODUCTS, json, paymentLinkFor } = require('./_shared')
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' })
@@ -12,11 +12,8 @@ exports.handler = async (event) => {
   }
   const productId = String(body.productId || '')
   if (!PRODUCTS[productId] || productId === 'aim-bundle') return json(400, { error: 'Unknown product' })
-  const host = event.headers.host || event.headers.Host || ''
-  const site = siteOrigin(body.origin, host)
   try {
-    const url = await createSession(productId, site)
-    return json(200, { url })
+    return json(200, { url: paymentLinkFor(productId) })
   } catch (error) {
     return json(error.status || 500, { error: error.message || 'Stripe could not be opened.' })
   }
