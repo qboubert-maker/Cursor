@@ -48,7 +48,7 @@ export const PRODUCTS = [
     id: 'controller-macro',
     index: '02',
     icon: Gamepad2,
-    title: 'Zero Delay Controller Macro',
+    title: 'Controller Macro',
     tagline: 'Hardware-level polling rate overrides.',
     body: 'Push your pad past its factory polling limit and bind frame-perfect macros directly at the input layer.',
     tags: ['USB polling override', 'Deadzone calibration', 'Macro remap'],

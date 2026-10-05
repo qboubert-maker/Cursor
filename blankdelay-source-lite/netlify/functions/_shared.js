@@ -27,11 +27,10 @@ const PRICES = {
 }
 
 const DOWNLOADS = {
-  'fps-boost': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
-  'keyboard-macro': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
-  'zero-delay-os': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
-  'premium-utility': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
-  'aim-bundle': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
+  'fps-boost': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Fps-Boost.exe',
+  'keyboard-macro': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Keyboard-Macro.exe',
+  'zero-delay-os': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Zero-Delay.exe',
+  'premium-utility': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Delay-Premium.exe',
   'controller-macro': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Delay-Controller-Macro.exe',
 }
 

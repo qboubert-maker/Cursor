@@ -13,28 +13,24 @@ export const STRIPE_PAYMENT_LINKS = {
 /** Installers already published for the original site. The new download screen opens these after payment. */
 export const PRODUCT_DOWNLOADS = {
   'fps-boost': {
-    url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
-    filename: 'BlankDelay-Setup.exe',
+    url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Fps-Boost.exe',
+    filename: 'Blank Fps Boost.exe',
   },
   'keyboard-macro': {
-    url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
-    filename: 'BlankDelay-Setup.exe',
+    url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Keyboard-Macro.exe',
+    filename: 'Blank Keyboard Macro.exe',
   },
   'zero-delay-os': {
-    url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
-    filename: 'BlankDelay-Setup.exe',
+    url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Zero-Delay.exe',
+    filename: 'Blank Zero Delay.exe',
   },
   'premium-utility': {
-    url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
-    filename: 'BlankDelay-Setup.exe',
+    url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Delay-Premium.exe',
+    filename: 'Blank Delay Premium.exe',
   },
   'controller-macro': {
     url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Delay-Controller-Macro.exe',
     filename: 'Blank Delay Controller Macro.exe',
-  },
-  'aim-bundle': {
-    url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
-    filename: 'BlankDelay-Setup.exe',
   },
 }
 
