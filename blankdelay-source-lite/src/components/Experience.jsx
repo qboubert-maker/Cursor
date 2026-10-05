@@ -783,74 +783,63 @@ function Atmosphere() {
       <primitive object={padRim} />
       <primitive object={padLeft} />
       <primitive object={padRight} />
-      {quality.mobile ? null : (
-        <Environment resolution={32} frames={1}>
-          <Lightformer form="rect" intensity={6} position={[0, 12, 10]} scale={[20, 2, 1]} color="#ffffff" />
-          <Lightformer form="rect" intensity={1.6} position={[10, 0, 6]} scale={[2, 14, 1]} color="#ffffff" />
-        </Environment>
-      )}
+      <Environment resolution={128} frames={1}>
+        <Lightformer form="rect" intensity={6} position={[0, 12, 10]} scale={[20, 2, 1]} color="#ffffff" />
+        <Lightformer form="rect" intensity={2.2} position={[-10, 2, 4]} scale={[2, 18, 1]} color="#ffffff" />
+        <Lightformer form="rect" intensity={1.6} position={[10, 0, 6]} scale={[2, 14, 1]} color="#ffffff" />
+        <Lightformer form="ring" intensity={2.4} position={[0, 4, 12]} scale={6} color="#ffffff" />
+      </Environment>
     </>
   )
 }
 
 function LaterVisuals() {
-  const [band, setBand] = useState(0)
+  const [stage, setStage] = useState(0)
   useEffect(() => {
-    const update = (value) => {
-      const p = Number(value) || 0
-      const next = p >= 0.9 ? 5 : p >= 0.7 ? 4 : p >= 0.6 ? 3 : p >= 0.42 ? 2 : p >= 0.18 ? 1 : 0
-      setBand((current) => (current === next ? current : next))
-    }
-    update(scrollProgress.get())
-    return scrollProgress.on('change', update)
-  }, [])
-
-  useEffect(() => {
-    if (band < 3) return undefined
-    const idle = window.requestIdleCallback || ((fn) => window.setTimeout(fn, 120))
-    const cancel = window.cancelIdleCallback || window.clearTimeout
-    const id = idle(() => {
-      preloadModel('/zero-pc.glb', false, false)
-      preloadTexture('/zero-mark.png')
-      preloadTexture('/apex-3-tkl.webp')
-      preloadTexture('/g502.webp')
-      preloadTexture('/ryzen9.webp')
-      preloadTexture('/i9.webp')
-      preloadTexture('/nvidia.webp')
-      preloadTexture('/radeon.webp')
+    let later = 0
+    let follow = 0
+    const frame = requestAnimationFrame(() => {
+      setStage(1)
+      follow = requestAnimationFrame(() => {
+        setStage(2)
+        preloadModel('/zero-pc.glb', false, false)
+        preloadTexture('/zero-mark.png')
+        preloadTexture('/apex-3-tkl.webp')
+        preloadTexture('/g502.webp')
+        preloadTexture('/ryzen9.webp')
+        preloadTexture('/i9.webp')
+        preloadTexture('/nvidia.webp')
+        preloadTexture('/radeon.webp')
+        later = window.setTimeout(() => setStage(3), 800)
+      })
     })
-    return () => cancel(id)
-  }, [band])
-
-  if (band === 0) return null
+    return () => {
+      cancelAnimationFrame(frame)
+      cancelAnimationFrame(follow)
+      clearTimeout(later)
+    }
+  }, [])
+  if (stage === 0) return null
   return (
     <>
-      {band >= 1 && (
+      {stage >= 1 && (
+        <Suspense fallback={null}>
+          <ControllerShowcase3D />
+        </Suspense>
+      )}
+      {stage >= 2 && (
         <Suspense fallback={null}>
           <AffiliateNetwork />
           <SocialParticles />
         </Suspense>
       )}
-      {band >= 2 && (
-        <Suspense fallback={null}>
-          <ControllerShowcase3D />
-        </Suspense>
-      )}
-      {band >= 3 && (
+      {stage >= 3 && (
         <Suspense fallback={null}>
           <KeyboardMouseShowcase3D />
           <ZeroDelayAppShowcase3D />
-        </Suspense>
-      )}
-      {band >= 4 && (
-        <Suspense fallback={null}>
           <FPSBoostShowcase3D />
           <PremiumUtilityShowcase3D />
           <AimBundleShowcase3D />
-        </Suspense>
-      )}
-      {band >= 5 && (
-        <Suspense fallback={null}>
           <MultiversalCompatibilityShowcase3D />
           <AboutShowcase3D />
         </Suspense>
@@ -870,20 +859,14 @@ export default function Experience() {
       onCreated={({ gl }) => {
         gl.setClearColor('#000000', 1)
         gl.debug.checkShaderErrors = false
-        gl.shadowMap.enabled = false
         gl.toneMapping = THREE.ACESFilmicToneMapping
         gl.toneMappingExposure = 1.05
-        const boot = document.getElementById('boot')
-        if (boot) {
-          boot.classList.add('is-done')
-          window.setTimeout(() => boot.remove(), 420)
-        }
         const context = gl.getContext()
         const info = context.getExtension('WEBGL_debug_renderer_info')
         if (!info) return
         const renderer = context.getParameter(info.UNMASKED_RENDERER_WEBGL) || ''
         if (/uhd|hd graphics|iris|mali-|llvmpipe|swiftshader|basic render/i.test(renderer)) {
-          quality.clouds = 28
+          quality.clouds = Math.min(quality.clouds, 150)
           setDpr(1)
         }
       }}
@@ -898,10 +881,10 @@ export default function Experience() {
       <Atmosphere />
       <Suspense fallback={null}>
         <PCModel />
-        {quality.clouds > 0 ? <VolumetricClouds /> : null}
+        <VolumetricClouds />
         <DataStreams />
       </Suspense>
-      {quality.mobile ? null : <LaterVisuals />}
+      <LaterVisuals />
     </Canvas>
   )
 }

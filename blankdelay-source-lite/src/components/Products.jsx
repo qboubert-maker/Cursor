@@ -94,7 +94,7 @@ function PurchaseCard({ product }) {
     <motion.article
       variants={cardVariants}
       whileHover={{ y: -4, borderColor: 'rgba(255,255,255,0.95)' }}
-      className={`pointer-events-auto group relative flex min-h-[148px] flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-black/55 p-4 shadow-[0_0_0_rgba(255,255,255,0)] transition-shadow duration-300 hover:shadow-[0_0_48px_rgba(255,255,255,0.16)] md:h-full md:min-h-0 md:bg-white/5 md:p-5 md:backdrop-blur-xl ${product.span}`}
+      className={`pointer-events-auto group relative flex min-h-[148px] flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-4 shadow-[0_0_0_rgba(255,255,255,0)] backdrop-blur-xl transition-shadow duration-300 hover:shadow-[0_0_48px_rgba(255,255,255,0.16)] md:h-full md:min-h-0 md:p-5 ${product.span}`}
     >
       <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/10 via-transparent to-transparent opacity-80" />
       <div className="relative flex items-start justify-between gap-3">
