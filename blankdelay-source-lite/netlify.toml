@@ -1,0 +1,36 @@
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "https://www.blankdelay.com/*"
+  to = "https://blankdelay.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/api/create-checkout-session"
+  to = "/.netlify/functions/create-checkout-session"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/checkout-session"
+  to = "/.netlify/functions/checkout-session"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/download"
+  to = "/.netlify/functions/download"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
