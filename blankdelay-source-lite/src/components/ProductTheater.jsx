@@ -59,6 +59,12 @@ export default function ProductTheater() {
     setSlidesReady(true)
   }, [demo.productId])
 
+  useEffect(() => {
+    if (!isTheaterOpen) return
+    setLeaving(false)
+    setBuyError('')
+  }, [isTheaterOpen])
+
   const play = () => {
     const index = SECTIONS.findIndex((section) => section.id === demo.sectionId)
     if (index >= 0) watchDemonstration(index)

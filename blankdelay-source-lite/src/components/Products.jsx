@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion'
-import { useState } from 'react'
 import { Cpu, Crosshair, Gamepad2, Keyboard, Layers, Zap } from 'lucide-react'
 import { useCheckout } from '../context/CheckoutContext'
 import { CHECKOUT_PRODUCTS, formatPrice } from '../lib/checkoutCatalog'
@@ -74,21 +73,13 @@ const cardVariants = {
 }
 
 function PurchaseCard({ product }) {
-  const { openCheckout } = useCheckout()
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
+  const { openTheater } = useCheckout()
   const Icon = product.icon
-  const buy = async (event) => {
+  const buy = (event) => {
     event.preventDefault()
     event.stopPropagation()
-    if (busy || product.comingSoon) return
-    setBusy(true)
-    setError('')
-    const result = await openCheckout(CHECKOUT_PRODUCTS[product.id])
-    if (!result?.ok) {
-      setBusy(false)
-      setError(result?.error || 'Checkout could not open. Try again.')
-    }
+    if (product.comingSoon) return
+    openTheater(CHECKOUT_PRODUCTS[product.id])
   }
   return (
     <motion.article
@@ -107,7 +98,6 @@ function PurchaseCard({ product }) {
         <h3 className="font-display stretch-wide text-[18px] leading-none font-black tracking-[-0.03em] uppercase md:text-[22px]">{product.title}</h3>
         <p className="mt-2 max-w-[36ch] text-[13px] leading-snug text-white/55">{product.tagline}</p>
       </div>
-      {error ? <p className="relative mt-2 text-[12px] text-white/70">{error}</p> : null}
       <div className="relative mt-4 flex items-center justify-between gap-3">
         {product.comingSoon ? (
           <span className="font-display stretch-semi text-[22px] font-black tracking-tight">Coming soon</span>
@@ -117,10 +107,9 @@ function PurchaseCard({ product }) {
             <button
               type="button"
               onClick={buy}
-              disabled={busy}
-              className="pointer-events-auto relative z-10 inline-flex items-center rounded-full bg-white px-4 py-2 text-[12px] font-semibold tracking-tight text-black transition-shadow duration-300 group-hover:shadow-[0_0_28px_rgba(255,255,255,0.65)] disabled:opacity-70"
+              className="pointer-events-auto relative z-10 inline-flex items-center rounded-full bg-white px-4 py-2 text-[12px] font-semibold tracking-tight text-black transition-shadow duration-300 group-hover:shadow-[0_0_28px_rgba(255,255,255,0.65)]"
             >
-              {busy ? 'Opening…' : 'Buy now'}
+              Buy now
             </button>
           </>
         )}
