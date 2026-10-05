@@ -783,10 +783,12 @@ function Atmosphere() {
       <primitive object={padRim} />
       <primitive object={padLeft} />
       <primitive object={padRight} />
-      <Environment resolution={32} frames={1}>
-        <Lightformer form="rect" intensity={6} position={[0, 12, 10]} scale={[20, 2, 1]} color="#ffffff" />
-        <Lightformer form="rect" intensity={1.6} position={[10, 0, 6]} scale={[2, 14, 1]} color="#ffffff" />
-      </Environment>
+      {quality.mobile ? null : (
+        <Environment resolution={32} frames={1}>
+          <Lightformer form="rect" intensity={6} position={[0, 12, 10]} scale={[20, 2, 1]} color="#ffffff" />
+          <Lightformer form="rect" intensity={1.6} position={[10, 0, 6]} scale={[2, 14, 1]} color="#ffffff" />
+        </Environment>
+      )}
     </>
   )
 }
@@ -896,10 +898,10 @@ export default function Experience() {
       <Atmosphere />
       <Suspense fallback={null}>
         <PCModel />
-        <VolumetricClouds />
+        {quality.clouds > 0 ? <VolumetricClouds /> : null}
         <DataStreams />
       </Suspense>
-      <LaterVisuals />
+      {quality.mobile ? null : <LaterVisuals />}
     </Canvas>
   )
 }

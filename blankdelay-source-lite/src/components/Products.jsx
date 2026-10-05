@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
-import { Crosshair, Gamepad2, Keyboard, Layers, Zap } from 'lucide-react'
+import { useState } from 'react'
+import { Cpu, Crosshair, Gamepad2, Keyboard, Layers, Zap } from 'lucide-react'
 import { useCheckout } from '../context/CheckoutContext'
 import { CHECKOUT_PRODUCTS, formatPrice } from '../lib/checkoutCatalog'
 import { EASE_EXPO } from '../lib/rig'
@@ -18,7 +19,7 @@ const CATALOG = [
     id: 'controller-macro',
     index: '02',
     icon: Gamepad2,
-    title: 'Zero Delay Controller Macro',
+    title: 'Controller Macro',
     price: formatPrice(CHECKOUT_PRODUCTS['controller-macro'].price),
     tagline: 'Polling overrides and frame-perfect pad macros.',
     span: 'md:col-span-2',
@@ -33,23 +34,32 @@ const CATALOG = [
     span: 'md:col-span-2',
   },
   {
-    id: 'aim-bundle',
+    id: 'zero-delay-os',
     index: '04',
+    icon: Cpu,
+    title: 'Zero Delay',
+    price: formatPrice(CHECKOUT_PRODUCTS['zero-delay-os'].price),
+    tagline: 'Kernel-level optimization. Uncapped FPS. Zero input latency.',
+    span: 'md:col-span-2',
+  },
+  {
+    id: 'aim-bundle',
+    index: '05',
     icon: Crosshair,
     title: 'Aim Bundle',
     price: formatPrice(CHECKOUT_PRODUCTS['aim-bundle'].price),
     tagline: 'FPS Boost, controller, and keyboard on one license.',
     comingSoon: true,
-    span: 'md:col-span-3',
+    span: 'md:col-span-2',
   },
   {
     id: 'premium-utility',
-    index: '05',
+    index: '06',
     icon: Layers,
     title: 'Premium Utility',
     price: formatPrice(CHECKOUT_PRODUCTS['premium-utility'].price),
     tagline: 'The full stack, private profiles, and early builds.',
-    span: 'md:col-span-3',
+    span: 'md:col-span-2',
   },
 ]
 
@@ -64,13 +74,27 @@ const cardVariants = {
 }
 
 function PurchaseCard({ product }) {
-  const { openTheater } = useCheckout()
+  const { openCheckout } = useCheckout()
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
   const Icon = product.icon
+  const buy = async (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (busy || product.comingSoon) return
+    setBusy(true)
+    setError('')
+    const result = await openCheckout(CHECKOUT_PRODUCTS[product.id])
+    if (!result?.ok) {
+      setBusy(false)
+      setError(result?.error || 'Checkout could not open. Try again.')
+    }
+  }
   return (
     <motion.article
       variants={cardVariants}
       whileHover={{ y: -4, borderColor: 'rgba(255,255,255,0.95)' }}
-      className={`pointer-events-auto group relative flex min-h-[148px] flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-4 shadow-[0_0_0_rgba(255,255,255,0)] backdrop-blur-xl transition-shadow duration-300 hover:shadow-[0_0_48px_rgba(255,255,255,0.16)] md:h-full md:min-h-0 md:p-5 ${product.span}`}
+      className={`pointer-events-auto group relative flex min-h-[148px] flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-black/55 p-4 shadow-[0_0_0_rgba(255,255,255,0)] transition-shadow duration-300 hover:shadow-[0_0_48px_rgba(255,255,255,0.16)] md:h-full md:min-h-0 md:bg-white/5 md:p-5 md:backdrop-blur-xl ${product.span}`}
     >
       <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/10 via-transparent to-transparent opacity-80" />
       <div className="relative flex items-start justify-between gap-3">
@@ -83,6 +107,7 @@ function PurchaseCard({ product }) {
         <h3 className="font-display stretch-wide text-[18px] leading-none font-black tracking-[-0.03em] uppercase md:text-[22px]">{product.title}</h3>
         <p className="mt-2 max-w-[36ch] text-[13px] leading-snug text-white/55">{product.tagline}</p>
       </div>
+      {error ? <p className="relative mt-2 text-[12px] text-white/70">{error}</p> : null}
       <div className="relative mt-4 flex items-center justify-between gap-3">
         {product.comingSoon ? (
           <span className="font-display stretch-semi text-[22px] font-black tracking-tight">Coming soon</span>
@@ -91,10 +116,11 @@ function PurchaseCard({ product }) {
             <span className="font-display stretch-semi text-[22px] font-black tracking-tight">{product.price}</span>
             <button
               type="button"
-              onClick={() => openTheater(CHECKOUT_PRODUCTS[product.id])}
-              className="pointer-events-auto inline-flex items-center rounded-full bg-white px-4 py-2 text-[12px] font-semibold tracking-tight text-black transition-shadow duration-300 group-hover:shadow-[0_0_28px_rgba(255,255,255,0.65)]"
+              onClick={buy}
+              disabled={busy}
+              className="pointer-events-auto relative z-10 inline-flex items-center rounded-full bg-white px-4 py-2 text-[12px] font-semibold tracking-tight text-black transition-shadow duration-300 group-hover:shadow-[0_0_28px_rgba(255,255,255,0.65)] disabled:opacity-70"
             >
-              Purchase
+              {busy ? 'Opening…' : 'Buy now'}
             </button>
           </>
         )}

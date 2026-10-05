@@ -2,9 +2,9 @@
 
 const PRODUCTS = {
   'fps-boost': { id: 'fps-boost', name: 'FPS Boost' },
-  'controller-macro': { id: 'controller-macro', name: 'Zero Delay Controller Macro' },
-  'keyboard-macro': { id: 'keyboard-macro', name: 'Keyboard & Mouse Macro' },
-  'zero-delay-os': { id: 'zero-delay-os', name: 'Zero Delay OS App' },
+  'controller-macro': { id: 'controller-macro', name: 'Controller Macro' },
+  'keyboard-macro': { id: 'keyboard-macro', name: 'Keyboard Macro' },
+  'zero-delay-os': { id: 'zero-delay-os', name: 'Zero Delay' },
   'premium-utility': { id: 'premium-utility', name: 'Premium Utility' },
   'aim-bundle': { id: 'aim-bundle', name: 'Elite Aim Bundle' },
 }
@@ -18,13 +18,21 @@ const PAYMENT_LINKS = {
   'aim-bundle': 'https://buy.stripe.com/8x28wI7eObA666j7Ut9bO07',
 }
 
+const PRICES = {
+  'fps-boost': 1599,
+  'controller-macro': 2599,
+  'keyboard-macro': 2599,
+  'zero-delay-os': 1599,
+  'premium-utility': 3299,
+}
+
 const DOWNLOADS = {
   'fps-boost': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
   'keyboard-macro': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
   'zero-delay-os': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
   'premium-utility': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
   'aim-bundle': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
-  'controller-macro': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Controller-Macro-V2-Setup.exe',
+  'controller-macro': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Delay-Controller-Macro.exe',
 }
 
 const json = (statusCode, body) => ({
@@ -58,7 +66,7 @@ async function stripeRequest(method, path, params) {
     if (params) url += `?${new URLSearchParams(params)}`
   } else {
     headers['Content-Type'] = 'application/x-www-form-urlencoded'
-    init.body = new URLSearchParams(params || {})
+    init.body = new URLSearchParams(params || {}).toString().replace(/%7BCHECKOUT_SESSION_ID%7D/g, '{CHECKOUT_SESSION_ID}')
   }
   const res = await fetch(url, init)
   const data = await res.json().catch(() => ({}))
@@ -84,11 +92,27 @@ async function ensureReturnUrl(paymentUrl, site) {
   })
 }
 
-function paymentUrl(productId) {
-  const base = PAYMENT_LINKS[productId]
-  const url = new URL(base)
-  url.searchParams.set('client_reference_id', productId)
-  return url.toString()
+async function createSession(productId, site) {
+  const product = PRODUCTS[productId]
+  const amount = PRICES[productId]
+  if (!product || !amount) {
+    const error = new Error('Unknown product')
+    error.status = 400
+    throw error
+  }
+  const session = await stripeRequest('POST', '/checkout/sessions', {
+    mode: 'payment',
+    success_url: `${site}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${site}/`,
+    client_reference_id: productId,
+    'metadata[productId]': productId,
+    'line_items[0][quantity]': '1',
+    'line_items[0][price_data][currency]': 'usd',
+    'line_items[0][price_data][unit_amount]': String(amount),
+    'line_items[0][price_data][product_data][name]': product.name,
+    'line_items[0][price_data][product_data][description]': product.name,
+  })
+  return session.url
 }
 
 function productFromSession(session) {
@@ -113,7 +137,6 @@ module.exports = {
   DOWNLOADS,
   json,
   siteOrigin,
-  ensureReturnUrl,
-  paymentUrl,
+  createSession,
   readSession,
 }

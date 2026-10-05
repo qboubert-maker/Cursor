@@ -135,8 +135,18 @@ function MagneticButton({ href, onClick, children }) {
 }
 
 function BuyNow({ productId, children }) {
-  const { openTheater } = useCheckout()
-  return <MagneticButton onClick={() => openTheater(CHECKOUT_PRODUCTS[productId])}>{children}</MagneticButton>
+  const { openCheckout } = useCheckout()
+  return (
+    <MagneticButton
+      onClick={async () => {
+        const product = CHECKOUT_PRODUCTS[productId]
+        const result = await openCheckout(product)
+        if (!result?.ok) window.alert(result?.error || 'Checkout could not open. Try again.')
+      }}
+    >
+      {children}
+    </MagneticButton>
+  )
 }
 
 function HeroPanel({ booted, onNavigate }) {
@@ -398,16 +408,16 @@ function ControllerPanel({ active }) {
     <motion.section
       style={style}
       className="absolute inset-0 flex items-end justify-center px-5 pt-20 pb-10 md:pb-16"
-      aria-label="Zero Delay Controller Macro"
+      aria-label="Controller Macro"
     >
       <div className="w-full max-w-[980px] text-center">
         <Eyebrow index="04" label="Hardware" active={active} center />
         <h2 className="font-display stretch-wide text-halo mt-4 text-[8.5vw] leading-[0.86] font-black tracking-[-0.04em] uppercase md:text-[4.6vw]">
           <RevealLine i={0} active={active}>
-            Zero Delay
+            Controller
           </RevealLine>
           <RevealLine i={1} active={active} className="text-outline">
-            Controller Macro
+            Macro
           </RevealLine>
         </h2>
         <motion.p

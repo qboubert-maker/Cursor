@@ -98,7 +98,10 @@ export default function Delivery() {
               >
                 {selectedProduct.name}
               </h2>
-              <p className="mt-5 max-w-md text-[16px] leading-relaxed text-white/60">Yours. Download it straight to this PC.</p>
+              <p className="mt-5 max-w-md text-[16px] leading-relaxed text-white/60">Yours. Download it straight to this device.</p>
+              <p className="mt-4 max-w-md text-[14px] leading-relaxed text-white/70">
+                For your license key, join Discord, make a support ticket, and have visual proof of purchase ready. Enjoy Blank Delay.
+              </p>
               <button
                 type="button"
                 onClick={download}

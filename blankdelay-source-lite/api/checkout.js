@@ -29,8 +29,8 @@ export const PRODUCT_DOWNLOADS = {
     filename: 'BlankDelay-Setup.exe',
   },
   'controller-macro': {
-    url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Controller-Macro-V2-Setup.exe',
-    filename: 'BlankDelay-Controller-Macro-V2-Setup.exe',
+    url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Delay-Controller-Macro.exe',
+    filename: 'Blank Delay Controller Macro.exe',
   },
   'aim-bundle': {
     url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe',
@@ -90,7 +90,7 @@ export function paymentLinkFor(productId, site) {
 
 export async function createCheckoutSession({ productId, origin, host }) {
   const product = CHECKOUT_PRODUCTS[productId]
-  if (!product || productId === 'aim-bundle' || !STRIPE_PAYMENT_LINKS[productId]) {
+  if (!product || productId === 'aim-bundle') {
     const error = new Error('Unknown product')
     error.status = 400
     throw error
@@ -98,15 +98,34 @@ export async function createCheckoutSession({ productId, origin, host }) {
 
   const site = safeOrigin(origin, host)
   const stripe = await stripeClient()
-  if (stripe) {
-    try {
-      await ensureReturnUrl(stripe, STRIPE_PAYMENT_LINKS[productId], site)
-    } catch (error) {
-      console.error('Could not set Stripe return URL:', error.message)
-    }
+  if (!stripe) {
+    const error = new Error('Stripe is not configured')
+    error.status = 503
+    throw error
   }
 
-  return { url: paymentLinkFor(productId, site) }
+  const session = await stripe.checkout.sessions.create({
+    mode: 'payment',
+    client_reference_id: product.id,
+    success_url: `${site}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${site}/`,
+    metadata: { productId: product.id },
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: 'usd',
+          unit_amount: product.price,
+          product_data: {
+            name: product.name,
+            description: product.description,
+          },
+        },
+      },
+    ],
+  })
+
+  return { url: session.url }
 }
 
 function productFromSession(session) {
