@@ -27,8 +27,59 @@
       />
     </noscript>
     <title>BLANK DELAY — Zero Delay. Infinite Advantage.</title>
+    <style>
+      #boot {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: grid;
+        place-items: center;
+        background: #000;
+        color: #fff;
+        transition: opacity 0.4s ease;
+      }
+      #boot.is-done { opacity: 0; pointer-events: none; }
+      #boot .mark {
+        width: 18px;
+        height: 18px;
+        margin: 0 auto 16px;
+        border-radius: 999px;
+        background: #fff;
+        box-shadow: 0 0 24px #fff;
+      }
+      #boot p {
+        margin: 0;
+        font: 700 13px/1 Inter, system-ui, sans-serif;
+        letter-spacing: 0.28em;
+      }
+      #boot .bar {
+        width: 140px;
+        height: 2px;
+        margin: 18px auto 0;
+        overflow: hidden;
+        background: rgba(255,255,255,0.15);
+      }
+      #boot .bar span {
+        display: block;
+        height: 100%;
+        width: 40%;
+        background: #fff;
+        animation: boot 0.9s ease-in-out infinite;
+      }
+      @keyframes boot {
+        0% { transform: translateX(-120%); }
+        100% { transform: translateX(320%); }
+      }
+    </style>
   </head>
   <body>
+    <div id="boot" aria-hidden="true">
+      <div>
+        <div class="mark"></div>
+        <p>BLANK DELAY</p>
+        <div class="bar"><span></span></div>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

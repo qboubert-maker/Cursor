@@ -95,8 +95,8 @@
 }
 
 .scanlines {
-  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 0px, rgba(255, 255, 255, 0.025) 1px, transparent 1px, transparent 3px);
-  mix-blend-mode: overlay;
+  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 4px);
+  opacity: 0.35;
 }
 
 .grain {

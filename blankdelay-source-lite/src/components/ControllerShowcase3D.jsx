@@ -178,5 +178,3 @@ export default function ControllerShowcase3D() {
   )
 }
 
-useGLTF.preload(PS5_URL, '/draco/', false)
-useGLTF.preload(XBOX_URL, '/draco/', false)
