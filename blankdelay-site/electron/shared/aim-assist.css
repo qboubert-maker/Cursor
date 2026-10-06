@@ -1,0 +1,63 @@
+/* BlankDelay Aim Assist Pro */
+body.bd-aim-pro .app{max-width:1280px;padding:20px 24px 28px}
+.aim-pro-shell{display:grid;grid-template-columns:minmax(380px,1fr) minmax(400px,1.1fr);gap:18px}
+@media(max-width:1020px){.aim-pro-shell{grid-template-columns:1fr}}
+.aim-pro-radar{position:relative;min-height:460px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:radial-gradient(ellipse 70% 60% at 50% 45%,rgba(255,68,68,.14),rgba(0,0,0,.92) 72%);overflow:hidden;display:flex;flex-direction:column}
+body[data-theme=shotgun] .aim-pro-radar{background:radial-gradient(ellipse 70% 60% at 50% 45%,rgba(255,140,40,.14),rgba(0,0,0,.92) 72%)}
+.aim-pro-radar-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.aim-pro-radar-head h3{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.aim-pro-radar-stage{flex:1;display:flex;align-items:center;justify-content:center;position:relative;min-height:300px}
+.aim-pro-crosshair{width:220px;height:220px;position:relative}
+.aim-pro-crosshair::before,.aim-pro-crosshair::after{content:"";position:absolute;background:rgba(255,255,255,.85)}
+.aim-pro-crosshair::before{left:50%;top:18%;width:2px;height:64%;transform:translateX(-50%)}
+.aim-pro-crosshair::after{top:50%;left:18%;height:2px;width:64%;transform:translateY(-50%)}
+.aim-pro-ring{position:absolute;inset:14%;border:2px solid rgba(255,68,68,.35);border-radius:50%;transition:inset .3s,border-color .25s,box-shadow .25s}
+.aim-pro-ring.radius-small{inset:30%}
+.aim-pro-ring.radius-medium{inset:14%}
+.aim-pro-ring.radius-large{inset:2%}
+.aim-pro-ring.fortnite-open{border-color:rgba(87,242,135,.45)}
+body[data-theme=shotgun] .aim-pro-ring{border-color:rgba(255,140,40,.4)}
+body[data-theme=shotgun] .aim-pro-ring.fortnite-open{border-color:rgba(255,140,40,.65)}
+.aim-pro-radius-label{text-align:center;font-size:10px;font-family:var(--mono);color:var(--dim);padding:0 16px 8px}
+.aim-pro-pad-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.aim-pad-btn{padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,.35);color:var(--dim);font-size:10px;font-weight:700;font-family:var(--mono);cursor:pointer}
+.aim-pad-btn.active,.aim-pad-btn:hover{border-color:var(--accent);color:var(--accent)}
+.aim-pro-stat span.fortnite-open{color:#57f287}
+#stat-fortnite.fortnite-open{color:#57f287}
+.aim-pro-bind-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.aim-pro-ring.locked{border-color:var(--accent);box-shadow:0 0 28px var(--glow);animation:aimPulse 1.2s ease-in-out infinite}
+.aim-pro-ring.searching{border-style:dashed;animation:aimSpin 6s linear infinite}
+@keyframes aimPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes aimSpin{to{transform:rotate(360deg)}}
+.aim-pro-status-big{text-align:center;padding:12px 16px 16px;border-top:1px solid rgba(255,255,255,.08)}
+.aim-pro-status-big .state{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent);letter-spacing:.06em}
+.aim-pro-status-big .sub{font-size:10px;color:var(--dim);margin-top:6px;font-family:var(--mono)}
+.aim-pro-workspace{border-radius:18px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);overflow:hidden}
+.aim-pro-nav{display:flex;border-bottom:1px solid rgba(255,255,255,.08)}
+.aim-pro-nav button{flex:1;padding:12px 8px;border:none;background:transparent;color:var(--dim);font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;font-family:inherit}
+.aim-pro-nav button.active{color:var(--text);border-bottom-color:var(--accent);background:rgba(255,68,68,.06)}
+body[data-theme=shotgun] .aim-pro-nav button.active{background:rgba(255,140,40,.08)}
+.aim-pro-section{display:none;padding:16px}.aim-pro-section.active{display:block}
+.aim-pro-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.aim-pro-stat{padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:rgba(0,0,0,.35)}
+.aim-pro-stat label{display:block;font-size:9px;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
+.aim-pro-stat span{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent)}
+.aim-pro-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.aim-pro-row label{flex:1;font-size:12px;font-weight:600}
+.aim-pro-row input[type=range]{flex:2;accent-color:var(--accent)}
+.aim-pro-row select,.aim-pro-input{padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:rgba(0,0,0,.4);color:var(--text);font-size:11px;font-family:var(--mono)}
+.aim-pro-class-grid{display:flex;flex-direction:column;gap:10px;max-height:340px;overflow-y:auto}
+.aim-pro-class-card{padding:12px;border-radius:12px;border:1px solid var(--border);background:rgba(0,0,0,.28)}
+.aim-pro-class-card h4{font-size:12px;font-weight:700;margin-bottom:8px;text-transform:uppercase;color:var(--accent)}
+.aim-pro-shotgun-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.aim-pro-shotgun-list label{display:flex;align-items:center;gap:8px;font-size:11px;padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:rgba(0,0,0,.25);cursor:pointer}
+.aim-pro-shotgun-list input{accent-color:var(--accent)}
+.aim-pro-keycap{padding:10px 16px;border-radius:10px;border:1px dashed var(--accent);font-family:var(--mono);font-size:12px;text-align:center;cursor:pointer;background:rgba(0,0,0,.35)}
+.aim-pro-keycap.capturing{border-style:solid;animation:aimPulse 1s infinite}
+.aim-pro-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.aim-pro-log{margin-top:14px;max-height:130px;overflow-y:auto;font-family:var(--mono);font-size:10px;border-radius:12px;border:1px solid var(--border);background:rgba(0,0,0,.45);padding:10px 12px}
+.aim-pro-log div{padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.aim-pro-log div.ok{color:var(--accent)}.aim-pro-log div.warn{color:#fbbf24}
+.aim-pro-hint{font-size:11px;color:var(--dim);line-height:1.55;margin-bottom:12px}
+.aim-pro-library{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#aim-global-toggle.active{background:var(--accent);color:var(--accent-text)}

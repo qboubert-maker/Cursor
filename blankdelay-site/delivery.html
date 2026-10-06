@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your BlankDelay Order</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="checkout.css">
+</head>
+<body class="loaded" id="delivery-page">
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+        <symbol id="speed-mark" viewBox="0 0 32 32">
+            <circle cx="8" cy="16" r="3.5" fill="currentColor"/>
+            <path fill="currentColor" d="M11 16h4l14-6-3 6 3 6-14-6z"/>
+        </symbol>
+    </svg>
+    <canvas id="bg-canvas"></canvas>
+
+    <nav class="scrolled">
+        <div class="nav-shell">
+            <a href="index.html" class="nav-logo">
+                <span class="mark"><svg><use href="#speed-mark"/></svg></span>
+                <span class="brand-name">BlankDelay</span>
+            </a>
+            <div class="nav-right">
+                <button class="theme-toggle" id="theme-toggle" title="Switch to light mode">☾</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="thankyou-page">
+        <div class="wrap thankyou-wrap">
+            <div class="thankyou-icon">✓</div>
+            <h1 class="thankyou-title">Your product is ready</h1>
+            <p class="thankyou-sub">Order <strong class="mono" id="del-order-id">—</strong> · <strong id="del-product">BlankDelay</strong></p>
+            <p class="checkout-note" style="text-align:center;margin-bottom:20px;">Delivered to <strong id="del-email">you@email.com</strong></p>
+
+            <div class="thankyou-card card">
+                <h3>Download</h3>
+                <p style="font-size:14px;color:var(--text-dim);margin-bottom:14px;" id="del-download-desc">Install the BlankDelay desktop app, then enter your license key.</p>
+                <a href="#" class="btn btn-primary" id="del-download-btn" target="_blank" rel="noopener">Download BlankDelay App</a>
+                <div id="del-security-notice"></div>
+            </div>
+
+            <div class="thankyou-card card">
+                <h3>License Key</h3>
+                <div class="license-display" id="del-license">BD-XXXX-XXXX-XXXX</div>
+                <button type="button" class="btn btn-ghost btn-sm" id="del-copy-key" style="margin-top:12px;">Copy License Key</button>
+            </div>
+
+            <div class="thankyou-card card">
+                <h3>How to activate</h3>
+                <ol class="thankyou-steps">
+                    <li><span>1</span><div id="del-step-download">Download and install the BlankDelay app for your product.</div></li>
+                    <li><span>2</span><div><strong>If Windows says it may be a virus</strong> — that is a false warning. See the notice above: click <strong>More info → Run anyway</strong>.</div></li>
+                    <li><span>3</span><div>Paste your license key above and click <strong>Activate</strong>.</div></li>
+                    <li><span>4</span><div>Enable the tweaks you want, then click <strong>Apply All Tweaks</strong>. Run as Administrator if prompted.</div></li>
+                </ol>
+                <p class="checkout-note mono" id="del-launch-hint" style="margin-top:14px;font-size:12px;"></p>
+            </div>
+
+            <div class="thankyou-card card">
+                <h3>Product info</h3>
+                <p style="font-size:14px;color:var(--text-dim);margin-bottom:6px;" id="del-tag">—</p>
+                <p style="font-size:14px;color:var(--text-dim);" id="del-price-line">—</p>
+            </div>
+
+            <div class="thankyou-actions">
+                <a href="index.html#faq" class="btn btn-primary">Need help? AI Support</a>
+                <a href="index.html#products" class="btn btn-ghost">Browse Products</a>
+            </div>
+
+            <p class="checkout-note" style="margin-top:28px;text-align:center;">14-day money-back guarantee · Keep this link for your records</p>
+        </div>
+    </main>
+
+    <script src="background.js"></script>
+    <script src="bd-store.js"></script>
+    <script src="bd-downloads.js"></script>
+    <script src="bd-download-notice.js"></script>
+    <script src="delivery.js"></script>
+    <script>
+        document.getElementById('theme-toggle')?.addEventListener('click', () => {
+            document.body.classList.toggle('theme-light');
+            const t = document.getElementById('theme-toggle');
+            if (t) t.textContent = document.body.classList.contains('theme-light') ? '☀' : '☾';
+        });
+        if (localStorage.getItem('bd-theme') === 'light') {
+            document.body.classList.add('theme-light');
+            const t = document.getElementById('theme-toggle');
+            if (t) t.textContent = '☀';
+        }
+    </script>
+</body>
+</html>

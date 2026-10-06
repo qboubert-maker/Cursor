@@ -1,0 +1,53 @@
+BlankDelay — Netlify drag-and-drop deploy (fix missing webhook files)
+=====================================================================
+
+PROBLEM
+You dragged something that did NOT include the whole site root, so Netlify
+never got netlify/functions/stripe-webhook.js (no auto emails after Stripe pay).
+
+WHAT TO UPLOAD
+Upload the FULL website folder — everything that sits NEXT TO index.html.
+
+Required at the TOP LEVEL of your zip/folder (same level as index.html):
+
+  index.html
+  netlify.toml
+  netlify/functions/stripe-webhook.js   <-- Stripe → license key → EmailJS
+  bd-email-config.js
+  email-delivery.js
+  downloads/BlankDelay-Setup.exe
+  (plus styles.css, main.js, assets/, etc.)
+
+DO NOT upload only:
+  - index.html alone
+  - a random subfolder
+  - the GitHub "Cursor" repo root (wrong project)
+
+ZIP STRUCTURE (correct)
+Open your zip. The FIRST things you see should be index.html and netlify.toml.
+WRONG: opening zip and only seeing a folder "blankdelay-site" — then Netlify
+       puts the site at blankdelay.com/blankdelay-site/ and breaks paths.
+
+WINDOWS STEPS
+1. Open your full BlankDelay site folder (e.g. C:\Users\Quincy\blankdelay).
+2. Select ALL files and folders inside (Ctrl+A).
+3. Right-click → Send to → Compressed (zipped) folder.
+   OR drag the selected items (not the parent folder name only).
+4. Netlify → your blankdelay.com site → Deploys tab.
+5. Scroll to "Need to update your site?" drop zone.
+6. Drop the .zip (or the folder contents).
+7. Wait for "Published".
+
+AFTER DEPLOY — CHECK (30 seconds)
+1. https://blankdelay.com/.netlify/functions/stripe-webhook
+   → should say Method Not Allowed (405), NOT Page not found (404).
+2. https://blankdelay.com/downloads/BlankDelay-Setup.exe
+   → should download (~79 MB).
+3. Deploy file browser → must show netlify/functions/stripe-webhook.js
+
+WHERE TO GET THE UPDATED FOLDER
+- Google Drive update folder (blankdelay-update), or
+- GitHub: blankdelay-site/ from your Cursor repo, or
+- Your PC copy if it already has netlify/ and downloads/BlankDelay-Setup.exe
+
+Then continue Stripe webhook + Netlify env vars (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET).

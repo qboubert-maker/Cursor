@@ -1,0 +1,12 @@
+IMPORTANT — Netlify function filename must be EXACTLY:
+
+  stripe-webhook.js
+
+Delete any copies like:
+  stripe-webhook (1).js
+  stripe-webhook (2).js
+  stripe-webhook (3).js
+
+Only ONE file: stripe-webhook.js (no spaces, no parentheses)
+
+If Windows renamed your download, rename it back to stripe-webhook.js before uploading.

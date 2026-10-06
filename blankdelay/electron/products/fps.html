@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BlankDelay — FPS Boost</title>
+    <link rel="stylesheet" href="../shared/app.css">
+    <link rel="stylesheet" href="../shared/bd-splash.css">
+    <link rel="stylesheet" href="../shared/bd-tweaks-grid.css">
+</head>
+<body class="bd-app" data-theme="fps">
+    <script src="../shared/system-live.js"></script>
+    <canvas id="bg-canvas" class="bg-canvas"></canvas>
+    <div id="bd-splash-root"
+        data-title="FPS BOOST"
+        data-short-name="FPS Boost"
+        data-tagline="Optimize · Accelerate · Dominate"></div>
+    <div class="bd-app-main" id="bd-app-main" hidden>
+        <div class="app" style="max-width:1180px">
+            <div class="topbar">
+                <div class="brand"><span class="mark"><svg viewBox="0 0 32 32"><circle cx="8" cy="16" r="3.5" fill="currentColor"/><path fill="currentColor" d="M11 16h4l14-6-3 6 3 6-14-6z"/></svg></span> BLANKDELAY <span style="opacity:.4;margin:0 6px">|</span> <span style="color:var(--accent)">FPS Boost</span></div>
+                <span class="status-pill" id="admin-status-pill">Checking…</span>
+            </div>
+            <div id="tweaks-grid-root"></div>
+            <div class="log" id="log" style="max-width:1180px;margin:18px auto 0;"><div>BlankDelay FPS Boost engine ready.</div></div>
+        </div>
+    </div>
+
+    <script src="../shared/background.js"></script>
+    <script src="../shared/bd-splash.js"></script>
+    <script src="../shared/bd-tweaks-grid.js"></script>
+    <script>
+    const CATEGORIES = [
+        {
+            name: 'Core Performance',
+            icon: '⚡',
+            tweaks: [
+                { id: 'gpu-scheduling', name: 'Hardware GPU Scheduling', desc: 'Offloads GPU scheduling to hardware — reduces CPU overhead', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers' -Name HwSchMode -Value 2 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers' -Name HwSchMode -Value 1 -Type DWord` },
+                { id: 'preemption', name: 'Disable GPU Preemption', desc: 'Prevents mid-frame context switches — smoother frametimes', apply: `if (!(Test-Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler')) { New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler' -Name EnablePreemption -Value 0 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler' -Name EnablePreemption -Value 1 -Type DWord` },
+                { id: 'priority-sep', name: 'CPU Priority Separation (Short/Fixed)', desc: 'Foreground apps get maximum CPU quantum', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl' -Name Win32PrioritySeparation -Value 26 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl' -Name Win32PrioritySeparation -Value 2 -Type DWord` },
+                { id: 'large-sys-cache', name: 'Disable Large System Cache', desc: 'Frees RAM from system cache for game use', apply: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management' -Name LargeSystemCache -Value 0 -Type DWord`, restore: `Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management' -Name LargeSystemCache -Value 1 -Type DWord` }
+            ]
+        },
+        {
+            name: 'Visuals & Overlay',
+            icon: '🖼',
+            tweaks: [
+                { id: 'fullscreen-opt', name: 'Disable Fullscreen Optimizations', desc: 'Removes DWM compositor overhead in exclusive fullscreen', apply: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehaviorMode -Value 2 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_HonorUserFSEBehaviorMode -Value 1 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehavior -Value 2 -Type DWord`, restore: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehaviorMode -Value 0 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_HonorUserFSEBehaviorMode -Value 0 -Type DWord; Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_FSEBehavior -Value 0 -Type DWord` },
+                { id: 'visual-fx', name: 'Strip Visual Effects', desc: 'Disables animations, transparency, shadows — pure performance', apply: `Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects' -Name VisualFXSetting -Value 2 -Type DWord; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Desktop' -Name UserPreferencesMask -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0x00,0x00,0x00)) -Type Binary`, restore: `Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects' -Name VisualFXSetting -Value 0 -Type DWord; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Desktop' -Name UserPreferencesMask -Value ([byte[]](0x9E,0x3E,0x07,0x80,0x12,0x00,0x00,0x00)) -Type Binary` },
+                { id: 'game-mode', name: 'Enable Game Mode', desc: 'Windows dedicates resources to foreground game', apply: `if (!(Test-Path 'HKCU:\\Software\\Microsoft\\GameBar')) { New-Item -Path 'HKCU:\\Software\\Microsoft\\GameBar' -Force | Out-Null }; Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\GameBar' -Name AutoGameModeEnabled -Value 1 -Type DWord`, restore: `Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\GameBar' -Name AutoGameModeEnabled -Value 0 -Type DWord` }
+            ]
+        },
+        {
+            name: 'Background & Services',
+            icon: '🧹',
+            tweaks: [
+                { id: 'game-dvr', name: 'Disable Game DVR & Game Bar', desc: 'Stops background recording — frees GPU resources', apply: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_Enabled -Value 0 -Type DWord; if (!(Test-Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR')) { New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR' -Name AllowGameDVR -Value 0 -Type DWord`, restore: `Set-ItemProperty -Path 'HKCU:\\System\\GameConfigStore' -Name GameDVR_Enabled -Value 1 -Type DWord; Remove-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR' -Name AllowGameDVR -ErrorAction SilentlyContinue` },
+                { id: 'superfetch', name: 'Disable SysMain (Superfetch)', desc: 'Stops background preloading — reduces disk/RAM usage', apply: `Stop-Service -Name SysMain -Force -ErrorAction SilentlyContinue; Set-Service -Name SysMain -StartupType Disabled -ErrorAction SilentlyContinue`, restore: `Set-Service -Name SysMain -StartupType Automatic -ErrorAction SilentlyContinue; Start-Service -Name SysMain -ErrorAction SilentlyContinue` }
+            ]
+        }
+    ];
+
+    (async function () {
+        const status = document.getElementById('admin-status-pill');
+        const log = document.getElementById('log');
+        function addLog(msg, type) {
+            const line = document.createElement('div');
+            line.className = type || '';
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            log.prepend(line);
+        }
+
+        await BdSplash.init({
+            onUnlock: async () => {
+                addLog('License validated — FPS Boost unlocked.', 'ok');
+                BdTweaksGrid.init({
+                    mountId: 'tweaks-grid-root',
+                    productLabel: 'FPS Boost',
+                    variant: 'fps',
+                    subtitle: 'Dynamic frame stabilizer. Apply instantly, persist after restart.',
+                    categories: CATEGORIES,
+                    onAdminStatus: (isAdmin) => {
+                        status.textContent = isAdmin ? 'Admin ✓' : 'No Admin';
+                        status.classList.toggle('admin-ok', isAdmin);
+                        addLog(isAdmin ? 'Running as Administrator.' : 'Not running as admin — click Restart as Admin.', isAdmin ? 'ok' : 'warn');
+                    },
+                    onApplied: () => BlankSystemLive.refresh && BlankSystemLive.refresh('fps'),
+                    onReverted: () => BlankSystemLive.refresh && BlankSystemLive.refresh('fps')
+                });
+                BlankSystemLive.ensureScanPanel?.();
+                BlankSystemLive.startPolling?.('fps');
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+/* BlankDelay Macro Pro */
+const BlankMacroPro=(function(){
+const GP=['A','B','X','Y','LB','RB','LT','RT','Back','Start','LS','RS','D-Up','D-Down','D-Left','D-Right'];
+const MOUSE=['LMB','RMB','MMB','M4','M5'];
+const KB=['F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12'];
+const GAMES={universal:{l:'Universal',e:''},fortnite:{l:'Fortnite',e:'FortniteClient-Win64-Shipping.exe'}};
+const FC={4:{o:'Q+C+E',m:'once'},5:{o:'Q+C+E',m:'once'},1:{o:'G+G',m:'once'},3:{o:'G+G+G',m:'once'},7:{o:'LMB',m:'repeat',r:12},0:{o:'1+2',m:'once'},11:{o:'SCROLLDOWN',m:'once'},10:{o:'KEYDOWN:SHIFT',m:'hold',x:'KEYUP:SHIFT'}};
+const FK={F1:{o:'Q+E'},F2:{o:'G+G+G'},F3:{o:'SCROLLDOWN'},F4:{o:'LMB',m:'repeat',r:10},F5:{o:'SPACE+A'},F6:{o:'Q+C+E'},F7:{o:'W+A'},F8:{o:'1+2'}};
+const FM={LMB:{o:'LMB',m:'repeat',r:10},RMB:{o:'RMB+LMB'},MMB:{o:'SCROLLDOWN'},M4:{o:'SCROLLUP'},M5:{o:'G+LMB'}};
+let product='controller',mapTab='controller',vizTab='controller',delay=5,jitter=0,loops=8,gameKey='fortnite';
+let maps=[],timeline=[],recording=false,lastEv=0,engineOn=false,pollId=null,mousePollId=null,lp={},lm={},holo=null,sel=0,textShort='',textExpand='',capsLayer=false;
+const el=id=>document.getElementById(id);
+function log(m,l){const b=el('macro-pro-log');if(!b)return;const n=document.createElement('div');n.className=l||'';n.textContent=new Date().toLocaleTimeString()+' — '+m;b.prepend(n);}
+function stat(id,t){const n=el(id);if(n)n.textContent=t;}
+function dmaps(){if(product==='controller')return GP.map((n,i)=>({idx:i,name:n,en:0,out:'',m:'once',r:8,dl:null,x:null}));if(mapTab==='keyboard')return KB.map(n=>({name:n,en:0,out:'',m:'once',r:8,dl:null}));return MOUSE.map(n=>({name:n,en:0,out:'',m:'once',r:8,dl:null}));}
+function showSec(s){document.querySelectorAll('.macro-pro-nav button').forEach(b=>b.classList.toggle('active',b.dataset.sec===s));document.querySelectorAll('.macro-pro-section').forEach(x=>x.classList.toggle('active',x.dataset.sec===s));}
+function rmaps(){const box=el('macro-pro-map');if(!box)return;if(!maps.length)maps=dmaps();box.innerHTML='';maps.forEach((m,i)=>{const row=document.createElement('div');row.className='macro-pro-map-row'+(m.en?' on':'')+(sel===i?' sel':'');const dl=m.dl!=null?m.dl:delay;row.innerHTML='<label class="trigger"><input type="checkbox" '+(m.en?'checked':'')+' data-f="en"> '+m.name+'</label><input data-f="out" value="'+(m.out||'')+'" placeholder="Q+C+E"><select data-f="m"><option value="once"'+(m.m==='once'?' selected':'')+'>Tap</option><option value="repeat"'+(m.m==='repeat'?' selected':'')+'>Repeat</option><option value="hold"'+(m.m==='hold'?' selected':'')+'>Hold</option><option value="toggle"'+(m.m==='toggle'?' selected':'')+'>Toggle</option></select><input type="number" min="1" max="200" data-f="dl" value="'+dl+'"><span style="font-size:9px;color:var(--dim)">ms</span>';row.onclick=e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;sel=i;rmaps();};row.querySelectorAll('[data-f]').forEach(inp=>inp.addEventListener(inp.dataset.f==='out'?'input':'change',()=>{m.en=!!row.querySelector('[data-f=en]').checked;m.out=row.querySelector('[data-f=out]').value.trim().toUpperCase();m.m=row.querySelector('[data-f=m]').value;m.dl=Math.max(1,parseInt(row.querySelector('[data-f=dl]').value,10)||delay);row.classList.toggle('on',m.en);}));box.appendChild(row);});}
+function rtl(){const box=el('macro-pro-timeline');if(!box)return;box.innerHTML=timeline.length?'':'<div class="macro-pro-hint">Press Record, perform inputs, Stop — then Play Timeline.</div>';timeline.forEach((a,i)=>{const row=document.createElement('div');row.className='macro-pro-tl-item';row.innerHTML='<span class="type">'+a.type+'</span><span>'+a.value+'</span><span class="delay">+'+a.delay+'ms</span><button class="btn btn-ghost btn-sm">×</button>';row.querySelector('button').onclick=()=>{timeline.splice(i,1);rtl();};box.appendChild(row);});}
+function fortnite(){maps=dmaps();if(product==='controller')maps.forEach(m=>{const p=FC[m.idx];if(p){m.en=1;m.out=p.o;m.m=p.m||'once';m.r=p.r||8;m.x=p.x||null;}});else if(mapTab==='keyboard')maps.forEach(m=>{const p=FK[m.name];if(p){m.en=1;m.out=p.o;m.m=p.m||'once';m.r=p.r||8;}});else maps.forEach(m=>{const p=FM[m.name];if(p){m.en=1;m.out=p.o;m.m=p.m||'once';m.r=p.r||8;}});log('Fortnite preset loaded.','ok');rmaps();}
+function recStart(){recording=true;lastEv=Date.now();timeline=[];el('btn-record')?.classList.add('recording');stat('stat-macro','Recording');log('Recording…','ok');rtl();}
+function recStop(){recording=false;el('btn-record')?.classList.remove('recording');stat('stat-macro','Idle');log('Recorded '+timeline.length+' actions.','ok');rtl();}
+function onKey(e){if(!recording)return;const now=Date.now();timeline.push({type:'KEY',value:e.key.toUpperCase(),delay:now-lastEv});lastEv=now;holo?.highlightKeys?.(e.key.toUpperCase());rtl();}
+function active(){return maps.filter(m=>m.en&&m.out);}
+function pads(){if(!navigator.getGamepads)return[];const a=navigator.getGamepads(),o=[];for(let i=0;i<a.length;i++)if(a[i]?.connected)o.push(a[i]);return o;}
+async function fire(m){const s=Math.max(1,(m.dl!=null?m.dl:delay)+(jitter?Math.floor(Math.random()*jitter):0));stat('stat-macro','Run: '+m.name);if(holo){if(product==='controller'&&m.idx!=null)holo.highlightPadButton(m.idx);else holo.highlightKeys?.(m.out);}await window.blankDelay.fireMacro({keys:m.out,speed:s,mode:m.m||'once',repeat:m.r||loops});log(m.name+' → '+m.out+' @ '+s+'ms','ok');stat('stat-macro','Idle');}
+async function playTL(){if(!timeline.length){log('Timeline empty.','warn');return;}stat('stat-macro','Playing');for(const a of timeline){if(a.delay)await new Promise(r=>setTimeout(r,a.delay));holo?.highlightKeys?.(a.value);await window.blankDelay.fireMacro({keys:a.value,speed:delay,mode:'once'});}stat('stat-macro','Idle');log('Timeline done.','ok');}
+function poll(){if(pollId)clearInterval(pollId);pollId=setInterval(()=>{if(!engineOn||product!=='controller')return;const p=pads()[0];if(!p)return;active().forEach(m=>{const prs=!!p.buttons[m.idx]?.pressed,k='p'+m.idx;if(prs&&!lp[k])fire(m);if(!prs&&lp[k]&&m.m==='hold'&&m.x)window.blankDelay.fireMacro({keys:m.x,speed:5,mode:'once'});lp[k]=prs;});},12);if(mousePollId)clearInterval(mousePollId);mousePollId=setInterval(async()=>{if(!engineOn||product!=='keyboard'||mapTab!=='mouse')return;const st=await window.blankDelay.pollInputState();if(!st?.mouse)return;active().forEach(m=>{const prs=!!st.mouse[m.name],k='m'+m.name;if(prs&&!lm[k])fire(m);lm[k]=prs;});},80);}
+async function activate(){const a=active();if(!a.length&&!timeline.length){log('Enable a mapping or record first.','warn');return;}const b=[];if(product==='controller')a.forEach(m=>b.push({id:'p'+m.idx,name:m.name,keys:m.out,tab:'controller',gamepadBtn:m.idx,mode:m.m,repeat:m.r||loops}));else if(mapTab==='keyboard')a.forEach(m=>b.push({id:'k'+m.name,name:m.name,keys:m.out,accelerator:m.name,tab:'keyboard',mode:m.m,repeat:m.r||loops}));else a.forEach(m=>b.push({id:'m'+m.name,name:m.name,keys:m.out,mouseBtn:m.name,tab:'mouse',mode:m.m,repeat:m.r||loops}));await window.blankDelay.startMacroEngine({type:product,speed:delay,game:GAMES[gameKey]?.e||'',binds:b,timeline,timestamp:Date.now()});engineOn=true;lp={};lm={};poll();stat('stat-status','ACTIVE');pill('Macros Live');stat('stat-profile',GAMES[gameKey]?.l||'Universal');log(a.length+' mappings live — OS input, any game.','ok');}
+async function deactivate(){engineOn=false;if(pollId)clearInterval(pollId);if(mousePollId)clearInterval(mousePollId);await window.blankDelay.stopMacroEngine();stat('stat-status','Idle');stat('stat-macro','Idle');pill('Licensed');log('Stopped.','ok');}
+async function refreshProf(){const s=el('profile-select');if(!s)return;const list=await window.blankDelay.listMacroProfiles(product);s.innerHTML='<option value="">— profile —</option>';(list||[]).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;s.appendChild(o);});}
+async function saveProf(){const n=el('profile-name')?.value?.trim()||'Default';await window.blankDelay.saveMacroProfile(product,n,{maps,timeline,delay,jitter,loops,gameKey,mapTab});await refreshProf();log('Saved '+n,'ok');}
+async function loadProf(){const n=el('profile-select')?.value;if(!n)return;const r=await window.blankDelay.loadMacroProfile(product,n);if(!r.success)return log('Not found','warn');const p=r.profile;maps=p.maps||dmaps();timeline=p.timeline||[];delay=p.delay??delay;jitter=p.jitter??0;gameKey=p.gameKey||gameKey;mapTab=p.mapTab||mapTab;rmaps();rtl();log('Loaded '+n,'ok');}
+function exportCfg(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({product,maps,timeline,delay,jitter,gameKey},null,2)],{type:'application/json'}));a.download='blankdelay-'+product+'.json';a.click();}
+function pill(t){const n=el('status-pill');if(n)n.textContent=t;}
+function bind(){
+document.querySelectorAll('.macro-pro-nav button').forEach(b=>b.addEventListener('click',()=>showSec(b.dataset.sec)));
+el('btn-fortnite')?.addEventListener('click',fortnite);
+el('btn-record')?.addEventListener('click',()=>recording?recStop():recStart());
+el('btn-play-tl')?.addEventListener('click',playTL);
+el('btn-activate')?.addEventListener('click',activate);
+el('btn-deactivate')?.addEventListener('click',deactivate);
+el('btn-save-profile')?.addEventListener('click',saveProf);
+el('btn-load-profile')?.addEventListener('click',loadProf);
+el('btn-export')?.addEventListener('click',exportCfg);
+el('import-file')?.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const p=JSON.parse(r.result);maps=p.maps||maps;timeline=p.timeline||[];delay=p.delay??delay;gameKey=p.gameKey||gameKey;rmaps();rtl();log('Imported.','ok');}catch{log('Bad file','warn');}};r.readAsText(f);});
+el('game-select')?.addEventListener('change',e=>{gameKey=e.target.value;stat('stat-profile',GAMES[gameKey]?.l);});
+el('delay-slider')?.addEventListener('input',e=>{delay=+e.target.value;el('delay-val').textContent=delay+'ms';});
+el('jitter-slider')?.addEventListener('input',e=>{jitter=+e.target.value;el('jitter-val').textContent=jitter+'ms';});
+el('loops-input')?.addEventListener('change',e=>{loops=Math.max(1,parseInt(e.target.value,10)||8);});
+el('text-short')?.addEventListener('input',e=>textShort=e.target.value.trim());
+el('text-expand')?.addEventListener('input',e=>textExpand=e.target.value);
+el('caps-layer')?.addEventListener('change',e=>{capsLayer=e.target.checked;log(capsLayer?'Caps Lock layer ON':'Caps Lock layer OFF','ok');});
+document.querySelectorAll('.macro-pro-cam-btns button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.macro-pro-cam-btns button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const st=el('macro-pro-viz-stage');st?.classList.remove('view-iso','view-top');if(b.dataset.view==='iso')st?.classList.add('view-iso');if(b.dataset.view==='top')st?.classList.add('view-top');}));
+if(product==='keyboard')document.querySelectorAll('[data-map-tab]').forEach(b=>b.addEventListener('click',()=>{mapTab=b.dataset.mapTab;vizTab=mapTab;document.querySelectorAll('[data-map-tab]').forEach(x=>x.classList.toggle('active',x.dataset.mapTab===mapTab));maps=dmaps();rmaps();holo?.setTab?.(vizTab);}));
+window.addEventListener('keydown',onKey);
+window.blankDelay.onMacroFired?.(d=>{holo?.highlightKeys?.(d.keys);log('Hotkey: '+d.keys,'ok');});
+window.blankDelay.onMacroPanic?.(()=>{engineOn=false;stat('stat-status','PANIC');pill('PANIC STOP');log('F12 panic stop.','warn');});
+}
+function init(o){product=o.product||'controller';vizTab=product==='controller'?'controller':'keyboard';mapTab=vizTab;maps=dmaps();bind();showSec('map');rmaps();rtl();refreshProf();return{unlock:()=>{if(typeof BlankDeviceHolo!=='undefined'){holo=BlankDeviceHolo.init({canvasId:'holo-fx',labelId:'holo-label',tab:vizTab});holo.start();window.blankDelay.detectDevices().then(d=>d&&holo.setPnpControllers(d.controllers||[]));}stat('stat-profile',GAMES[gameKey].l);stat('stat-status','Ready');log('Macro Pro ready — map, record, Fortnite, F12 panic.','ok');}};}
+return{init};})();

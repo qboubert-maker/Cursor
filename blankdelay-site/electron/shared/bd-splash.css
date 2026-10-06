@@ -1,0 +1,190 @@
+/* BlankDelay — Blank Optimizer-style splash + key gate (all products) */
+.bd-splash-screen {
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    background:
+        radial-gradient(ellipse 90% 75% at 50% 42%, rgba(244,244,245,0.14), rgba(244,244,245,0.04) 42%, transparent 70%),
+        #050506;
+    overflow: hidden;
+    color: #f4f4f5;
+    font-family: Inter, "Segoe UI", sans-serif;
+}
+.bd-splash-fx-canvas, .bd-splash-particles {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.7;
+}
+.bd-splash-screen > *:not(.bd-splash-fx-canvas):not(.bd-splash-particles) { position: relative; z-index: 1; }
+
+.bd-splash-enter { animation: bdSplashIn 0.55s cubic-bezier(0.22,1,0.36,1) both; }
+.bd-splash-exit { animation: bdSplashOut 0.38s cubic-bezier(0.55,0,1,0.45) both; }
+.bd-splash-unlock { animation: bdSplashUnlock 0.72s cubic-bezier(0.22,1,0.36,1) forwards; }
+@keyframes bdSplashOut { from { opacity: 1; transform: none; filter: blur(0); } to { opacity: 0; transform: scale(0.96) translateY(10px); filter: blur(6px); } }
+@keyframes bdSplashUnlock { 0% { opacity: 1; filter: blur(0); } 55% { opacity: 1; filter: blur(0) brightness(1.25); } 100% { opacity: 0; filter: blur(10px) brightness(1.5); transform: scale(1.03); } }
+@keyframes bdSplashIn { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+.bd-app-enter { animation: bdAppIn 0.75s cubic-bezier(0.22,1,0.36,1) both; }
+@keyframes bdAppIn { from { opacity: 0; transform: translateY(18px) scale(0.98); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+.bd-splash-screen.panel-hidden, body.bd-licensed .bd-splash-screen { display: none !important; }
+
+.bd-splash-topbar {
+    position: absolute; top: 0; left: 0; right: 0; height: 56px;
+    display: flex; align-items: center; padding: 0 22px; z-index: 3;
+}
+.bd-splash-topbar-brand { display: inline-flex; align-items: center; gap: 10px; }
+.bd-splash-topbar-brand .mark2 {
+    width: 22px; height: 22px; border-radius: 7px; background: #fff; color: #000;
+    display: flex; align-items: center; justify-content: center;
+}
+.bd-splash-topbar-brand .mark2 svg { width: 12px; height: 12px; }
+.bd-splash-topbar-name { font-size: 13px; font-weight: 800; letter-spacing: 0.04em; }
+.bd-splash-topbar-div { width: 1px; height: 14px; background: rgba(244,244,245,0.22); }
+.bd-splash-topbar-suite { font-size: 12px; font-weight: 600; color: rgba(244,244,245,0.55); }
+
+.bd-splash-stage {
+    position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;
+    text-align: center; animation: bdSplashIn 0.85s cubic-bezier(0.22,1,0.36,1) both;
+}
+.bd-splash-orbits { position: absolute; inset: -40px; pointer-events: none; }
+.bd-splash-orbits span {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 1px solid rgba(244,244,245,0.08);
+    animation: bdOrbit 14s linear infinite;
+}
+.bd-splash-orbits span:nth-child(2) { inset: 18px; animation-duration: 18s; animation-direction: reverse; opacity: 0.7; }
+.bd-splash-orbits span:nth-child(3) { inset: 36px; animation-duration: 22s; opacity: 0.5; }
+.bd-splash-orbits span:nth-child(4) { inset: 54px; animation-duration: 28s; animation-direction: reverse; opacity: 0.35; }
+@keyframes bdOrbit { to { transform: rotate(360deg); } }
+
+.bd-splash-logo-btn {
+    position: relative; width: min(280px, 56vw); height: min(280px, 56vw);
+    border: none; background: transparent; cursor: pointer; padding: 0;
+    display: grid; place-items: center;
+}
+.bd-splash-logo-halo {
+    position: absolute; inset: 18%; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.28), transparent 70%);
+    filter: blur(18px); animation: bdHalo 2.8s ease-in-out infinite;
+}
+@keyframes bdHalo { 0%,100% { opacity: 0.55; transform: scale(0.96); } 50% { opacity: 1; transform: scale(1.05); } }
+.bd-splash-logo-ring {
+    position: absolute; inset: 8%; border-radius: 50%;
+    border: 1px solid rgba(244,244,245,0.22);
+    animation: bdOrbit 10s linear infinite;
+}
+.bd-splash-logo-ring--rev { inset: 16%; animation-direction: reverse; animation-duration: 14s; border-color: rgba(244,244,245,0.12); }
+.bd-splash-logo-mark {
+    position: relative; width: 42%; height: 42%; border-radius: 22%;
+    background: #fff; color: #000; display: grid; place-items: center;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.45), 0 0 40px rgba(255,255,255,0.18);
+}
+.bd-splash-logo-mark svg { width: 48%; height: 48%; }
+
+.bd-splash-product {
+    margin-top: 18px; font-size: clamp(13px, 1.7vw, 16px); font-weight: 800;
+    letter-spacing: 0.28em; text-transform: uppercase; color: #fff;
+}
+.bd-splash-tagline {
+    margin-top: 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.22em;
+    text-transform: uppercase; color: rgba(244,244,245,0.45);
+    display: inline-flex; align-items: center; gap: 10px;
+}
+.bd-splash-tagline .dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(244,244,245,0.35); }
+.bd-splash-tap {
+    margin-top: 34px; padding: 12px 28px; border-radius: 999px;
+    border: 1px solid rgba(244,244,245,0.22); background: rgba(255,255,255,0.04);
+    color: rgba(244,244,245,0.82); font-size: 11px; font-weight: 800; letter-spacing: 0.16em;
+    text-transform: uppercase; cursor: pointer; animation: bdTapPulse 2.2s ease-in-out infinite;
+}
+.bd-splash-tap:hover { border-color: #fff; color: #fff; background: rgba(255,255,255,0.08); }
+@keyframes bdTapPulse { 0%,100% { opacity: 0.75; } 50% { opacity: 1; } }
+
+.bd-splash-footer {
+    position: absolute; bottom: 22px; left: 0; right: 0;
+    display: flex; justify-content: center; align-items: center; gap: 10px;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(244,244,245,0.32); font-weight: 600; z-index: 3;
+}
+.bd-splash-footer .sep { width: 1px; height: 10px; background: rgba(244,244,245,0.2); }
+
+/* Key modal — glass card */
+.bd-splash-key-wrap {
+    position: fixed; inset: 0; z-index: 5;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+}
+.bd-splash-key-wrap[hidden] { display: none !important; }
+.bd-splash-key-backdrop {
+    position: absolute; inset: 0;
+    background: radial-gradient(900px 520px at 50% 40%, rgba(244,244,245,0.1), transparent 65%), rgba(0,0,0,0.78);
+}
+.bd-splash-key-card {
+    position: relative; width: min(560px, 92vw); z-index: 1;
+    border-radius: 24px; padding: 32px;
+    background: linear-gradient(160deg, rgba(24,24,27,0.96), rgba(9,9,11,0.98) 60%, rgba(3,3,3,0.99));
+    border: 1px solid rgba(244,244,245,0.12);
+    box-shadow: inset 0 1px rgba(255,255,255,0.05), 0 22px 50px -28px rgba(0,0,0,0.85);
+    text-align: left;
+}
+.bd-splash-key-card .key-stripe {
+    position: absolute; left: 0; right: 0; top: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #fff, #e4e4e7, #fff, transparent);
+    border-radius: 24px 24px 0 0;
+}
+.bd-splash-key-close {
+    position: absolute; top: 14px; right: 14px; width: 34px; height: 34px;
+    border-radius: 10px; border: 1px solid rgba(244,244,245,0.12);
+    background: rgba(255,255,255,0.04); color: rgba(244,244,245,0.7);
+    font-size: 20px; line-height: 1; cursor: pointer;
+}
+.bd-splash-key-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.bd-splash-key-mark {
+    width: 48px; height: 48px; border-radius: 14px; background: #fff; color: #000;
+    display: grid; place-items: center; flex-shrink: 0;
+}
+.bd-splash-key-mark svg { width: 24px; height: 24px; }
+.gate-brand { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(244,244,245,0.45); margin-bottom: 4px; }
+.bd-splash-key-card h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
+.bd-splash-key-card .sub { font-size: 13px; color: rgba(244,244,245,0.55); margin: 10px 0 20px; line-height: 1.55; }
+.bd-splash-key-card .sub a { color: #fff; }
+.bd-splash-key-card .sub strong { color: #fff; }
+
+.bd-splash-key-input-wrap {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(0,0,0,0.45); border: 1px solid rgba(244,244,245,0.14);
+    border-radius: 14px; padding: 4px 4px 4px 14px;
+}
+.bd-splash-key-input-wrap:focus-within { border-color: rgba(255,255,255,0.45); box-shadow: 0 0 0 3px rgba(255,255,255,0.08); }
+.bd-splash-key-input-wrap input {
+    flex: 1; border: none; background: transparent; padding: 12px 0;
+    font-family: "JetBrains Mono", Consolas, monospace; font-size: 14px; font-weight: 600;
+    letter-spacing: 0.06em; color: #fff; width: 100%;
+}
+.bd-splash-key-input-wrap input::placeholder { color: rgba(255,255,255,0.28); }
+.bd-splash-key-toggle {
+    border: none; background: rgba(255,255,255,0.06); color: rgba(244,244,245,0.7);
+    border-radius: 10px; padding: 10px 12px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+}
+
+.bd-splash-activate {
+    width: 100%; margin-top: 14px; padding: 15px 20px; border-radius: 14px; border: none;
+    background: #fff; color: #000; font-size: 13px; font-weight: 800;
+    letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+}
+.bd-splash-activate:hover { transform: translateY(-1px); }
+.bd-splash-activate:disabled { opacity: 0.6; cursor: default; transform: none; }
+.bd-splash-discord {
+    display: block; margin-top: 12px; text-align: center; font-size: 12px; font-weight: 700;
+    color: rgba(244,244,245,0.55); text-decoration: none;
+}
+.bd-splash-discord:hover { color: #fff; }
+.bd-splash-key-msg { margin-top: 12px; font-size: 12px; min-height: 18px; font-family: "JetBrains Mono", Consolas, monospace; }
+.bd-splash-key-msg.error { color: #ff7b7b; }
+.bd-splash-validated {
+    margin-top: 14px; padding: 12px 14px; border-radius: 12px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18);
+    color: #fff; font-size: 12px; font-family: "JetBrains Mono", Consolas, monospace; font-weight: 700;
+}
+.bd-splash-validated[hidden] { display: none !important; }
+
+body.bd-app .bd-app-main[hidden] { display: none !important; }
+body.bd-licensed .bd-app-main { display: block !important; }

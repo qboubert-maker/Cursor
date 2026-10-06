@@ -1,0 +1,26 @@
+{
+  "name": "blankdelay-fulfillment",
+  "version": "1.0.0",
+  "description": "BlankDelay product hub, license keys, Stripe fulfillment, and Discord key bot",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "hub": "node server/index.js",
+    "bot": "node discord-bot/bot.js",
+    "dev": "node server/index.js",
+    "seed-keys": "node server/seed-keys.js",
+    "build-downloads": "node scripts/build-downloads.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "cors": "^2.8.5",
+    "discord.js": "^14.18.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "nodemailer": "^6.10.0",
+    "stripe": "^17.7.0"
+  }
+}

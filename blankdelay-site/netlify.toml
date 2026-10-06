@@ -1,0 +1,95 @@
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[build]
+
+[[redirects]]
+  from = "https://www.blankdelay.com/*"
+  to = "https://blankdelay.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.blankdelay.com/*"
+  to = "https://blankdelay.com/:splat"
+  status = 301
+  force = true
+
+# Pretty affiliate landing URL
+[[redirects]]
+  from = "/blankdelayaffiliatetweaks"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/blankdelayaffiliatetweaks/"
+  to = "/index.html"
+  status = 200
+
+# Large desktop builds live on GitHub Releases (Netlify file size limit)
+[[redirects]]
+  from = "/downloads/BlankDelay-Setup.exe"
+  to = "https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Setup.exe"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/downloads/BlankDelay-Controller-Macro-V2-Setup.exe"
+  to = "https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Controller-Macro-V2-Setup.exe"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/downloads/BlankDelay-Controller-Macro-V2-Portable.zip"
+  to = "https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/BlankDelay-Controller-Macro-V2-Portable.zip"
+  status = 302
+  force = true
+
+# Product-named Setup.exe URLs → hub installer (except Controller Macro)
+[[redirects]]
+  from = "/downloads/BlankDelay-Blank-Premium-Utility-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 302
+  force = true
+[[redirects]]
+  from = "/downloads/BlankDelay-Zero-Delay-Plus-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 302
+  force = true
+[[redirects]]
+  from = "/downloads/BlankDelay-Zero-Delay-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 302
+  force = true
+[[redirects]]
+  from = "/downloads/BlankDelay-FPS-Boost-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 302
+  force = true
+[[redirects]]
+  from = "/downloads/BlankDelay-Ping-Optimizer-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 302
+  force = true
+[[redirects]]
+  from = "/downloads/BlankDelay-Keyboard-Macro-V2-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 302
+  force = true
+[[redirects]]
+  from = "/downloads/BlankDelay-Aim-Bundle-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 302
+  force = true
+[[redirects]]
+  from = "/downloads/BlankDelay-Shotgun-Pack-Setup.exe"
+  to = "/downloads/BlankDelay-Setup.exe"
+  status = 302
+  force = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
