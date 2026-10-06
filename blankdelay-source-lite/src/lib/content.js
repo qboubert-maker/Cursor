@@ -22,8 +22,8 @@ export const SOCIALS = [
     channels: [
       { label: 'BlankDelay YT', href: 'https://youtube.com/@blankdelayy?si=FiT_rX-5jjRYdcKO' },
       { label: 'Main YouTube Channel', href: 'https://youtube.com/@whyblankk?si=GBwxYH3dJfjMs9BU' },
-      { label: 'Second Main Channel', href: 'https://youtube.com/@whyblankk?si=GBwxYH3dJfjMs9BU' },
-      { label: 'Blank 1v1 Map Channel', href: 'https://youtube.com/@blank1v1map?si=4bjyduWR3Zj1Fwow' },
+      { label: 'Second Main Channel', href: 'https://youtube.com/@blankwym?si=sFiLnAlpCu8nUepC' },
+      { label: 'Blank 1v1 Map Channel', href: 'https://youtube.com/@blank1v1map?si=aG99t9_vTRUYqnp3' },
     ],
   },
   {
