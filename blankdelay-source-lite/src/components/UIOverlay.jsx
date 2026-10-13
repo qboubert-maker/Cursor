@@ -6,7 +6,7 @@ import Products from './Products'
 import AffiliateSystem from './AffiliateSystem'
 import SocialsUI from './SocialsUI'
 import { DISCORD_URL } from '../lib/content'
-import { CHECKOUT_PRODUCTS } from '../lib/checkoutCatalog'
+import { CHECKOUT_PRODUCTS, formatPrice } from '../lib/checkoutCatalog'
 import { useCheckout } from '../context/CheckoutContext'
 import { EASE_EXPO, SECTIONS, scrollProgress } from '../lib/rig'
 
@@ -68,7 +68,7 @@ function Eyebrow({ index, label, active, center = false }) {
   )
 }
 
-function MagneticButton({ href, onClick, children }) {
+function MagneticButton({ href, onClick, children, tone = 'light' }) {
   const anchorRef = useRef(null)
   const [hot, setHot] = useState(false)
   const x = useMotionValue(0)
@@ -92,11 +92,14 @@ function MagneticButton({ href, onClick, children }) {
   return (
     <div className="pointer-events-auto relative -m-16 p-16" onMouseMove={onMove} onMouseEnter={() => setHot(true)} onMouseLeave={onLeave}>
       <motion.div style={{ x: sx, y: sy }} className="relative">
-        {[0, 0.55].map((delay) => (
+        {[
+          { delay: 0, ring: tone === 'split' ? 'border-[#ff3148]' : 'border-white' },
+          { delay: 0.55, ring: tone === 'split' ? 'border-[#c4a6ff]' : 'border-white' },
+        ].map(({ delay, ring }) => (
           <motion.span
             key={delay}
             aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-full border border-white"
+            className={`pointer-events-none absolute inset-0 rounded-full border ${ring}`}
             animate={{ scale: [1, hot ? 1.6 : 1.35], opacity: [0.55, 0] }}
             transition={{ duration: hot ? 1 : 1.8, repeat: Infinity, delay, ease: 'easeOut' }}
           />
@@ -115,13 +118,15 @@ function MagneticButton({ href, onClick, children }) {
           animate={{ scale: hot ? 1.07 : 1 }}
           whileTap={{ scale: 0.94 }}
           transition={{ type: 'spring', stiffness: 320, damping: 16 }}
-          className={`relative inline-flex items-center overflow-hidden rounded-full bg-white px-9 py-6 text-black transition-shadow duration-500 md:px-16 md:py-9 ${
-            hot ? 'cta-glow-hot' : 'cta-glow'
+          className={`relative inline-flex items-center overflow-hidden rounded-full px-9 py-6 transition-shadow duration-500 md:px-16 md:py-9 ${
+            tone === 'split'
+              ? `bg-[linear-gradient(100deg,#ff3148_0%,#c43a9a_48%,#7c3fd6_100%)] text-white ${hot ? 'cta-glow-split-hot' : 'cta-glow-split'}`
+              : `bg-white text-black ${hot ? 'cta-glow-hot' : 'cta-glow'}`
           }`}
         >
           <motion.span
             aria-hidden
-            className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 skew-x-[-20deg] bg-linear-to-r from-transparent via-black/15 to-transparent"
+            className={`pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 skew-x-[-20deg] bg-linear-to-r from-transparent ${tone === 'split' ? 'via-white/35' : 'via-black/15'} to-transparent`}
             animate={{ x: hot ? ['0%', '520%'] : '0%' }}
             transition={hot ? { duration: 0.9, repeat: Infinity, repeatDelay: 0.4, ease: 'easeInOut' } : { duration: 0 }}
           />
@@ -134,9 +139,13 @@ function MagneticButton({ href, onClick, children }) {
   )
 }
 
-function BuyNow({ productId, children }) {
+function BuyNow({ productId, children, tone }) {
   const { openTheater } = useCheckout()
-  return <MagneticButton onClick={() => openTheater(CHECKOUT_PRODUCTS[productId])}>{children}</MagneticButton>
+  return (
+    <MagneticButton tone={tone} onClick={() => openTheater(CHECKOUT_PRODUCTS[productId])}>
+      {children}
+    </MagneticButton>
+  )
 }
 
 function HeroPanel({ booted, onNavigate }) {
@@ -252,7 +261,7 @@ function ProductsPanel({ active }) {
     <motion.section style={style} className="absolute inset-0 flex flex-col px-5 pt-20 pb-4 md:px-10 md:pt-24 md:pb-5" aria-label="View All Products">
       <div className="mx-auto flex min-h-0 w-full max-w-[1320px] flex-1 flex-col">
         <div className="mb-3 shrink-0">
-          <Eyebrow index="12" label="Purchase" active={active} />
+          <Eyebrow index="13" label="Purchase" active={active} />
           <h2 className="font-display stretch-wide mt-2 text-[9vw] leading-[0.86] font-black tracking-[-0.04em] uppercase md:text-[3.6vw]">
             <RevealLine i={0} active={active}>
               View All
@@ -581,6 +590,85 @@ function UtilityPanel({ active }) {
   )
 }
 
+function SideName({ letters, side, color }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`pointer-events-none absolute top-[46%] z-20 hidden -translate-y-1/2 flex-col items-center gap-2 md:flex lg:gap-3.5 ${side === 'left' ? 'left-[5%]' : 'right-[5%]'}`}
+      style={{
+        fontFamily: 'Shojumaru, serif',
+        fontSize: 'clamp(34px, 4vw, 62px)',
+        lineHeight: 1,
+        color,
+        WebkitTextStroke: '2px rgba(0,0,0,0.88)',
+        paintOrder: 'stroke fill',
+        textShadow: '0 3px 14px rgba(0,0,0,0.9)',
+      }}
+    >
+      {letters.map((letter, index) => (
+        <span key={`${side}-${index}`}>{letter}</span>
+      ))}
+    </div>
+  )
+}
+
+function OptimizerPanel({ active }) {
+  const style = usePanel([0.736, 0.752, 0.784, 0.804], 36)
+  const state = active ? 'show' : 'hidden'
+  return (
+    <motion.section style={style} className="absolute inset-0 overflow-hidden" aria-label="The Blank Optimizer">
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse at 18% 68%, rgba(200,16,46,0.78), transparent 46%), radial-gradient(ellipse at 82% 68%, rgba(124,63,214,0.78), transparent 46%), linear-gradient(180deg, #140210 0%, #07010c 74%)',
+        }}
+      />
+      <img
+        src="/tweaks/body/itachi.png"
+        alt=""
+        className="pointer-events-none absolute bottom-0 left-[2%] z-10 h-[72%] w-auto max-w-[34vw] object-contain object-bottom md:left-[9%] md:h-[86%]"
+      />
+      <img
+        src="/tweaks/body/sasuke.png"
+        alt=""
+        className="pointer-events-none absolute right-[2%] bottom-0 z-10 h-[72%] w-auto max-w-[34vw] object-contain object-bottom md:right-[9%] md:h-[86%]"
+      />
+      <SideName letters={['B', 'L', 'A', 'N', 'K']} side="left" color="#ff3148" />
+      <SideName letters={['N', 'O', 'U', 'Z', 'E', 'N']} side="right" color="#d7b4ff" />
+      <div className="relative z-20 flex h-full items-center justify-center px-5 pt-16 pb-10">
+        <div className="w-full max-w-[640px] text-center">
+          <Eyebrow index="09" label="The Blank Optimizer" active={active} center />
+          <h2 className="font-display stretch-wide text-halo mt-4 text-[8vw] leading-[0.86] font-black tracking-[-0.045em] text-white uppercase md:text-[4.4vw]">
+            <RevealLine i={0} active={active}>
+              Blank
+            </RevealLine>
+            <RevealLine i={1} active={active} className="text-[#ff3148]">
+              Optimizer
+            </RevealLine>
+          </h2>
+          <motion.p
+            variants={fadeUp}
+            initial="hidden"
+            animate={state}
+            custom={2}
+            className="mx-auto mt-4 max-w-md text-[14px] leading-relaxed text-white/70 md:text-[16px]"
+          >
+            Itachi on red. Sasuke on purple. The Blank Optimizer is on sale.
+          </motion.p>
+          <motion.div variants={fadeUp} initial="hidden" animate={state} custom={4} className="mt-8 flex flex-col items-center gap-3">
+            <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1 font-mono text-[11px] tracking-[0.24em] text-white uppercase">On sale</span>
+            <BuyNow productId="blank-optimizer" tone="split">
+              <span className="font-display stretch-wide text-[22px] font-black tracking-[-0.02em] uppercase md:text-[34px]">Buy Now</span>
+              <span className="text-[28px] leading-none font-black tracking-[-0.04em] md:text-[40px]">{formatPrice(CHECKOUT_PRODUCTS['blank-optimizer'].price)}</span>
+            </BuyNow>
+          </motion.div>
+        </div>
+      </div>
+    </motion.section>
+  )
+}
+
 function AimPanel({ active }) {
   const style = usePanel([0.8, 0.822, 0.842, 0.858], 80)
   const state = active ? 'show' : 'hidden'
@@ -591,7 +679,7 @@ function AimPanel({ active }) {
       aria-label="Elite Aim Bundle"
     >
       <div className="w-full max-w-[1100px] text-center">
-        <Eyebrow index="09" label="Crosshair" active={active} center />
+        <Eyebrow index="10" label="Crosshair" active={active} center />
         <h2 className="font-display stretch-wide text-halo mt-4 text-[9vw] leading-[0.86] font-black tracking-[-0.045em] uppercase md:text-[6.2vw]">
           <RevealLine i={0} active={active}>
             Elite Aim
@@ -651,7 +739,7 @@ function GamesPanel({ active }) {
       aria-label="Multiversal Compatibility"
     >
       <div className="w-full max-w-[1180px] text-center">
-        <Eyebrow index="10" label="Engines" active={active} center />
+        <Eyebrow index="11" label="Engines" active={active} center />
         <h2 className="font-display stretch-wide text-halo mt-3 text-[7.4vw] leading-[0.86] font-black tracking-[-0.045em] uppercase md:text-[4.8vw]">
           <RevealLine i={0} active={active}>
             Multiversal
@@ -681,7 +769,7 @@ function AboutPanel({ active }) {
     <motion.section style={style} className="absolute inset-0 flex items-end px-4 pt-14 pb-2 md:px-8 md:pt-20 md:pb-8" aria-label="About Blank Delay">
       <div className="mx-auto flex w-full max-w-[1180px] flex-col">
         <motion.div variants={fadeUp} initial="hidden" animate={state} custom={0} className="mx-auto max-w-3xl text-center">
-          <Eyebrow index="11" label="Founder" active={active} center />
+          <Eyebrow index="12" label="Founder" active={active} center />
           <h2 className="font-display stretch-wide text-halo mt-2 text-[7vw] leading-[0.88] font-black tracking-[-0.045em] uppercase md:mt-3 md:text-[3.4vw]">
             About Blank Delay
           </h2>
@@ -771,10 +859,11 @@ export default function UIOverlay({ active, booted, onNavigate }) {
       <KernelPanel active={booted && active === 5} />
       <FpsPanel active={booted && active === 6} />
       <UtilityPanel active={booted && active === 7} />
-      <AimPanel active={booted && active === 8} />
-      <GamesPanel active={booted && active === 9} />
-      <AboutPanel active={booted && active === 10} />
-      <ProductsPanel active={booted && active === 11} />
+      <OptimizerPanel active={booted && active === 8} />
+      <AimPanel active={booted && active === 9} />
+      <GamesPanel active={booted && active === 10} />
+      <AboutPanel active={booted && active === 11} />
+      <ProductsPanel active={booted && active === 12} />
       <ScreenFlash />
       <Hud active={active} booted={booted} />
     </div>

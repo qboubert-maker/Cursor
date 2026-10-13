@@ -21,6 +21,7 @@ import { SIDE_YAW } from '../lib/layout'
 import { padKey, padLeft, padRight, padRim } from '../lib/padLights'
 import { quality } from '../lib/quality'
 import { rig, scrollProgress } from '../lib/rig'
+import { subscribeScenePaused } from '../lib/smoothScroll'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -783,7 +784,7 @@ function Atmosphere() {
       <primitive object={padRim} />
       <primitive object={padLeft} />
       <primitive object={padRight} />
-      <Environment resolution={128} frames={1}>
+      <Environment resolution={quality.mobile ? 64 : 96} frames={1}>
         <Lightformer form="rect" intensity={6} position={[0, 12, 10]} scale={[20, 2, 1]} color="#ffffff" />
         <Lightformer form="rect" intensity={2.2} position={[-10, 2, 4]} scale={[2, 18, 1]} color="#ffffff" />
         <Lightformer form="rect" intensity={1.6} position={[10, 0, 6]} scale={[2, 14, 1]} color="#ffffff" />
@@ -850,9 +851,13 @@ function LaterVisuals() {
 
 export default function Experience() {
   const [dpr, setDpr] = useState(quality.dpr)
+  const [running, setRunning] = useState(true)
+
+  useEffect(() => subscribeScenePaused((paused) => setRunning(!paused)), [])
 
   return (
     <Canvas
+      frameloop={running ? 'always' : 'never'}
       dpr={dpr}
       gl={{ antialias: quality.antialias, alpha: false, stencil: false, powerPreference: 'high-performance' }}
       camera={{ fov: 32, near: 0.08, far: 180, position: [0, 0.55, 15.5] }}
@@ -865,8 +870,7 @@ export default function Experience() {
         const info = context.getExtension('WEBGL_debug_renderer_info')
         if (!info) return
         const renderer = context.getParameter(info.UNMASKED_RENDERER_WEBGL) || ''
-        if (/uhd|hd graphics|iris|mali-|llvmpipe|swiftshader|basic render/i.test(renderer)) {
-          quality.clouds = Math.min(quality.clouds, 150)
+        if (/uhd|hd graphics|iris|mali-|adreno|llvmpipe|swiftshader|basic render/i.test(renderer)) {
           setDpr(1)
         }
       }}
@@ -875,7 +879,7 @@ export default function Experience() {
       <CameraController />
       <PerformanceMonitor
         flipflops={2}
-        onDecline={() => setDpr((current) => Math.max(1, Math.round((current - 0.2) * 100) / 100))}
+        onDecline={() => setDpr(1)}
         onFallback={() => setDpr(1)}
       />
       <Atmosphere />

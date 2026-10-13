@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, loadEnv } from 'vite'
@@ -27,6 +28,26 @@ function sendError(res, error) {
   res.statusCode = error.status || 500
   res.setHeader('Content-Type', 'application/json')
   res.end(JSON.stringify({ error: error.message || 'Request failed' }))
+}
+
+function consolePage() {
+  const rewrite = (req, _res, next) => {
+    const url = (req.url || '').split('?')[0]
+    if (url === '/console' || url === '/console/') req.url = '/console.html'
+    if (url === '/commercial' || url === '/commercial/') req.url = '/commercial.html'
+    if (url === '/controller' || url === '/controller/') req.url = '/controller.html'
+    if (url === '/optimizer' || url === '/optimizer/') req.url = '/optimizer.html'
+    next()
+  }
+  return {
+    name: 'blank-delay-console-page',
+    configureServer(server) {
+      server.middlewares.use(rewrite)
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(rewrite)
+    },
+  }
 }
 
 function paymentApi() {
@@ -86,6 +107,23 @@ export default defineConfig(({ mode }) => {
   if (env.STRIPE_SECRET_KEY) process.env.STRIPE_SECRET_KEY = env.STRIPE_SECRET_KEY
 
   return {
-    plugins: [react(), tailwindcss(), paymentApi()],
+    plugins: [react(), tailwindcss(), consolePage(), paymentApi()],
+    server: {
+      watch: {
+        ignored: ['**/config/**'],
+      },
+    },
+    worker: { format: 'es' },
+    build: {
+      rolldownOptions: {
+        input: {
+          main: fileURLToPath(new URL('./index.html', import.meta.url)),
+          console: fileURLToPath(new URL('./console.html', import.meta.url)),
+          commercial: fileURLToPath(new URL('./commercial.html', import.meta.url)),
+          controller: fileURLToPath(new URL('./controller.html', import.meta.url)),
+          optimizer: fileURLToPath(new URL('./optimizer.html', import.meta.url)),
+        },
+      },
+    },
   }
 })

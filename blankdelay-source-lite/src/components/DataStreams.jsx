@@ -1,10 +1,11 @@
 import { useEffect, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { quality } from '../lib/quality'
 import { rig } from '../lib/rig'
 
-const STREAK_COUNT = 900
-const DUST_COUNT = 2600
+const STREAK_COUNT = Math.round(900 * quality.streams)
+const DUST_COUNT = Math.round(2600 * quality.streams)
 
 function mulberry32(seed) {
   let a = seed >>> 0

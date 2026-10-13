@@ -8,6 +8,15 @@ export const CHECKOUT_PRODUCTS = {
     downloadName: 'Blank-Delay-FPS-Boost.zip',
     features: ['Timer resolution', 'Core unparking', 'GPU scheduling', 'Even frame delivery'],
   },
+  'controller-optimizer': {
+    id: 'controller-optimizer',
+    name: 'Controller Optimizer',
+    price: 1999,
+    description: 'PS5 and Xbox in one app. One driver on at a time, so games see a single controller.',
+    badge: 'Hardware',
+    downloadName: 'Blank-Delay-Controller-Optimizer.zip',
+    features: ['PlayStation view', 'Xbox view', 'One driver at a time'],
+  },
   'controller-macro': {
     id: 'controller-macro',
     name: 'Controller Macro',
@@ -16,6 +25,15 @@ export const CHECKOUT_PRODUCTS = {
     badge: 'Hardware',
     downloadName: 'Blank-Delay-Controller-Macro.zip',
     features: ['USB polling override', 'Deadzone calibration', 'Frame-perfect pad macros'],
+  },
+  'keyboard-optimizer': {
+    id: 'keyboard-optimizer',
+    name: 'Keyboard Optimizer',
+    price: 1999,
+    description: 'Pushes a keyboard and mouse to their maximum polling rate, with timing from 0 to 10 milliseconds.',
+    badge: 'Peripherals',
+    downloadName: 'Blank-Delay-Keyboard-Optimizer.zip',
+    features: ['Maximum polling rate', '0 to 10 milliseconds', 'Every keyboard and mouse'],
   },
   'keyboard-macro': {
     id: 'keyboard-macro',
@@ -35,6 +53,16 @@ export const CHECKOUT_PRODUCTS = {
     downloadName: 'Blank-Delay-OS.zip',
     features: ['Kernel scheduling', 'Input path override', 'One-click apply and revert'],
   },
+  'blank-optimizer': {
+    id: 'blank-optimizer',
+    name: 'The Blank Optimizer',
+    price: 1999,
+    description:
+      'The Blank Optimizer comes with a Controller Optimizer and a Keyboard Optimizer, plus every tweak in the store. Blank Delay clipping software is included, so you can capture your favorite in-game moments.',
+    badge: 'On sale',
+    downloadName: 'The-Blank-Optimizer.exe',
+    features: ['Controller Optimizer', 'Keyboard Optimizer', 'Every store tweak', 'Blank Delay clipping software'],
+  },
   'premium-utility': {
     id: 'premium-utility',
     name: 'Premium Utility',
@@ -47,7 +75,7 @@ export const CHECKOUT_PRODUCTS = {
   'aim-bundle': {
     id: 'aim-bundle',
     name: 'Elite Aim Bundle',
-    price: 1499,
+    price: 1599,
     description: 'Algorithmic precision. Custom crosshair overlays. Perfect tracking. Feel the zero-latency override.',
     badge: 'Crosshair',
     features: ['FPS Boost', 'Controller macro', 'Keyboard macro', 'One license'],

@@ -7,6 +7,9 @@ const PRODUCTS = {
   'zero-delay-os': { id: 'zero-delay-os', name: 'Zero Delay' },
   'premium-utility': { id: 'premium-utility', name: 'Premium Utility' },
   'aim-bundle': { id: 'aim-bundle', name: 'Elite Aim Bundle' },
+  'controller-optimizer': { id: 'controller-optimizer', name: 'Controller Optimizer' },
+  'keyboard-optimizer': { id: 'keyboard-optimizer', name: 'Keyboard Optimizer' },
+  'blank-optimizer': { id: 'blank-optimizer', name: 'The Blank Optimizer' },
 }
 
 const PAYMENT_LINKS = {
@@ -23,6 +26,9 @@ const DOWNLOADS = {
   'zero-delay-os': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Zero-Delay.exe',
   'premium-utility': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Delay-Premium.exe',
   'controller-macro': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Delay-Controller-Macro.exe',
+  'controller-optimizer': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Delay-Controller-Optimizer.exe',
+  'keyboard-optimizer': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Delay-Keyboard-Optimizer.exe',
+  'blank-optimizer': 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/The-Blank-Optimizer.exe',
 }
 
 const json = (statusCode, body) => ({
@@ -71,8 +77,9 @@ async function stripeRequest(method, path, params) {
 function paymentLinkFor(productId) {
   const base = PAYMENT_LINKS[productId]
   if (!base) {
-    const error = new Error('Unknown product')
-    error.status = 400
+    const product = PRODUCTS[productId]
+    const error = new Error(product ? `Checkout for ${product.name} opens soon. Join Discord to get it now.` : 'Unknown product')
+    error.status = product ? 503 : 400
     throw error
   }
   const url = new URL(base)

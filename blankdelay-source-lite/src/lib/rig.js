@@ -1,6 +1,6 @@
 import { motionValue } from 'framer-motion'
 
-export const LOGO_URL = encodeURI('/Blank Delay Logo.png')
+export const LOGO_URL = encodeURI(`${import.meta.env.BASE_URL}Blank Delay Logo.png`)
 
 // Smoothed (scrubbed) master-timeline progress. GSAP writes it, Framer Motion reads it,
 // so the HTML overlay and the 3D scene share exactly the same clock.
@@ -83,18 +83,19 @@ export const SECTIONS = [
   { id: 'kernel', label: 'Zero Delay', index: '06', range: [0.669, 0.694] },
   { id: 'fps', label: 'FPS Boost', index: '07', range: [0.694, 0.703] },
   { id: 'utility', label: 'Utility', index: '08', range: [0.703, 0.733] },
-  { id: 'aim', label: 'Aim', index: '09', range: [0.733, 0.855] },
-  { id: 'games', label: 'Games', index: '10', range: [0.855, 0.925] },
-  { id: 'about', label: 'About', index: '11', range: [0.925, 0.988] },
-  { id: 'products', label: 'Products', index: '12', range: [0.988, 1] },
+  { id: 'optimizer', label: 'Optimizer', index: '09', range: [0.733, 0.8] },
+  { id: 'aim', label: 'Aim', index: '10', range: [0.8, 0.855] },
+  { id: 'games', label: 'Games', index: '11', range: [0.855, 0.925] },
+  { id: 'about', label: 'About', index: '12', range: [0.925, 0.988] },
+  { id: 'products', label: 'Products', index: '13', range: [0.988, 1] },
 ]
 
 // Scroll positions where each chapter's content is fully assembled.
 // Socials lands inside the settled Connect With Us hold (panel is opaque from 0.418–0.455).
-export const SECTION_TARGETS = [0, 0.291, 0.436, 0.596, 0.65, 0.682, 0.699, 0.729, 0.845, 0.916, 0.958, 0.995]
+export const SECTION_TARGETS = [0, 0.291, 0.436, 0.596, 0.65, 0.682, 0.699, 0.729, 0.766, 0.845, 0.916, 0.958, 0.995]
 
 export const sectionFromProgress = (p) =>
-  p < 0.223 ? 0 : p < 0.358 ? 1 : p < 0.462 ? 2 : p < 0.63 ? 3 : p < 0.669 ? 4 : p < 0.694 ? 5 : p < 0.703 ? 6 : p < 0.733 ? 7 : p < 0.855 ? 8 : p < 0.925 ? 9 : p < 0.988 ? 10 : 11
+  p < 0.223 ? 0 : p < 0.358 ? 1 : p < 0.462 ? 2 : p < 0.63 ? 3 : p < 0.669 ? 4 : p < 0.694 ? 5 : p < 0.703 ? 6 : p < 0.733 ? 7 : p < 0.8 ? 8 : p < 0.855 ? 9 : p < 0.925 ? 10 : p < 0.988 ? 11 : 12
 
 // Hover/click target for the social particle logos. 0 idle, 1 TikTok, 2 Instagram, 3 YouTube, 4 Discord.
 export const socialRig = { id: 0, locked: 0 }

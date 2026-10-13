@@ -5,6 +5,7 @@ import DiscordIcon from './icons/DiscordIcon'
 import { useCheckout } from '../context/CheckoutContext'
 import { DISCORD_URL } from '../lib/content'
 import { EASE_EXPO, LOGO_URL, SECTIONS, scrollProgress } from '../lib/rig'
+import PolicyPanel from './PolicyPanel'
 
 const LINKS = SECTIONS
 const GROUPS = Array.from({ length: Math.ceil(LINKS.length / 3) }, (_, group) =>
@@ -13,6 +14,7 @@ const GROUPS = Array.from({ length: Math.ceil(LINKS.length / 3) }, (_, group) =>
 
 export default function Navbar({ active, booted, playing, onTogglePlay, onNavigate }) {
   const [open, setOpen] = useState(false)
+  const [policy, setPolicy] = useState(false)
   const { isTheaterOpen, isCheckoutOpen } = useCheckout()
   const hidden = isTheaterOpen || isCheckoutOpen
 
@@ -29,6 +31,7 @@ export default function Navbar({ active, booted, playing, onTogglePlay, onNaviga
   }
 
   return (
+    <>
     <motion.header
       initial={{ y: -90, opacity: 0 }}
       animate={booted ? { y: 0, opacity: hidden ? 0 : 1 } : { y: -90, opacity: 0 }}
@@ -36,12 +39,21 @@ export default function Navbar({ active, booted, playing, onTogglePlay, onNaviga
       className={`fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black/75 transition-opacity duration-500 ${hidden ? 'pointer-events-none opacity-0' : ''}`}
     >
       <div className="mx-auto flex h-16 max-w-[1680px] items-center justify-between px-5 md:px-8">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
         <button onClick={() => go(0)} className="group flex shrink-0 items-center gap-2.5" aria-label="Blank Delay — back to top">
           <span className="relative block h-8 w-[3.25rem] overflow-hidden" aria-hidden="true">
             <img src={LOGO_URL} alt="" className="pointer-events-none absolute left-1/2 top-1/2 h-[4.75rem] w-[4.75rem] max-w-none -translate-x-1/2 -translate-y-1/2" />
           </span>
           <span className="font-display stretch-wide text-[13px] font-extrabold tracking-[0.06em] text-white">BLANK DELAY</span>
         </button>
+        <button
+          type="button"
+          onClick={() => setPolicy(true)}
+          className="shrink-0 font-mono text-[10px] tracking-[0.22em] text-white/70 uppercase transition-colors hover:text-white"
+        >
+          Policy
+        </button>
+        </div>
 
         <nav className="mx-3 hidden min-w-0 flex-1 items-center justify-center gap-2 md:flex min-[1440px]:mx-5 min-[1440px]:gap-3" aria-label="Primary">
           {GROUPS.map((group) => (
@@ -167,5 +179,7 @@ export default function Navbar({ active, booted, playing, onTogglePlay, onNaviga
         )}
       </AnimatePresence>
     </motion.header>
+    <PolicyPanel open={policy} onClose={() => setPolicy(false)} />
+    </>
   )
 }

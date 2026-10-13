@@ -6,6 +6,11 @@
   command = "npm run build"
   publish = "dist"
 
+# binding.gyp and electron belong to the desktop apps; the website build needs neither.
+[build.environment]
+  NPM_FLAGS = "--ignore-scripts"
+  ELECTRON_SKIP_BINARY_DOWNLOAD = "1"
+
 [[redirects]]
   from = "https://www.blankdelay.com/*"
   to = "https://blankdelay.com/:splat"
@@ -29,6 +34,26 @@
   to = "/.netlify/functions/download"
   status = 200
   force = true
+
+[[redirects]]
+  from = "/console"
+  to = "/console.html"
+  status = 200
+
+[[redirects]]
+  from = "/commercial"
+  to = "/commercial.html"
+  status = 200
+
+[[redirects]]
+  from = "/controller"
+  to = "/controller.html"
+  status = 200
+
+[[redirects]]
+  from = "/optimizer"
+  to = "/optimizer.html"
+  status = 200
 
 [[redirects]]
   from = "/*"

@@ -31,6 +31,18 @@ export const PRODUCT_DOWNLOADS = {
     url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Delay-Controller-Macro.exe',
     filename: 'Blank Delay Controller Macro.exe',
   },
+  'controller-optimizer': {
+    url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Delay-Controller-Optimizer.exe',
+    filename: 'Blank Delay Controller Optimizer.exe',
+  },
+  'keyboard-optimizer': {
+    url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/Blank-Delay-Keyboard-Optimizer.exe',
+    filename: 'Blank Delay Keyboard Optimizer.exe',
+  },
+  'blank-optimizer': {
+    url: 'https://github.com/qboubert-maker/Cursor/releases/download/blankdelay-desktop-v2/The-Blank-Optimizer.exe',
+    filename: 'The Blank Optimizer.exe',
+  },
 }
 
 const stripeClient = async () => {
@@ -55,8 +67,13 @@ export async function createCheckoutSession({ productId }) {
     error.status = 400
     throw error
   }
-
-  return { url: paymentLinkFor(product.id) }
+  const url = paymentLinkFor(product.id)
+  if (!url) {
+    const error = new Error(`Checkout for ${product.name} opens soon. Join Discord to get it now.`)
+    error.status = 503
+    throw error
+  }
+  return { url }
 }
 
 function productFromSession(session) {

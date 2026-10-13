@@ -2,8 +2,9 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { LOGO_STAGE, rig, socialRig } from '../lib/rig'
+import { quality } from '../lib/quality'
 
-const COUNT = 5600
+const COUNT = Math.round(5600 * quality.particles)
 const SAMPLE = 420
 const SCALE = 1.38
 
@@ -194,6 +195,7 @@ const vertexShader = /* glsl */ `
 
 const fragmentShader = /* glsl */ `
   uniform float uOpacity;
+  uniform vec3 uTint;
   varying float vEdge;
   void main() {
     vec2 p = gl_PointCoord - vec2(0.5);
@@ -202,7 +204,7 @@ const fragmentShader = /* glsl */ `
     float core = smoothstep(0.28, 0.0, d);
     float alpha = (disc * mix(0.55, 0.95, vEdge) + core * mix(0.45, 0.85, vEdge)) * uOpacity;
     if (alpha < 0.02) discard;
-    gl_FragColor = vec4(vec3(1.0), alpha);
+    gl_FragColor = vec4(mix(uTint, vec3(1.0), vEdge), alpha);
   }
 `
 
@@ -216,21 +218,34 @@ const glowVertex = /* glsl */ `
 
 const glowFragment = /* glsl */ `
   uniform float uOpacity;
+  uniform vec3 uTint;
   varying vec2 vUv;
   void main() {
     float d = length(vUv - vec2(0.5)) * 2.0;
     float glow = smoothstep(1.0, 0.0, d);
     float alpha = glow * glow * 0.16 * uOpacity;
     if (alpha < 0.01) discard;
-    gl_FragColor = vec4(vec3(1.0), alpha);
+    gl_FragColor = vec4(uTint, alpha);
   }
 `
 
-export default function SocialParticles() {
+function tintOf(color) {
+  const hex = String(color || '#ffffff').replace('#', '')
+  const full = hex.length === 3 ? hex.split('').map((part) => part + part).join('') : hex
+  const value = Number.parseInt(full, 16)
+  if (!Number.isFinite(value)) return [1, 1, 1]
+  return [((value >> 16) & 255) / 255, ((value >> 8) & 255) / 255, (value & 255) / 255]
+}
+
+export default function SocialParticles({ color = '#ffffff' }) {
   const group = useRef(null)
   const points = useRef(null)
   const glow = useRef(null)
   const field = useMemo(() => buildField(), [])
+  const tint = useMemo(() => {
+    const [r, g, b] = tintOf(color)
+    return new THREE.Vector3(r, g, b)
+  }, [color])
   const fade = useRef(0)
   const activeId = useRef(0)
   const clock = useRef(0)
@@ -305,7 +320,7 @@ export default function SocialParticles() {
           depthWrite={false}
           blending={THREE.AdditiveBlending}
           toneMapped={false}
-          uniforms={{ uOpacity: { value: 0 } }}
+          uniforms={{ uOpacity: { value: 0 }, uTint: { value: tint } }}
           vertexShader={glowVertex}
           fragmentShader={glowFragment}
         />
@@ -316,7 +331,7 @@ export default function SocialParticles() {
           depthWrite={false}
           blending={THREE.AdditiveBlending}
           toneMapped={false}
-          uniforms={{ uOpacity: { value: 0 } }}
+          uniforms={{ uOpacity: { value: 0 }, uTint: { value: tint } }}
           vertexShader={vertexShader}
           fragmentShader={fragmentShader}
         />

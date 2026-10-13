@@ -9,31 +9,88 @@ import { pauseSmoothScroll, resumeSmoothScroll } from '../lib/smoothScroll'
 import DiscordIcon from './icons/DiscordIcon'
 import MediaReel from './MediaReel'
 import { CONTROLLER_SLIDES } from '../lib/controllerSlides'
+import { CONTROLLER_OPTIMIZER_SLIDES } from '../lib/controllerOptimizerSlides'
 import { KEYBOARD_SLIDES } from '../lib/keyboardSlides'
+import { KEYBOARD_OPTIMIZER_SLIDES } from '../lib/keyboardOptimizerSlides'
 import { FPS_SLIDES } from '../lib/fpsSlides'
 import { ZERO_DELAY_SLIDES } from '../lib/zeroDelaySlides'
 import { PREMIUM_SLIDES } from '../lib/premiumSlides'
+import { BLANK_OPTIMIZER_SLIDES } from '../lib/blankOptimizerSlides'
+
+const CONTROLLER_CHOICES = [
+  {
+    id: 'controller-optimizer',
+    title: 'Controller Optimizer',
+    line: 'PS5 and Xbox in one app. One driver on at a time.',
+    image: '/demos/controller-optimizer/01-ps5.png',
+  },
+  {
+    id: 'controller-macro',
+    title: 'Controller Macro',
+    line: 'Polling override and frame-perfect pad macros.',
+    image: '/demos/controller/01-controller.jpg',
+  },
+]
+
+const KEYBOARD_CHOICES = [
+  {
+    id: 'keyboard-optimizer',
+    title: 'Keyboard Optimizer',
+    line: 'Every keyboard and mouse. Set the response from 0 to 10 ms.',
+    image: '/demos/keyboard-optimizer/01-board.png',
+  },
+  {
+    id: 'keyboard-macro',
+    title: 'Keyboard Macro',
+    line: 'Sub-millisecond chains on your keyboard and mouse.',
+    image: '/demos/keyboard/01-hero.jpg',
+  },
+]
+
+const CHOICE_MENUS = [
+  { ids: ['controller-macro', 'controller-optimizer'], eyebrow: 'Two products', title: 'Choose your controller', choices: CONTROLLER_CHOICES },
+  { ids: ['keyboard-macro', 'keyboard-optimizer'], eyebrow: 'Two products', title: 'Choose your keyboard', choices: KEYBOARD_CHOICES },
+]
+
+const WHAT_IT_DOES = {
+  'controller-optimizer':
+    'Controller Optimizer pushes your controller to the maximum polling rate it supports. A non-bannable macro engine lets you set that response anywhere from 0 to 10 milliseconds. Xbox, SCUF, and PlayStation controllers are supported.',
+  'keyboard-optimizer':
+    'Keyboard Optimizer pushes your keyboard and mouse to the maximum polling rate they support. A non-bannable macro engine lets you set that response anywhere from 0 to 10 milliseconds. Every keyboard and mouse is supported.',
+  'blank-optimizer':
+    'The Blank Optimizer comes with a Controller Optimizer and a Keyboard Optimizer, plus every tweak in the store. Blank Delay clipping software is included, so you can capture your favorite in-game moments.',
+}
 
 const PRODUCT_SLIDES = {
+  'controller-optimizer': CONTROLLER_OPTIMIZER_SLIDES,
   'controller-macro': CONTROLLER_SLIDES,
+  'keyboard-optimizer': KEYBOARD_OPTIMIZER_SLIDES,
   'keyboard-macro': KEYBOARD_SLIDES,
   'fps-boost': FPS_SLIDES,
   'zero-delay-os': ZERO_DELAY_SLIDES,
   'premium-utility': PREMIUM_SLIDES,
+  'blank-optimizer': BLANK_OPTIMIZER_SLIDES,
 }
 
 const DEMOS = [
+  { productId: 'controller-optimizer', sectionId: 'controllers', line: 'PS5 and Xbox in one app. One driver on at a time.' },
   { productId: 'controller-macro', sectionId: 'controllers', line: 'Polling override, live on PS5 and Xbox.' },
+  { productId: 'keyboard-optimizer', sectionId: 'desk', line: 'Every keyboard and mouse. Set the response from 0 to 10 ms.' },
   { productId: 'keyboard-macro', sectionId: 'desk', line: 'Sub-millisecond chains on your keyboard and mouse.' },
   { productId: 'zero-delay-os', sectionId: 'kernel', line: 'The OS app opening the kernel path.' },
   { productId: 'fps-boost', sectionId: 'fps', line: 'Frame pacing across both processors.' },
+  { productId: 'blank-optimizer', sectionId: 'optimizer', line: 'Controller Optimizer, Keyboard Optimizer, every store tweak, and Blank Delay clipping software.' },
   { productId: 'premium-utility', sectionId: 'utility', line: 'The Premium app: games, optimization lanes, and debloat.' },
   { productId: 'aim-bundle', sectionId: 'aim', line: 'The crosshair locking to the cursor.' },
 ]
 
 export default function ProductTheater() {
   const { isTheaterOpen, theaterProductId, closeTheater, watchDemonstration, openCheckout } = useCheckout()
-  const activeId = theaterProductId && CHECKOUT_PRODUCTS[theaterProductId] ? theaterProductId : DEMOS[0].productId
+  const openedId = theaterProductId && CHECKOUT_PRODUCTS[theaterProductId] ? theaterProductId : DEMOS[0].productId
+  const openedMenu = CHOICE_MENUS.find((menu) => menu.ids.includes(openedId)) || null
+  const [chosenId, setChosenId] = useState(null)
+  const choosing = Boolean(openedMenu) && !chosenId
+  const activeId = chosenId || openedId
   const demo = DEMOS.find((item) => item.productId === activeId) || DEMOS[0]
   const product = CHECKOUT_PRODUCTS[demo.productId]
 
@@ -56,25 +113,35 @@ export default function ProductTheater() {
   const slides = PRODUCT_SLIDES[demo.productId]
 
   useEffect(() => {
-    setSlidesReady(true)
-  }, [demo.productId])
+    setChosenId(null)
+    setBuyError('')
+    setLeaving(false)
+  }, [isTheaterOpen, theaterProductId])
 
   useEffect(() => {
-    if (!isTheaterOpen) return
-    setLeaving(false)
-    setBuyError('')
-  }, [isTheaterOpen])
+    setSlidesReady(true)
+  }, [demo.productId])
 
   const play = () => {
     const index = SECTIONS.findIndex((section) => section.id === demo.sectionId)
     if (index >= 0) watchDemonstration(index)
   }
 
+  const themed = product?.id === 'blank-optimizer'
+
   return (
     <AnimatePresence>
       {isTheaterOpen && product && (
         <motion.div
-          className="pointer-events-auto fixed inset-0 z-[75] flex items-center justify-center bg-transparent p-4 md:p-6"
+          className="pointer-events-auto fixed inset-0 z-[75] flex items-center justify-center p-4 md:p-6"
+          style={
+            themed
+              ? {
+                  background:
+                    'radial-gradient(ellipse at 16% 70%, rgba(200,16,46,0.95), transparent 46%), radial-gradient(ellipse at 84% 70%, rgba(124,63,214,0.95), transparent 46%), linear-gradient(180deg, #140210 0%, #07010c 80%)',
+                }
+              : undefined
+          }
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -91,26 +158,76 @@ export default function ProductTheater() {
           >
             <header className="flex shrink-0 items-end justify-between px-7 pt-5 pb-4 md:px-8">
               <div>
-                <p className="font-mono text-[11px] tracking-[0.34em] text-white/45 uppercase">Demonstration</p>
-                <h2 className="font-display stretch-wide mt-2 text-[28px] leading-none font-black tracking-[-0.045em] uppercase md:text-[36px]">See what you're buying</h2>
+                <p className="font-mono text-[11px] tracking-[0.34em] text-white/45 uppercase">{choosing ? openedMenu.eyebrow : 'Demonstration'}</p>
+                <h2 className="font-display stretch-wide mt-2 text-[28px] leading-none font-black tracking-[-0.045em] uppercase md:text-[36px]">
+                  {choosing ? openedMenu.title : "See what you're buying"}
+                </h2>
               </div>
-              <button
-                type="button"
-                onClick={closeTheater}
-                aria-label="Close demonstrations"
-                className="grid h-12 w-12 place-items-center rounded-full border border-white/25 bg-white/5 text-white/70 transition-colors hover:border-white hover:bg-white hover:text-black"
-              >
-                <X size={18} />
-              </button>
+              <div className="flex items-center gap-3">
+                {chosenId && openedMenu ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setChosenId(null)
+                      setBuyError('')
+                      setLeaving(false)
+                    }}
+                    className="rounded-full border border-white/25 px-4 py-3 font-mono text-[11px] tracking-[0.22em] text-white/70 uppercase transition-colors hover:bg-white hover:text-black"
+                  >
+                    Choose again
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={closeTheater}
+                  aria-label="Close demonstrations"
+                  className="grid h-12 w-12 place-items-center rounded-full border border-white/25 bg-white/5 text-white/70 transition-colors hover:border-white hover:bg-white hover:text-black"
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </header>
 
+            {choosing ? (
+              <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto overscroll-contain border-t border-white/15 px-6 py-6 md:grid-cols-2 md:px-8">
+                {openedMenu.choices.map((choice) => {
+                  const item = CHECKOUT_PRODUCTS[choice.id]
+                  return (
+                    <button
+                      key={choice.id}
+                      type="button"
+                      onClick={() => setChosenId(choice.id)}
+                      className="group flex min-h-[280px] flex-col overflow-hidden rounded-[28px] border border-white/20 bg-white/[0.04] text-left transition duration-300 hover:border-white hover:bg-white/[0.08]"
+                    >
+                      <span className="relative min-h-0 flex-1 bg-black/40">
+                        <img src={choice.image} alt="" className="absolute inset-0 h-full w-full object-contain p-4 transition duration-300 group-hover:scale-[1.02]" />
+                      </span>
+                      <span className="flex items-end justify-between gap-4 border-t border-white/15 px-5 py-5 md:px-6">
+                        <span className="min-w-0">
+                          <span className="font-display stretch-wide block text-[26px] leading-none font-black tracking-[-0.045em] uppercase md:text-[34px]">{choice.title}</span>
+                          <span className="mt-2 block max-w-[28ch] text-[14px] leading-snug text-white/60">{choice.line}</span>
+                        </span>
+                        <span className="font-display shrink-0 text-[30px] leading-none font-black tracking-[-0.045em] md:text-[38px]">{formatPrice(item.price)}</span>
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            ) : (
             <div className="flex min-h-0 flex-1 flex-col border-t border-white/15 px-6 pt-6 pb-4 md:px-8 md:pt-7">
               {slides && slidesReady ? (
                 <div className="flex min-h-0 flex-1 flex-col">
                   <MediaReel key={demo.productId} slides={slides} onEmpty={() => setSlidesReady(false)} />
-                  <p className="mt-3 shrink-0 font-mono text-[11px] tracking-[0.2em] text-white/45 uppercase">
-                    {slides.some((slide) => slide.type === 'video') ? 'Slide through the product, then the video.' : 'Slide through the product.'}
-                  </p>
+                  {WHAT_IT_DOES[demo.productId] ? (
+                    <div className="mt-4 shrink-0 border-t border-white/10 pt-4">
+                      <p className="font-mono text-[11px] tracking-[0.34em] text-white/45 uppercase">What does this do</p>
+                      <p className="mt-2 max-w-4xl text-[15px] leading-relaxed text-white/78 md:text-[16px]">{WHAT_IT_DOES[demo.productId]}</p>
+                    </div>
+                  ) : (
+                    <p className="mt-3 shrink-0 font-mono text-[11px] tracking-[0.2em] text-white/45 uppercase">
+                      {slides.some((slide) => slide.type === 'video') ? 'Slide through the product, then the video.' : 'Slide through the product.'}
+                    </p>
+                  )}
                 </div>
               ) : (
                 <button
@@ -131,7 +248,22 @@ export default function ProductTheater() {
                 </button>
               )}
             </div>
+            )}
 
+            {choosing ? (
+              <footer className="flex shrink-0 justify-end border-t border-white/15 bg-black/35 px-6 py-5 md:px-8">
+                <a
+                  href={DISCORD_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 text-[14px] text-white/55 transition-colors hover:text-white"
+                >
+                  <span>Need help?</span>
+                  <DiscordIcon className="h-4 w-4" />
+                  <span className="font-semibold text-white">Join Discord</span>
+                </a>
+              </footer>
+            ) : (
             <footer className="grid shrink-0 grid-cols-1 items-center gap-4 border-t border-white/15 bg-black/35 px-6 py-6 md:grid-cols-[1fr_auto_1fr] md:px-8">
               <div className="hidden md:block" aria-hidden="true" />
               <button
@@ -146,7 +278,11 @@ export default function ProductTheater() {
                     setBuyError(result?.error || 'Stripe could not be opened.')
                   }
                 }}
-                className="inline-flex min-h-[76px] w-[min(100%,420px)] items-center justify-center gap-4 justify-self-center rounded-full bg-white px-8 text-black shadow-[0_0_0_8px_rgba(255,255,255,0.22),0_0_90px_rgba(255,255,255,1)] transition-transform duration-300 hover:scale-[1.04] sm:min-h-[92px] sm:gap-5 sm:px-12"
+                className={`inline-flex min-h-[76px] w-[min(100%,420px)] items-center justify-center gap-4 justify-self-center rounded-full px-8 transition-transform duration-300 hover:scale-[1.04] sm:min-h-[92px] sm:gap-5 sm:px-12 ${
+                  product.id === 'blank-optimizer'
+                    ? 'bg-[linear-gradient(100deg,#ff3148_0%,#c43a9a_48%,#7c3fd6_100%)] text-white shadow-[0_0_0_8px_rgba(196,58,154,0.28),0_0_90px_rgba(124,63,214,0.55)]'
+                    : 'bg-white text-black shadow-[0_0_0_8px_rgba(255,255,255,0.22),0_0_90px_rgba(255,255,255,1)]'
+                }`}
               >
                 <span className="text-[16px] font-black tracking-[0.24em] uppercase">Buy now</span>
                 <span className="text-[42px] leading-none font-black tracking-[-0.045em]">{formatPrice(product.price)}</span>
@@ -162,6 +298,7 @@ export default function ProductTheater() {
                 <span className="font-semibold text-white">Join Discord</span>
               </a>
             </footer>
+            )}
             {buyError ? <p className="px-8 pb-5 text-center text-[13px] text-white/70">{buyError}</p> : null}
           </motion.div>
         </motion.div>

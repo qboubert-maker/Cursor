@@ -26,3 +26,6 @@ downloads
 *.njsproj
 *.sln
 *.sw?
+build
+release
+dist-app

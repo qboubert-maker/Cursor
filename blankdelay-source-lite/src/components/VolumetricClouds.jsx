@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { quality } from '../lib/quality'
 import { rig } from '../lib/rig'
 
 const TAU = Math.PI * 2
@@ -181,6 +180,7 @@ const vertexShader = /* glsl */ `
   attribute float aSeed;
 
   uniform float uTime;
+  uniform float uDrift;
 
   varying vec2 vUv;
   varying vec2 vLocal;
@@ -194,6 +194,7 @@ const vertexShader = /* glsl */ `
     vLocal = uv - 0.5;
 
     vec3 center = aOffset;
+    center.z += uDrift;
     center.x += sin(uTime * 0.05 + aSeed * 31.0) * 1.6;
     center.y += cos(uTime * 0.04 + aSeed * 17.0) * 0.9;
 
@@ -275,8 +276,8 @@ const fragmentShader = /* glsl */ `
   }
 `
 
-export default function VolumetricClouds() {
-  const { geometry, material, clouds, buffers, order, lightWorld, lightView, forward } = useMemo(() => {
+export default function VolumetricClouds({ sony = false, tint = null }) {
+  const { geometry, material, lightWorld, lightView, grey, play } = useMemo(() => {
     const clouds = buildCloudField()
     const count = clouds.length
 
@@ -294,9 +295,21 @@ export default function VolumetricClouds() {
       alpha: new Float32Array(count),
       seed: new Float32Array(count),
     }
+    for (let i = 0; i < count; i += 1) {
+      const cloud = clouds[i]
+      buffers.offset[i * 3] = cloud.x
+      buffers.offset[i * 3 + 1] = cloud.y
+      buffers.offset[i * 3 + 2] = cloud.z
+      buffers.scale[i * 2] = cloud.w
+      buffers.scale[i * 2 + 1] = cloud.h
+      buffers.rot[i] = cloud.rot
+      buffers.variant[i] = cloud.variant
+      buffers.alpha[i] = cloud.alpha
+      buffers.seed[i] = cloud.seed
+    }
     const attach = (name, array, size) => {
       const attr = new THREE.InstancedBufferAttribute(array, size)
-      attr.setUsage(THREE.DynamicDrawUsage)
+      attr.setUsage(THREE.StaticDrawUsage)
       geometry.setAttribute(name, attr)
     }
     attach('aOffset', buffers.offset, 3)
@@ -313,6 +326,7 @@ export default function VolumetricClouds() {
       uniforms: {
         uMap: { value: createCloudAtlas() },
         uTime: { value: 0 },
+        uDrift: { value: 0 },
         uLightView: { value: new THREE.Vector3() },
         uLightIntensity: { value: 1 },
         uLightRange: { value: 300 },
@@ -330,12 +344,18 @@ export default function VolumetricClouds() {
     return {
       geometry,
       material,
-      clouds,
-      buffers,
-      order: clouds.map((_, i) => i),
       lightWorld: new THREE.Vector3(0, 0.4, 0.6),
       lightView: new THREE.Vector3(),
-      forward: new THREE.Vector3(),
+      grey: {
+        shadow: new THREE.Color('#060606'),
+        body: new THREE.Color('#4a4a4a'),
+        rim: new THREE.Color('#ffffff'),
+      },
+      play: {
+        shadow: new THREE.Color('#020a1a'),
+        body: new THREE.Color('#0c3e8c'),
+        rim: new THREE.Color('#6d9ed4'),
+      },
     }
   }, [])
 
@@ -349,73 +369,49 @@ export default function VolumetricClouds() {
   )
 
   const mesh = useRef(null)
+  const sonyRef = useRef(sony)
+  const tintRef = useRef(tint)
+  const tone = useRef(sony ? 1 : 0)
+  const tintHold = useRef({
+    scratch: new THREE.Color(),
+    white: new THREE.Color('#ffffff'),
+    shadow: new THREE.Color(),
+    body: new THREE.Color(),
+    rim: new THREE.Color(),
+  })
+  sonyRef.current = sony
+  tintRef.current = tint
 
-  useFrame(({ camera, clock }) => {
+  useFrame(({ camera, clock }, delta) => {
+    const u = material.uniforms
+    if (tintRef.current) {
+      const hold = tintHold.current
+      hold.scratch.set(tintRef.current)
+      hold.shadow.copy(hold.scratch).multiplyScalar(0.2)
+      hold.body.copy(hold.scratch)
+      hold.rim.copy(hold.white).lerp(hold.scratch, 0.42)
+      u.uShadow.value.copy(hold.shadow)
+      u.uBody.value.copy(hold.body)
+      u.uRim.value.copy(hold.rim)
+    } else {
+      tone.current = THREE.MathUtils.damp(tone.current, sonyRef.current ? 1 : 0, 3.2, delta)
+      const t = tone.current
+      u.uShadow.value.copy(grey.shadow).lerp(play.shadow, t)
+      u.uBody.value.copy(grey.body).lerp(play.body, t)
+      u.uRim.value.copy(grey.rim).lerp(play.rim, t)
+    }
     const opacity = rig.clouds
     const visible = opacity > 0.012
     mesh.current.visible = visible
     if (!visible) return
 
-    camera.updateMatrixWorld()
-    const u = material.uniforms
     u.uTime.value = clock.elapsedTime
+    u.uDrift.value = rig.travel * 14
     u.uOpacity.value = opacity
     u.uFogDensity.value = rig.fog
     u.uLightIntensity.value = 0.55 + rig.logo * 0.9 + rig.glow * 0.45 + rig.flash * 2.4
     lightWorld.set(rig.logoX, rig.logoY, rig.logoZ)
     u.uLightView.value.copy(lightView.copy(lightWorld).applyMatrix4(camera.matrixWorldInverse))
-
-    camera.getWorldDirection(forward)
-    const cx = camera.position.x
-    const cy = camera.position.y
-    const cz = camera.position.z
-    const drift = rig.travel * 14
-
-    for (let i = 0; i < clouds.length; i++) {
-      const c = clouds[i]
-      const wz = c.z + drift
-      c.depth = (c.x - cx) * forward.x + (c.y - cy) * forward.y + (wz - cz) * forward.z
-    }
-    order.sort((a, b) => clouds[b].depth - clouds[a].depth)
-
-    const budget = quality.clouds
-    let inFront = 0
-    for (let k = 0; k < order.length; k++) {
-      if (clouds[order[k]].depth > -8) inFront += 1
-    }
-    const skip = Math.max(0, inFront - budget)
-    const { offset, scale, rot, variant, alpha, seed } = buffers
-    let seen = 0
-    let n = 0
-    for (let k = 0; k < order.length; k++) {
-      const c = clouds[order[k]]
-      if (c.depth <= -8) continue
-      seen += 1
-      if (seen <= skip) continue
-      offset[n * 3] = c.x
-      offset[n * 3 + 1] = c.y
-      offset[n * 3 + 2] = c.z + drift
-      scale[n * 2] = c.w
-      scale[n * 2 + 1] = c.h
-      rot[n] = c.rot
-      variant[n] = c.variant
-      alpha[n] = c.alpha
-      seed[n] = c.seed
-      n += 1
-    }
-    geometry.instanceCount = n
-    const upload = (attr, count) => {
-      attr.clearUpdateRanges()
-      if (count > 0) attr.addUpdateRange(0, count)
-      attr.needsUpdate = count > 0
-    }
-    const a = geometry.attributes
-    upload(a.aOffset, n * 3)
-    upload(a.aScale, n * 2)
-    upload(a.aRot, n)
-    upload(a.aVariant, n)
-    upload(a.aAlpha, n)
-    upload(a.aSeed, n)
   })
 
   return <mesh ref={mesh} geometry={geometry} material={material} frustumCulled={false} renderOrder={0} />

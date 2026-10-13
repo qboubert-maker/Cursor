@@ -1,0 +1,48 @@
+{
+  "appId": "com.blankdelay.theoptimizer",
+  "productName": "The Blank Optimizer",
+  "asar": true,
+  "npmRebuild": false,
+  "asarUnpack": [
+    "build/Release/*.node"
+  ],
+  "files": [
+    "dist-optimizer/**",
+    "electron/optimizer-main.js",
+    "electron/optimizer-preload.cjs",
+    "electron/optimizer-clips.js",
+    "electron/optimizer-clip-buffer.js",
+    "electron/key-watch.js",
+    "electron/keyboard-ipc.js",
+    "electron/optimizer-license.js",
+    "electron/taskbar-guard.js",
+    "electron/optimizer-tweak-engine.js",
+    "electron/optimizer-tweak-catalog.js",
+    "src/main/ipcHandlers.js",
+    "src/main/license.js",
+    "build/Release/blank_delay_engine.node",
+    "build/Release/blank_keyboard_engine.node",
+    "electron/blank-delay.ico",
+    "package.json",
+    "!node_modules/**",
+    "!**/.env",
+    "!**/.env.*"
+  ],
+  "extraMetadata": {
+    "main": "electron/optimizer-main.js"
+  },
+  "directories": {
+    "output": "release-optimizer"
+  },
+  "electronDist": "node_modules/electron/dist",
+  "win": {
+    "target": [
+      "portable"
+    ],
+    "icon": "electron/blank-delay.ico",
+    "signExecutable": false
+  },
+  "portable": {
+    "artifactName": "The Blank Optimizer.exe"
+  }
+}
