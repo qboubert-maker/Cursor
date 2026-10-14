@@ -7,6 +7,9 @@ export const STRIPE_PAYMENT_LINKS = {
   'keyboard-macro': 'https://buy.stripe.com/cNi3cobv4gUqcuHeiR9bO0i',
   'zero-delay-os': 'https://buy.stripe.com/6oU5kw56GeMigKXfmV9bO0h',
   'premium-utility': 'https://buy.stripe.com/fZu3co8iSaw2eCP1w59bO0g',
+  'controller-optimizer': 'https://buy.stripe.com/14A14g6aKbA62U73Ed9bO0n',
+  'keyboard-optimizer': 'https://buy.stripe.com/dRm00c2Yy9rY66jeiR9bO0o',
+  'blank-optimizer': 'https://buy.stripe.com/bJeeV6bv49rY66j1w59bO0m',
 }
 
 /** Installers already published for the original site. The new download screen opens these after payment. */
