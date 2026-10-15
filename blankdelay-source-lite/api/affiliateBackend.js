@@ -17,13 +17,10 @@ class StoreConflict extends Error {}
 
 const transaction = new AsyncLocalStorage()
 
-let blobs = null
+// Netlify hands each request a short-lived Blobs token, so a store kept from an earlier request fails with "Token expired".
 const blobStore = async () => {
-  if (!blobs) {
-    const { getStore } = await import('@netlify/blobs')
-    blobs = getStore({ name: STORE_NAME, consistency: 'strong' })
-  }
-  return blobs
+  const { getStore } = await import('@netlify/blobs')
+  return getStore({ name: STORE_NAME, consistency: 'strong' })
 }
 
 export async function loadData() {

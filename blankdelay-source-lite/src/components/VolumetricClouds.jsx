@@ -248,12 +248,19 @@ const fragmentShader = /* glsl */ `
     float dist = length(toLight);
     vec3 L = toLight / dist;
     vec3 V = normalize(-vViewPos);
-    float atten = uLightIntensity / (1.0 + pow(dist / uLightRange, 2.0));
+    float range = dist / uLightRange;
+    float atten = uLightIntensity / (1.0 + range * range);
 
     float ndl = dot(N, L);
     float wrap = clamp(ndl * 0.5 + 0.5, 0.0, 1.0);
     float forward = clamp(dot(-V, L), 0.0, 1.0);
-    float phase = pow(forward, 14.0) * 0.8 + pow(forward, 80.0) * 2.6;
+    // forward^14 and forward^80 by squaring; pow() is far slower on phone GPUs.
+    float f2 = forward * forward;
+    float f4 = f2 * f2;
+    float f8 = f4 * f4;
+    float f16 = f8 * f8;
+    float f64 = f16 * f16 * f16 * f16;
+    float phase = f8 * f4 * f2 * 0.8 + f64 * f16 * 2.6;
 
     // Only the rims that face the light on screen catch the silver lining.
     vec2 gDir = g / max(length(g), 0.0001);
@@ -261,14 +268,17 @@ const fragmentShader = /* glsl */ `
     float rimFacing = clamp(dot(-gDir, lDir), 0.0, 1.0);
     float edge = smoothstep(0.0, 0.45, d) * (1.0 - smoothstep(0.45, 1.0, d));
     float silver = phase * edge * mix(0.1, 1.0, rimFacing) * 2.6 + phase * 0.08;
-    float spec = pow(max(ndl, 0.0), 6.0);
+    float n1 = max(ndl, 0.0);
+    float n2 = n1 * n1;
+    float spec = n2 * n2 * n2;
     float sky = clamp(N.y, 0.0, 1.0) * 0.12;
 
     vec3 col = mix(uShadow, uBody, clamp(wrap * atten * 1.25 + sky, 0.0, 1.0));
     col += uRim * (silver + spec * 0.35) * atten;
 
     float depth = -vViewPos.z;
-    float fog = 1.0 - exp(-pow(uFogDensity * depth, 2.0));
+    float fogDepth = uFogDensity * depth;
+    float fog = 1.0 - exp(-fogDepth * fogDepth);
     col = mix(col, vec3(0.0), fog);
 
     gl_FragColor = vec4(col, alpha);
