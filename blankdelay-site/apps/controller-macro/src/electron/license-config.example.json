@@ -1,0 +1,7 @@
+{
+  "clientId": "YOUR_BLANK_DISCORD_APPLICATION_ID",
+  "offlineGraceHours": 72,
+  "productId": "blankdelay-controller",
+  "apiKey": "generate-a-long-random-secret",
+  "apiBaseUrl": "https://YOUR-BLANK-TUNNEL.trycloudflare.com"
+}

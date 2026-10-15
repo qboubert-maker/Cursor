@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BlankDelay Product Hub</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg"></div>
+  <header class="top">
+    <div class="brand">BLANKDELAY</div>
+    <div class="tag">Product Hub · Test keys · Downloads</div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Delay? We Left That <span>BLANK</span>.</h1>
+      <p>Open any product, grab a test key, or simulate a purchase email. Downloads are the real <code>BlankDelay-Setup.exe</code> hub installer.</p>
+      <p class="hint" style="margin-top:12px">
+        <a href="/product-hub/hub.html">Open Electron Product Hub</a> ·
+        <a href="/site/">Open storefront</a> ·
+        <a href="/downloads/BlankDelay-Setup.exe">Download BlankDelay-Setup.exe</a>
+      </p>
+    </section>
+
+    <section class="tools cardish" id="setupPanel">
+      <h2>Setup status (what still needs your keys)</h2>
+      <ul id="setupList" class="setup-list">
+        <li>Loading…</li>
+      </ul>
+      <p class="hint">Green = ready. Red = you still need to add that in <code>.env</code> / Stripe / Discord.</p>
+    </section>
+
+    <section class="tools cardish">
+      <h2>Help a stuck customer (right now)</h2>
+      <p class="hint">Payment already succeeded? Generate their key + download link here, then DM / email it to them.</p>
+      <div class="row">
+        <input id="stuckEmail" placeholder="customer@email.com" />
+        <select id="stuckProduct"></select>
+        <button id="stuckBtn">Make key + download link</button>
+      </div>
+      <pre id="stuckResult">Enter their email + product, then send them the key and download URL.</pre>
+    </section>
+
+    <section class="tools cardish">
+      <h2>Key tester</h2>
+      <div class="row">
+        <input id="keyInput" placeholder="PASTE-LICENSE-KEY" />
+        <button id="validateBtn">Validate</button>
+        <button id="redeemBtn" class="ghost">Redeem</button>
+      </div>
+      <pre id="keyResult">Enter a key to validate.</pre>
+    </section>
+
+    <section class="tools cardish">
+      <h2>Admin test fulfill (sends email if SMTP set)</h2>
+      <div class="row">
+        <input id="adminToken" placeholder="Admin token" />
+        <input id="testEmail" placeholder="buyer@email.com" />
+        <select id="testProduct"></select>
+        <button id="fulfillBtn">Generate key + email</button>
+      </div>
+      <pre id="fulfillResult">Uses POST /api/admin/fulfill</pre>
+    </section>
+
+    <section>
+      <h2 class="section-title">Products</h2>
+      <div id="products" class="grid"></div>
+    </section>
+  </main>
+
+  <footer>
+    Discord: <a href="https://discord.gg/cJafcE7y5W" target="_blank" rel="noreferrer">discord.gg/cJafcE7y5W</a>
+  </footer>
+  <script src="hub.js"></script>
+</body>
+</html>

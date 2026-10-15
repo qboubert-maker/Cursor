@@ -1,0 +1,9 @@
+This folder is filled by running (on your PC):
+
+  Double-click: Setup-Netlify-Upload-Folder.bat
+  (in this folder, or in blankdelay-site on Desktop after script runs)
+
+That copies the full site from your GitHub repo folder to:
+  Desktop\BlankDelay-Netlify-Upload
+
+Then drag ALL contents onto Netlify Deploys.

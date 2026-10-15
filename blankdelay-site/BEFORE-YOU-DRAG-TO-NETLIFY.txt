@@ -1,0 +1,27 @@
+================================================================================
+  BEFORE YOU DRAG THIS FOLDER ONTO NETLIFY
+================================================================================
+
+1. Open folder: netlify\functions\
+
+2. You must see ONLY ONE JavaScript file named exactly:
+      stripe-webhook.js
+
+3. DELETE anything like:
+      stripe-webhook (1).js
+      stripe-webhook (2).js
+      stripe-webhook (3).js
+
+   (Windows adds " (3)" when you download the same file again — Netlify FAILS if that name stays.)
+
+4. Do NOT double-click stripe-webhook.js on your PC (Windows Script Host error is normal).
+
+5. Drag THIS ENTIRE FOLDER onto Netlify -> Deploys.
+
+6. Test in Chrome address bar (not Netlify):
+   https://blankdelay.com/.netlify/functions/stripe-webhook
+   Should say: Method not allowed
+
+Then read AFTER-DEPLOY-EMAIL-SETUP.txt for Stripe + EmailJS.
+
+================================================================================

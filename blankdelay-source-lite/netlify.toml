@@ -1,0 +1,78 @@
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# binding.gyp and electron belong to the desktop apps; the website build needs neither.
+[build.environment]
+  NPM_FLAGS = "--ignore-scripts"
+  ELECTRON_SKIP_BINARY_DOWNLOAD = "1"
+
+[[redirects]]
+  from = "https://www.blankdelay.com/*"
+  to = "https://blankdelay.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/api/create-checkout-session"
+  to = "/.netlify/functions/create-checkout-session"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/download"
+  to = "/.netlify/functions/download"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/console"
+  to = "/console.html"
+  status = 200
+
+[[redirects]]
+  from = "/commercial"
+  to = "/commercial.html"
+  status = 200
+
+[[redirects]]
+  from = "/controller"
+  to = "/controller.html"
+  status = 200
+
+[[redirects]]
+  from = "/optimizer"
+  to = "/optimizer.html"
+  status = 200
+
+[[redirects]]
+  from = "/affiliates"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/affiliates/*"
+  to = "/index.html"
+  status = 200
+
+# Affiliate links: blankdelay.com/?ref=name and blankdelay.com/name are counted by the affiliate function.
+[[redirects]]
+  from = "/"
+  to = "/ref/:ref"
+  status = 302
+  query = { ref = ":ref" }
+  force = true
+
+[[redirects]]
+  from = "/:slug"
+  to = "/ref/:slug"
+  status = 302
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

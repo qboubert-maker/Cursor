@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BlankDelay — Keyboard Macro V2</title>
+<link rel="stylesheet" href="../shared/app.css">
+<link rel="stylesheet" href="../shared/bd-splash.css">
+<link rel="stylesheet" href="../shared/bd-controller-shell.css">
+</head>
+<body class="bd-app bd-macro-app" data-theme="keyboard">
+<canvas id="bg-canvas" class="bg-canvas"></canvas>
+<div id="bd-splash-root"
+    data-title="KEYBOARD MACRO V2"
+    data-short-name="Keyboard Macro"
+    data-tagline="Optimize · Accelerate · Dominate"></div>
+<div class="bd-app-main" id="bd-app-main" hidden>
+    <div id="controller-shell-root"></div>
+</div>
+<script src="../shared/background.js"></script>
+<script src="../shared/bd-splash-fx.js"></script>
+<script src="../shared/bd-splash.js"></script>
+<script src="../shared/bd-controller-shell.js"></script>
+<script>
+(async function () {
+    await BdSplash.init({
+        onUnlock: () => {
+            BdControllerShell.init({ mountId: 'controller-shell-root', productLabel: 'Keyboard Macro', mode: 'keyboard' });
+        }
+    });
+})();
+</script>
+</body>
+</html>

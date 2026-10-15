@@ -1,0 +1,232 @@
+/* Socials stage — SJTweaks Free Utility layout, Blank mono B&W */
+
+.page[data-page="socials"] {
+  align-items: stretch;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #050506;
+}
+
+.soc--stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 0;
+  border: none;
+  background:
+    radial-gradient(ellipse 62% 52% at 50% 42%, rgba(255, 255, 255, 0.08), transparent 64%),
+    radial-gradient(ellipse 42% 38% at 18% 48%, rgba(255, 255, 255, 0.04), transparent 58%),
+    radial-gradient(ellipse 42% 38% at 82% 48%, rgba(255, 255, 255, 0.045), transparent 58%),
+    radial-gradient(ellipse 90% 55% at 50% 100%, rgba(0, 0, 0, 0.72), transparent 58%),
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255, 255, 255, 0.035), transparent 55%),
+    #050506;
+  box-shadow: inset 0 0 100px rgba(255, 255, 255, 0.03);
+  -webkit-app-region: no-drag;
+}
+
+.soc__floats {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  justify-items: center;
+  gap: clamp(8px, 2vw, 28px);
+  padding: clamp(72px, 10vh, 104px) clamp(20px, 4vw, 48px) clamp(110px, 15vh, 140px);
+}
+
+.soc__atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.soc__core {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(56vw, 520px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.14) 0%, rgba(180, 180, 180, 0.06) 42%, transparent 70%);
+  filter: blur(24px);
+  animation: socCore 6s ease-in-out infinite;
+  opacity: 0.9;
+}
+
+.soc__halo {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(76vw, 720px);
+  aspect-ratio: 1.2;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.09) 0%, transparent 62%);
+  filter: blur(36px);
+  animation: socHalo 8s ease-in-out infinite;
+  opacity: 0.75;
+}
+
+.soc__orbit {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  transform: translate(-50%, -50%);
+}
+
+.soc__orbit--a {
+  width: min(48vw, 420px);
+  aspect-ratio: 1;
+  animation: socOrbit 22s linear infinite;
+  -webkit-mask: conic-gradient(from 0deg, #000 0 28%, transparent 28% 55%, #000 55% 78%, transparent 78% 100%);
+  mask: conic-gradient(from 0deg, #000 0 28%, transparent 28% 55%, #000 55% 78%, transparent 78% 100%);
+}
+
+.soc__orbit--b {
+  width: min(64vw, 580px);
+  aspect-ratio: 1;
+  border-color: rgba(255, 255, 255, 0.1);
+  animation: socOrbit 32s linear infinite reverse;
+  -webkit-mask: conic-gradient(from 90deg, #000 0 18%, transparent 18% 62%, #000 62% 80%, transparent 80% 100%);
+  mask: conic-gradient(from 90deg, #000 0 18%, transparent 18% 62%, #000 62% 80%, transparent 80% 100%);
+}
+
+.soc__sparkles {
+  position: absolute;
+  inset: 12% 10%;
+  opacity: 0.45;
+  background:
+    radial-gradient(circle at 16% 30%, rgba(255, 255, 255, 0.85) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 24%, rgba(220, 220, 220, 0.65) 0 1px, transparent 2px),
+    radial-gradient(circle at 52% 70%, rgba(240, 240, 240, 0.55) 0 1px, transparent 2px),
+    radial-gradient(circle at 30% 72%, rgba(200, 200, 200, 0.45) 0 1px, transparent 2px),
+    radial-gradient(circle at 88% 58%, rgba(230, 230, 230, 0.5) 0 1px, transparent 2px);
+  animation: socSparkles 5s ease-in-out infinite;
+}
+
+.soc__vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 46%, transparent 28%, rgba(5, 5, 6, 0.72) 100%),
+    linear-gradient(180deg, rgba(5, 5, 6, 0.4) 0%, transparent 16%, transparent 72%, rgba(5, 5, 6, 0.78) 100%);
+}
+
+.soc__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='.55'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.soc-float {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 520px;
+  height: min(74vh, 640px);
+  text-decoration: none;
+  color: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.soc-float:hover { transform: translateY(-6px) scale(1.03); }
+
+.soc-float:focus-visible .soc-float__label {
+  outline: 2px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 6px;
+}
+
+.soc-float__canvas {
+  display: block;
+  width: min(100%, 460px);
+  height: min(100%, 460px);
+  aspect-ratio: 1 / 1;
+  max-width: 460px;
+  max-height: min(58vh, 460px);
+  pointer-events: none;
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.18));
+  transition: filter 0.35s ease;
+}
+
+.soc-float:hover .soc-float__canvas {
+  filter: drop-shadow(0 0 28px rgba(255, 255, 255, 0.32));
+}
+
+.soc-float__label {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  opacity: 0.92;
+  transition: opacity 0.2s ease;
+}
+
+.soc-float:hover .soc-float__label { opacity: 1; }
+
+.soc-float__label strong {
+  font-family: Inter, 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  color: #f2f2f2;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.75);
+}
+
+.soc-float__label em {
+  font-style: normal;
+  font-size: 12.5px;
+  color: rgba(180, 180, 180, 0.88);
+}
+
+@keyframes socCore {
+  0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.85; transform: translate(-50%, -50%) scale(1.06); }
+}
+
+@keyframes socHalo {
+  0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.97); }
+  50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.04); }
+}
+
+@keyframes socOrbit {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes socSparkles {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .soc__core,
+  .soc__halo,
+  .soc__orbit--a,
+  .soc__orbit--b,
+  .soc__sparkles {
+    animation: none;
+  }
+}

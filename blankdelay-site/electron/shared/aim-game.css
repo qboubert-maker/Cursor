@@ -1,0 +1,209 @@
+/* BlankDelay Aim Bundle — game UI */
+.aim-app { max-width: 100% !important; padding: 0 !important; min-height: 100vh; }
+.aim-screen { position: relative; z-index: 2; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
+.aim-screen.panel-hidden { display: none !important; }
+
+.aim-license-wrap { width: 100%; max-width: 420px; }
+.aim-license-wrap .card { backdrop-filter: blur(12px); background: rgba(0,0,0,0.55); border-color: rgba(255,255,255,0.15); }
+
+/* —— Premium license portal —— */
+.aim-license-screen { overflow: hidden; }
+.aim-bg-vignette {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background: radial-gradient(ellipse 85% 80% at 50% 50%, transparent 0%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.45) 100%);
+}
+.aim-cursor-glow {
+    position: fixed; width: 360px; height: 360px; margin: -180px 0 0 -180px;
+    border-radius: 50%; pointer-events: none; z-index: 1; opacity: 0;
+    background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 40%, transparent 72%);
+    transition: opacity 0.35s ease;
+    mix-blend-mode: screen;
+}
+.aim-license-aura {
+    position: absolute; width: min(90vw, 720px); height: min(90vw, 720px); border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 45%, transparent 72%);
+    animation: aimAuraPulse 3.5s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes aimAuraPulse { 0%,100% { transform: scale(1); opacity: 0.65; } 50% { transform: scale(1.08); opacity: 1; } }
+.aim-license-ring {
+    position: absolute; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1);
+    pointer-events: none;
+}
+.aim-license-ring--1 { width: min(85vw, 620px); height: min(85vw, 620px); animation: aimRingSpin 24s linear infinite; border-color: rgba(255,255,255,0.18); }
+.aim-license-ring--2 { width: min(95vw, 780px); height: min(95vw, 780px); animation: aimRingSpin 36s linear infinite reverse; border-style: dashed; border-color: rgba(255,255,255,0.1); opacity: 0.7; }
+@keyframes aimRingSpin { to { transform: rotate(360deg); } }
+
+.aim-license-portal {
+    position: relative; z-index: 2; width: min(440px, 92vw);
+    padding: 36px 32px 28px; text-align: center;
+    background: linear-gradient(165deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.58) 100%);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 24px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 24px 80px rgba(0,0,0,0.5), 0 0 80px rgba(255,255,255,0.06);
+    backdrop-filter: blur(14px);
+    animation: aimPortalIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes aimPortalIn { from { opacity: 0; transform: translateY(24px) scale(0.96); } to { opacity: 1; transform: none; } }
+.aim-license-portal::before {
+    content: ''; position: absolute; inset: -1px; border-radius: 24px; padding: 1px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.55), transparent 40%, transparent 60%, rgba(255,255,255,0.35));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none; animation: aimBorderShift 4s ease-in-out infinite;
+}
+@keyframes aimBorderShift { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+.aim-license-icon-wrap { position: relative; width: 88px; height: 88px; margin: 0 auto 18px; }
+.aim-license-icon-glow {
+    position: absolute; inset: -16px; border-radius: 22px;
+    background: radial-gradient(circle, rgba(255,255,255,0.28) 0%, transparent 70%);
+    animation: aimAuraPulse 2s ease-in-out infinite;
+}
+.aim-license-mark {
+    position: relative; width: 88px !important; height: 88px !important;
+    border-radius: 20px !important; background: #fff !important; color: #000 !important;
+    box-shadow: 0 0 48px rgba(255,255,255,0.35), 0 0 0 1px rgba(255,255,255,0.2);
+    animation: aimMarkFloat 3s ease-in-out infinite;
+}
+.aim-license-mark svg { width: 42px !important; height: 42px !important; }
+@keyframes aimMarkFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+.aim-license-eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.45); margin-bottom: 8px;
+}
+.aim-license-title {
+    font-size: clamp(26px, 5vw, 34px); font-weight: 900; letter-spacing: 0.05em; line-height: 1.1;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(255,255,255,0.25);
+}
+.aim-license-title span { display: block; color: #fff; font-size: 1.05em; margin-top: 2px; opacity: 0.92; }
+.aim-license-tagline { font-size: 13px; color: rgba(255,255,255,0.55); margin: 10px 0 24px; line-height: 1.5; }
+
+.aim-key-field { text-align: left; margin-bottom: 18px; }
+.aim-key-field > label {
+    display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 8px;
+}
+.aim-key-input-wrap {
+    position: relative; display: flex; align-items: center;
+    background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px; overflow: hidden; transition: border-color 0.25s, box-shadow 0.25s;
+}
+.aim-key-input-wrap:focus-within {
+    border-color: rgba(255,255,255,0.55);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.08), 0 0 32px rgba(255,255,255,0.12);
+}
+.aim-key-icon {
+    padding: 0 14px; display: flex; align-items: center; justify-content: center;
+}
+.aim-key-icon svg { width: 18px; height: 18px; color: #fff; opacity: 0.9; }
+.aim-key-input-wrap input {
+    flex: 1; border: none !important; background: transparent !important;
+    padding: 16px 14px 16px 0 !important; font-family: var(--mono) !important;
+    font-size: 14px !important; font-weight: 600 !important; letter-spacing: 0.08em !important;
+    color: #fff !important; width: 100% !important; margin: 0 !important;
+}
+.aim-key-input-wrap input::placeholder { color: rgba(255,255,255,0.25); letter-spacing: 0.06em; }
+.aim-key-input-wrap input:focus { outline: none !important; }
+.aim-key-shine {
+    position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+    animation: aimKeyShine 3s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes aimKeyShine { 0% { left: -100%; } 50%,100% { left: 150%; } }
+.aim-key-hint { margin-top: 8px !important; text-align: center; font-size: 10px !important; }
+
+.aim-activate-btn {
+    position: relative; width: 100%; overflow: hidden;
+    padding: 16px 24px !important; font-size: 13px !important; font-weight: 800 !important;
+    letter-spacing: 0.14em !important; border-radius: 14px !important;
+    background: linear-gradient(135deg, #ffffff 0%, #e8e8e8 50%, #cccccc 100%) !important;
+    color: #000 !important;
+    border: none !important; box-shadow: 0 4px 28px rgba(255,255,255,0.2) !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+}
+.aim-activate-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(255,255,255,0.3) !important; }
+.aim-activate-btn:active { transform: translateY(0); }
+.aim-activate-btn .aim-btn-text { position: relative; z-index: 1; }
+.aim-activate-btn .aim-btn-glow {
+    position: absolute; inset: 0; background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.25) 50%, transparent 60%);
+    transform: translateX(-100%); animation: aimBtnSweep 2.5s ease-in-out infinite;
+}
+@keyframes aimBtnSweep { 0% { transform: translateX(-100%); } 40%,100% { transform: translateX(100%); } }
+.aim-activate-btn.is-loading { pointer-events: none; opacity: 0.85; }
+.aim-activate-btn.is-loading .aim-btn-text::after { content: '…'; animation: aimDots 1s steps(3) infinite; }
+@keyframes aimDots { 0% { content: ''; } 33% { content: '.'; } 66% { content: '..'; } }
+
+.aim-license-portal .license-msg { text-align: center; margin-top: 12px; min-height: 18px; }
+.aim-license-features {
+    display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 22px;
+    padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.06);
+}
+.aim-license-features span {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 6px 12px; border-radius: 999px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.85);
+}
+.aim-key-input-wrap.aim-key-error { animation: aimKeyShake 0.45s ease; border-color: rgba(255,255,255,0.7) !important; }
+@keyframes aimKeyShake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); } }
+.aim-bg-vignette { transition: opacity 0.5s ease; }
+
+.aim-title-wrap { text-align: center; animation: aimFloat 4s ease-in-out infinite; }
+@keyframes aimFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.aim-title-wrap .mark { width: 72px; height: 72px; border-radius: 16px; margin: 0 auto 20px; box-shadow: 0 0 40px rgba(255,255,255,0.2); }
+.aim-title-wrap .mark svg { width: 36px; height: 36px; }
+.aim-title-glow { font-size: clamp(32px, 6vw, 52px); font-weight: 900; letter-spacing: 0.06em; line-height: 1.05; color: #fff; text-shadow: 0 0 30px rgba(255,255,255,0.35), 0 0 60px rgba(255,255,255,0.12); }
+.aim-title-glow span { display: block; color: #fff; font-size: 0.92em; margin-top: 4px; opacity: 0.9; }
+.aim-title-sub { margin-top: 12px; font-size: 13px; color: rgba(255,255,255,0.6); letter-spacing: 0.12em; text-transform: uppercase; }
+.btn-start-hero {
+    margin-top: 36px; font-size: 16px !important; padding: 18px 48px !important; letter-spacing: 0.14em;
+    border-radius: 999px; background: #fff !important; color: #000 !important;
+    box-shadow: 0 0 28px rgba(255,255,255,0.25); animation: aimPulse 2s ease-in-out infinite;
+}
+@keyframes aimPulse { 0%,100% { box-shadow: 0 0 28px rgba(255,255,255,0.25); } 50% { box-shadow: 0 0 48px rgba(255,255,255,0.4); } }
+
+.aim-game-screen { padding: 0 !important; justify-content: stretch; }
+.aim-game-frame { position: relative; flex: 1; width: 100%; height: 100vh; background: #4ab8f5; cursor: crosshair; }
+.aim-game-frame canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+
+body.aim-in-game .bg-canvas { pointer-events: none; transition: opacity 0.35s ease; }
+body.aim-in-game .aim-bg-vignette,
+body.aim-in-game .aim-cursor-glow { opacity: 0 !important; pointer-events: none; }
+body.aim-in-game .aim-app { background: #000; }
+
+.aim-loading { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.92); }
+.aim-loading.panel-hidden { display: none !important; }
+.aim-loading .mark { width: 56px; height: 56px; margin-bottom: 20px; animation: aimSpin 3s linear infinite; }
+@keyframes aimSpin { to { transform: rotate(360deg); } }
+.aim-load-bar { width: min(320px, 80vw); height: 6px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden; margin-top: 16px; }
+.aim-load-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #888, #fff); border-radius: 999px; transition: width 0.08s linear; }
+.aim-load-text { font-family: var(--mono); font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 10px; }
+
+.aim-hud { position: absolute; top: 12px; right: 12px; left: auto; display: flex; justify-content: flex-end; pointer-events: none; z-index: 5; opacity: 0.85; }
+.aim-hud-stat { font-family: var(--mono); font-size: 11px; padding: 8px 12px; background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; }
+.aim-hud-stat strong { color: #ff4444; }
+
+.aim-hints { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 10px; color: rgba(255,255,255,0.45); z-index: 5; pointer-events: none; white-space: nowrap; }
+
+.aim-options { position: absolute; inset: 0; z-index: 15; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.82); backdrop-filter: blur(8px); padding: 20px; }
+.aim-options.panel-hidden { display: none !important; }
+.aim-options-panel { width: min(520px, 96vw); max-height: 90vh; overflow-y: auto; background: rgba(12,12,16,0.95); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 22px; }
+.aim-options-panel h3 { font-size: 16px; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+.aim-options-panel h3 .mark { width: 28px; height: 28px; border-radius: 6px; }
+.aim-options-panel h3 .mark svg { width: 14px; height: 14px; }
+.aim-opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.aim-opt-field label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--dim); margin-bottom: 6px; }
+.aim-opt-field input[type="range"], .aim-opt-field select { width: 100%; accent-color: #ff4444; }
+.aim-opt-field select { padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: #0a0a0a; color: #fff; font-size: 12px; }
+.aim-gun-pick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0; }
+.aim-gun-btn { padding: 12px 6px; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: #fff; font-size: 10px; font-weight: 700; cursor: pointer; text-align: center; }
+.aim-gun-btn.active { border-color: #ff4444; background: rgba(255,68,68,0.15); box-shadow: 0 0 12px rgba(255,68,68,0.25); }
+.aim-gun-btn span { display: block; font-size: 18px; margin-bottom: 4px; }
+
+.mark svg { width: 18px; height: 18px; display: block; }
+.topbar-minimal { position: absolute; top: 0; left: 0; right: 0; z-index: 3; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; pointer-events: none; }
+.topbar-minimal .brand { pointer-events: auto; }

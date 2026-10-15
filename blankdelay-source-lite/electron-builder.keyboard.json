@@ -1,0 +1,35 @@
+{
+  "appId": "com.blankdelay.keyboardoptimizer",
+  "productName": "Blank Delay Keyboard Optimizer",
+  "asar": true,
+  "npmRebuild": false,
+  "asarUnpack": [
+    "build/Release/blank_keyboard_engine.node"
+  ],
+  "files": [
+    "dist-keyboard/**",
+    "electron/keyboard-loader-main.js",
+    "electron/keyboard-loader-preload.cjs",
+    "electron/keyboard-ipc.js",
+    "electron/keyboard-license.js",
+    "electron/blank-delay.ico",
+    "build/Release/blank_keyboard_engine.node",
+    "package.json"
+  ],
+  "extraMetadata": {
+    "main": "electron/keyboard-loader-main.js"
+  },
+  "directories": {
+    "output": "release"
+  },
+  "electronDist": "node_modules/electron/dist",
+  "win": {
+    "target": [
+      "portable"
+    ],
+    "icon": "electron/blank-delay.ico"
+  },
+  "portable": {
+    "artifactName": "Blank Delay Keyboard Optimizer.exe"
+  }
+}

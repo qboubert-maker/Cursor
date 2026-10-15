@@ -1,0 +1,16 @@
+export const BLANK_OPTIMIZER_SLIDES = [
+  { type: 'image', src: '/demos/blank-optimizer/01-games.png', alt: 'Blank Optimizer game library' },
+  { type: 'image', src: '/demos/blank-optimizer/02-tweaks.png', alt: 'Blank Optimizer tweaks with Itachi and Sasuke' },
+  { type: 'image', src: '/demos/blank-optimizer/03-lane.png', alt: 'Blank Optimizer tweak lane' },
+  { type: 'image', src: '/demos/blank-optimizer/04-playstation.png', alt: 'Blank Optimizer PlayStation controller' },
+  { type: 'image', src: '/demos/blank-optimizer/05-xbox.png', alt: 'Blank Optimizer Xbox controller' },
+  { type: 'image', src: '/demos/blank-optimizer/06-keyboard.png', alt: 'Blank Optimizer keyboard and mouse' },
+  { type: 'image', src: '/demos/blank-optimizer/07-clips.png', alt: 'Blank Delay clipping software' },
+  { type: 'image', src: '/demos/blank-optimizer/08-settings.png', alt: 'Blank Optimizer driver settings' },
+  { type: 'image', src: '/demos/blank-optimizer/09-socials.png', alt: 'Blank Optimizer socials' },
+  { type: 'image', src: '/demos/blank-optimizer/10-team-blank.png', alt: 'Blank Optimizer team, Blank' },
+  { type: 'image', src: '/demos/blank-optimizer/11-team-nouzen.png', alt: 'Blank Optimizer team, Nouzen' },
+  { type: 'image', src: '/demos/blank-optimizer/12-team-fraudhelp.png', alt: 'Blank Optimizer team, fraudhelp' },
+  { type: 'image', src: '/demos/blank-optimizer/13-team-droxzbtw.png', alt: 'Blank Optimizer team, Droxzbtw' },
+  { type: 'image', src: '/demos/blank-optimizer/14-team-murder.png', alt: 'Blank Optimizer team, Murder' },
+]

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BlankDelay — Controller Macro V2</title>
+<link rel="stylesheet" href="../shared/app.css">
+<link rel="stylesheet" href="../shared/bd-splash.css">
+<link rel="stylesheet" href="../shared/bd-gamepad-live.css">
+<link rel="stylesheet" href="../shared/bd-controller-shell.css">
+</head>
+<body class="bd-app bd-macro-app" data-theme="controller">
+<canvas id="bg-canvas" class="bg-canvas"></canvas>
+<div id="bd-splash-root"
+    data-title="CONTROLLER MACRO V2"
+    data-short-name="Controller Macro"
+    data-tagline="Optimize · Accelerate · Dominate"></div>
+<div class="bd-app-main" id="bd-app-main" hidden>
+    <div id="controller-shell-root"></div>
+</div>
+<script src="../shared/background.js"></script>
+<script src="../shared/bd-splash-fx.js"></script>
+<script src="../shared/bd-splash.js"></script>
+<script src="../shared/bd-gamepad-live.js"></script>
+<script src="../shared/bd-controller-shell.js"></script>
+<script>
+(async function () {
+    await BdSplash.init({
+        onUnlock: () => {
+            BdControllerShell.init({ mountId: 'controller-shell-root', productLabel: 'Controller Macro' });
+        }
+    });
+})();
+</script>
+</body>
+</html>

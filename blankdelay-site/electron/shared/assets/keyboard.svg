@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 220" fill="none">
+  <rect x="20" y="50" width="480" height="140" rx="14" stroke="rgba(87,242,135,0.55)" stroke-width="2.5" fill="rgba(87,242,135,0.06)"/>
+  <g stroke="rgba(87,242,135,0.45)" stroke-width="1.2" fill="rgba(87,242,135,0.04)">
+    <rect x="40" y="70" width="24" height="18" rx="3"/><rect x="70" y="70" width="24" height="18" rx="3"/><rect x="100" y="70" width="24" height="18" rx="3"/><rect x="130" y="70" width="24" height="18" rx="3"/><rect x="160" y="70" width="24" height="18" rx="3"/><rect x="190" y="70" width="24" height="18" rx="3"/><rect x="220" y="70" width="24" height="18" rx="3"/><rect x="250" y="70" width="24" height="18" rx="3"/><rect x="280" y="70" width="24" height="18" rx="3"/><rect x="310" y="70" width="24" height="18" rx="3"/><rect x="340" y="70" width="24" height="18" rx="3"/><rect x="370" y="70" width="24" height="18" rx="3"/><rect x="400" y="70" width="24" height="18" rx="3"/><rect x="430" y="70" width="24" height="18" rx="3"/>
+    <rect x="40" y="98" width="30" height="18" rx="3"/><rect x="78" y="98" width="24" height="18" rx="3"/><rect x="108" y="98" width="24" height="18" rx="3"/><rect x="138" y="98" width="24" height="18" rx="3"/><rect x="168" y="98" width="24" height="18" rx="3"/><rect x="198" y="98" width="24" height="18" rx="3"/><rect x="228" y="98" width="24" height="18" rx="3"/><rect x="258" y="98" width="24" height="18" rx="3"/><rect x="288" y="98" width="24" height="18" rx="3"/><rect x="318" y="98" width="24" height="18" rx="3"/><rect x="348" y="98" width="24" height="18" rx="3"/><rect x="378" y="98" width="24" height="18" rx="3"/><rect x="408" y="98" width="24" height="18" rx="3"/><rect x="438" y="98" width="24" height="18" rx="3"/>
+    <rect x="170" y="126" width="180" height="18" rx="3"/>
+  </g>
+  <text x="260" y="205" text-anchor="middle" fill="rgba(87,242,135,0.7)" font-size="13" font-family="monospace">KEYBOARD</text>
+</svg>

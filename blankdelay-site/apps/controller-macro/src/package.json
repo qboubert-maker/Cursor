@@ -1,0 +1,15 @@
+{
+  "name": "blankdelay-controller-macro",
+  "productName": "BlankDelay Controller Macro",
+  "version": "2.0.0",
+  "description": "BlankDelay Controller Macro V2 — DualSense & Xbox macros with Fortnite-ready drivers",
+  "main": "electron/main.js",
+  "author": "BlankDelay",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "koffi": "^2.16.3",
+    "node-hid": "^3.4.0",
+    "vigemclient": "^1.5.3",
+    "xinput-ffi": "^4.0.2"
+  }
+}

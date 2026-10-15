@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlankDelay — Your Product</title>
+    <link rel="stylesheet" href="electron/shared/app.css">
+</head>
+<body id="product-page">
+    <canvas id="bg-canvas" class="bg-canvas"></canvas>
+    <div class="app">
+        <div class="topbar">
+            <div class="brand"><span class="mark">BD</span> BLANKDELAY</div>
+            <span class="status-pill" id="status">Ready</span>
+        </div>
+
+        <div class="hero">
+            <span class="tag" id="product-tag">Product</span>
+            <h1 id="product-name">BlankDelay</h1>
+            <p id="product-desc">Enter your license key from your purchase email to unlock your product.</p>
+        </div>
+
+        <div class="license card" id="license-section">
+            <h3>License Key</h3>
+            <p class="field-hint" id="key-hint">Paste the key from your order email.</p>
+            <input id="license-key" type="text" placeholder="BD-XXXX-XXXX-XXXX" autocomplete="off">
+            <div class="actions" style="margin-top:10px">
+                <button class="btn btn-primary" id="license-btn">Activate</button>
+            </div>
+            <p class="license-msg" id="license-msg"></p>
+        </div>
+
+        <div class="card" id="unlocked-panel" hidden>
+            <h3>✓ Product activated</h3>
+            <p style="font-size:14px;color:var(--dim);line-height:1.6;margin-top:8px;" id="unlocked-msg">
+                Your license is valid. On a real install, the BlankDelay desktop app opens here with all tweaks ready to apply.
+            </p>
+            <p class="field-hint mono" id="order-ref" style="margin-top:12px;"></p>
+            <div class="actions" style="margin-top:16px">
+                <button class="btn btn-primary" id="open-desktop-btn">Open Desktop App (this PC)</button>
+                <a href="index.html#faq" class="btn btn-ghost">AI Support</a>
+            </div>
+        </div>
+
+        <div class="log" id="log"><div>Waiting for license key…</div></div>
+    </div>
+
+    <script src="electron/shared/app.js"></script>
+    <script src="bd-store.js"></script>
+    <script src="product.js"></script>
+</body>
+</html>
