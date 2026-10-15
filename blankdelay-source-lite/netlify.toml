@@ -24,12 +24,6 @@
   force = true
 
 [[redirects]]
-  from = "/api/checkout-session"
-  to = "/.netlify/functions/checkout-session"
-  status = 200
-  force = true
-
-[[redirects]]
   from = "/api/download"
   to = "/.netlify/functions/download"
   status = 200
@@ -54,6 +48,29 @@
   from = "/optimizer"
   to = "/optimizer.html"
   status = 200
+
+[[redirects]]
+  from = "/affiliates"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/affiliates/*"
+  to = "/index.html"
+  status = 200
+
+# Affiliate links: blankdelay.com/?ref=name and blankdelay.com/name are counted by the affiliate function.
+[[redirects]]
+  from = "/"
+  to = "/ref/:ref"
+  status = 302
+  query = { ref = ":ref" }
+  force = true
+
+[[redirects]]
+  from = "/:slug"
+  to = "/ref/:slug"
+  status = 302
 
 [[redirects]]
   from = "/*"

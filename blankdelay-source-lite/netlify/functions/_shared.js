@@ -77,7 +77,24 @@ async function stripeRequest(method, path, params) {
   return data
 }
 
-function paymentLinkFor(productId) {
+const AFFILIATE_SLUG = /^[a-z0-9](?:[a-z0-9-]{1,22}[a-z0-9])$/
+
+function referralFromCookie(header) {
+  for (const part of String(header || '').split(';')) {
+    const [name, ...rest] = part.trim().split('=')
+    if (name !== 'bd_ref') continue
+    let slug = ''
+    try {
+      slug = decodeURIComponent(rest.join('=')).trim().toLowerCase()
+    } catch {
+      return ''
+    }
+    return AFFILIATE_SLUG.test(slug) ? slug : ''
+  }
+  return ''
+}
+
+function paymentLinkFor(productId, referral = '') {
   const base = PAYMENT_LINKS[productId]
   if (!base) {
     const product = PRODUCTS[productId]
@@ -86,12 +103,13 @@ function paymentLinkFor(productId) {
     throw error
   }
   const url = new URL(base)
-  url.searchParams.set('client_reference_id', productId)
+  // The affiliate link rides along so the sale can be credited when the customer returns.
+  url.searchParams.set('client_reference_id', referral ? `${productId}__${referral}` : productId)
   return url.toString()
 }
 
 async function productFromSession(session) {
-  const ref = String(session.client_reference_id || session.metadata?.productId || '').trim()
+  const ref = String(session.client_reference_id || session.metadata?.productId || '').split('__')[0].trim()
   if (PRODUCTS[ref] && PAYMENT_LINKS[ref]) return PRODUCTS[ref]
   if (!session.payment_link) return null
   // Someone opened the Stripe link directly, without the reference the site adds.
@@ -100,7 +118,7 @@ async function productFromSession(session) {
   return match ? PRODUCTS[match] : null
 }
 
-async function readSession(sessionId) {
+async function readSession(sessionId, { withSession = false } = {}) {
   const session = await stripeRequest('GET', `/checkout/sessions/${encodeURIComponent(sessionId)}`)
   const product = await productFromSession(session)
   const paid = session.payment_status === 'paid' && Boolean(product)
@@ -108,6 +126,7 @@ async function readSession(sessionId) {
     paid,
     productId: paid ? product.id : '',
     productName: paid ? product.name : '',
+    ...(withSession ? { session } : {}),
   }
 }
 
@@ -117,5 +136,6 @@ module.exports = {
   json,
   siteOrigin,
   paymentLinkFor,
+  referralFromCookie,
   readSession,
 }

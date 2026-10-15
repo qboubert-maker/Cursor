@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { useRef, useState } from 'react'
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import { AlertTriangle, ArrowDown, ArrowRight, CheckCircle2, DollarSign, Target } from 'lucide-react'
 import DiscordIcon from './icons/DiscordIcon'
 import Products from './Products'
@@ -224,14 +224,13 @@ function HeroPanel({ booted, onNavigate }) {
             Join Discord
           </a>
         </div>
-        <button
-          type="button"
-          onClick={() => onNavigate(SECTIONS.findIndex((section) => section.id === 'affiliates'))}
+        <a
+          href="/affiliates"
           className="pointer-events-auto inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/5 px-6 py-3.5 text-[13px] font-semibold tracking-tight text-white backdrop-blur-md transition-colors duration-300 hover:border-white hover:bg-white/10"
         >
           <DollarSign size={16} />
           Become an affiliate today
-        </button>
+        </a>
       </motion.div>
 
       <motion.div
@@ -285,20 +284,6 @@ function ProductsPanel({ active }) {
 
 function AffiliatePanel({ active }) {
   const style = usePanel([0.238, 0.283, 0.34, 0.362])
-  const [applyOpen, setApplyOpen] = useState(false)
-
-  useEffect(() => {
-    if (!active) setApplyOpen(false)
-  }, [active])
-
-  useEffect(() => {
-    if (!applyOpen) return undefined
-    const onKey = (event) => {
-      if (event.key === 'Escape') setApplyOpen(false)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [applyOpen])
 
   return (
     <motion.section style={style} className="absolute inset-0 flex items-center px-5 pt-20 pb-6 md:px-10 md:pt-24" aria-label="Premium Affiliate System">
@@ -323,46 +308,16 @@ function AffiliatePanel({ active }) {
             custom={2}
             className="mt-4 max-w-md text-[14px] leading-relaxed text-white/60"
           >
-            Every operator you bring in pays you back. Live referrals, tiered commission, and a payout rail that does not wait on anyone.
+            Every operator you bring in pays you 10% of the sale. Your dashboard tracks the link, the clicks, and the balance.
           </motion.p>
-          <div className="relative mt-6">
-            <button
-              type="button"
-              onClick={() => setApplyOpen((open) => !open)}
-              aria-expanded={applyOpen}
-              aria-controls="affiliate-apply-menu"
+          <div className="relative mt-6 flex flex-wrap gap-3">
+            <a
+              href="/affiliates"
               className="pointer-events-auto group inline-flex items-center gap-2.5 rounded-full bg-white px-6 py-3.5 text-[13px] font-semibold tracking-tight text-black transition-shadow duration-300 hover:shadow-[0_0_40px_rgba(255,255,255,0.55)]"
             >
-              Apply Now
+              Open affiliate dashboard
               <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
-            </button>
-            <AnimatePresence>
-              {applyOpen && (
-                <motion.div
-                  id="affiliate-apply-menu"
-                  role="dialog"
-                  aria-label="Affiliate application"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  transition={{ duration: 0.35, ease: EASE_EXPO }}
-                  className="absolute left-0 top-full z-30 mt-3 w-[min(100%,320px)] rounded-2xl border border-white/15 bg-black/85 p-5 text-white shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-xl"
-                >
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/45">Discord</p>
-                  <p className="mt-3 text-[15px] font-semibold leading-snug">Join Discord</p>
-                  <p className="mt-2 text-[13px] leading-relaxed text-white/60">Make a support ticket to submit your application.</p>
-                  <a
-                    href={DISCORD_URL}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-5 inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white px-5 py-3 text-[13px] font-semibold tracking-tight text-black transition-shadow duration-300 hover:shadow-[0_0_32px_rgba(255,255,255,0.45)]"
-                  >
-                    <DiscordIcon className="h-4 w-4" />
-                    Join Discord
-                  </a>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            </a>
           </div>
         </div>
         <AffiliateSystem active={active} />

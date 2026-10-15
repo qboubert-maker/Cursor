@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, loadEnv } from 'vite'
 import { createCheckoutSession, openDownload, readCheckoutSession } from './api/checkout.js'
+import { handleAffiliateRequest, referralFrom } from './api/affiliateHttp.js'
 
 function readJson(req) {
   return new Promise((resolve, reject) => {
@@ -37,6 +38,7 @@ function consolePage() {
     if (url === '/commercial' || url === '/commercial/') req.url = '/commercial.html'
     if (url === '/controller' || url === '/controller/') req.url = '/controller.html'
     if (url === '/optimizer' || url === '/optimizer/') req.url = '/optimizer.html'
+    if (url === '/affiliates' || url.startsWith('/affiliates/')) req.url = '/index.html'
     next()
   }
   return {
@@ -55,6 +57,7 @@ function paymentApi() {
     const [url, query = ''] = (req.url || '').split('?')
     const params = new URLSearchParams(query)
     try {
+      if (await handleAffiliateRequest(req, res)) return
       if (url === '/api/create-checkout-session') {
         if (req.method !== 'POST') {
           res.statusCode = 405
@@ -62,7 +65,7 @@ function paymentApi() {
           return
         }
         const body = await readJson(req)
-        const result = await createCheckoutSession({ ...body, host: req.headers.host })
+        const result = await createCheckoutSession({ ...body, host: req.headers.host, referral: referralFrom(req) })
         res.statusCode = 200
         res.setHeader('Content-Type', 'application/json')
         res.end(JSON.stringify(result))
@@ -83,7 +86,7 @@ function paymentApi() {
         return
       }
     } catch (error) {
-      if (url === '/api/create-checkout-session' || url === '/api/checkout-session' || url === '/api/download') {
+      if (url.startsWith('/api/') || url.startsWith('/ref/')) {
         sendError(res, error)
         return
       }
@@ -104,13 +107,24 @@ function paymentApi() {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  if (env.STRIPE_SECRET_KEY) process.env.STRIPE_SECRET_KEY = env.STRIPE_SECRET_KEY
+  for (const key of [
+    'STRIPE_SECRET_KEY',
+    'STRIPE_WEBHOOK_SECRET',
+    'AFFILIATE_SESSION_SECRET',
+    'SMTP_HOST',
+    'SMTP_PORT',
+    'SMTP_USER',
+    'SMTP_PASS',
+    'SMTP_FROM',
+  ]) {
+    if (env[key]) process.env[key] = env[key]
+  }
 
   return {
     plugins: [react(), tailwindcss(), consolePage(), paymentApi()],
     server: {
       watch: {
-        ignored: ['**/config/**'],
+        ignored: ['**/config/**', '**/data/**'],
       },
     },
     worker: { format: 'es' },

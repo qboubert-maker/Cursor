@@ -1,3 +1,4 @@
+import { creditPaidCheckout } from './affiliateHttp.js'
 import { CHECKOUT_PRODUCTS } from '../src/lib/checkoutCatalog.js'
 
 /** Live Payment Links already used on blankdelay.com. Buy now opens these exact Stripe pages. */
@@ -55,22 +56,22 @@ const stripeClient = async () => {
   return new Stripe(secret)
 }
 
-export function paymentLinkFor(productId) {
+export function paymentLinkFor(productId, referral = '') {
   const base = STRIPE_PAYMENT_LINKS[productId]
   if (!base) return null
   const url = new URL(base)
-  url.searchParams.set('client_reference_id', productId)
+  url.searchParams.set('client_reference_id', referral ? `${productId}__${referral}` : productId)
   return url.toString()
 }
 
-export async function createCheckoutSession({ productId }) {
+export async function createCheckoutSession({ productId, referral }) {
   const product = CHECKOUT_PRODUCTS[productId]
   if (!product || productId === 'aim-bundle') {
     const error = new Error('Unknown product')
     error.status = 400
     throw error
   }
-  const url = paymentLinkFor(product.id)
+  const url = paymentLinkFor(product.id, typeof referral === 'string' ? referral.slice(0, 24) : '')
   if (!url) {
     const error = new Error(`Checkout for ${product.name} opens soon. Join Discord to get it now.`)
     error.status = 503
@@ -80,7 +81,7 @@ export async function createCheckoutSession({ productId }) {
 }
 
 function productFromSession(session) {
-  const ref = String(session.client_reference_id || session.metadata?.productId || '').trim()
+  const ref = String(session.client_reference_id || session.metadata?.productId || '').split('__')[0].trim()
   if (CHECKOUT_PRODUCTS[ref]) return CHECKOUT_PRODUCTS[ref]
   const paymentLink = String(session.payment_link || '')
   const match = Object.entries(STRIPE_PAYMENT_LINKS).find(([, url]) => paymentLink && url.includes(paymentLink))
@@ -98,6 +99,13 @@ export async function readCheckoutSession(sessionId) {
   const session = await stripe.checkout.sessions.retrieve(sessionId)
   const product = productFromSession(session)
   const paid = session.payment_status === 'paid' && Boolean(product)
+  if (paid) {
+    try {
+      await creditPaidCheckout(session)
+    } catch (error) {
+      console.error('Affiliate commission was not recorded', error)
+    }
+  }
   return {
     paid,
     productId: paid ? product.id : '',
