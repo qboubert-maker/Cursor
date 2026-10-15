@@ -5,7 +5,6 @@ import {
   adminExists,
   adminProfile,
   banAffiliate,
-  createAdmin,
   login,
   loginWithAdminKey,
   programRoster,
@@ -282,12 +281,9 @@ export async function handleAffiliateRequest(req, res) {
       return send(res, 200, { exists: await adminExists() })
     }
 
+    // Whoever called this first would become program admin, so admins sign in with a Discord bot key instead.
     if (url === '/api/affiliate/admin' && req.method === 'POST') {
-      if (limited(clientIp(req))) return send(res, 429, { error: 'Too many attempts. Wait a few minutes.' })
-      const body = await readBody(req)
-      const user = await createAdmin(body)
-      const token = await signSession(user.id, 'admin')
-      return send(res, 200, { user }, [cookie(COOKIE, token, SESSION_MAX_AGE, secure)])
+      return send(res, 403, { error: 'Program login uses an Affiliate Admin key from the Blank Delay Discord bot.' })
     }
 
     if (url === '/api/affiliate/roster' && req.method === 'GET') {
