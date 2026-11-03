@@ -1,18 +1,76 @@
 (function () {
-    /* ── Page load ── */
-    window.addEventListener('load', () => {
-        document.body.classList.remove('loading');
-        document.body.classList.add('loaded');
+    /* ── Page load ──
+       The black loader used to stay up until every image finished.
+       That blocked every tap. Show the page as soon as this script runs. */
+    document.body.classList.remove('loading');
+    document.body.classList.add('loaded');
+
+    const phone = window.matchMedia('(pointer: coarse), (max-width: 820px)').matches;
+
+    /* Logos already point at real files. The 750KB embedded copy only loads if one fails. */
+    let logosRequested = false;
+    function loadEmbeddedLogos() {
+        if (logosRequested) return;
+        logosRequested = true;
+        const s = document.createElement('script');
+        s.src = 'logo-assets.js';
+        s.async = true;
+        document.body.appendChild(s);
+    }
+    document.querySelectorAll('img[data-bd-img]').forEach(img => {
+        if (img.complete && img.naturalWidth === 0) loadEmbeddedLogos();
+        else img.addEventListener('error', loadEmbeddedLogos, { once: true });
     });
 
-    /* ── Custom cursor mark ── */
-    const cursorMark = document.getElementById('cursor-mark');
-    document.addEventListener('mousemove', e => {
-        if (cursorMark) {
-            cursorMark.style.left = e.clientX + 'px';
-            cursorMark.style.top = e.clientY + 'px';
+    /* Draw product canvases only while they are on screen. */
+    function paintWhileVisible(host, draw) {
+        if (!host) return;
+        let on = false;
+        let raf = 0;
+        function loop() {
+            if (!on || document.hidden) { raf = 0; on = document.hidden ? false : on; return; }
+            draw();
+            raf = requestAnimationFrame(loop);
         }
-    });
+        function start() {
+            if (on) return;
+            on = true;
+            if (!raf) raf = requestAnimationFrame(loop);
+        }
+        function stop() {
+            on = false;
+            if (raf) cancelAnimationFrame(raf);
+            raf = 0;
+        }
+        if (typeof IntersectionObserver !== 'function') { start(); return; }
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) start(); else stop(); });
+        }, { rootMargin: '160px 0px' });
+        obs.observe(host);
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) stop();
+            else {
+                const r = host.getBoundingClientRect();
+                if (r.bottom > -160 && r.top < window.innerHeight + 160) start();
+            }
+        });
+    }
+
+    /* ── Custom cursor mark (desktop only; phones have no cursor) ── */
+    const cursorMark = document.getElementById('cursor-mark');
+    if (!phone && cursorMark) {
+        let queued = false, cx = 0, cy = 0;
+        document.addEventListener('mousemove', e => {
+            cx = e.clientX; cy = e.clientY;
+            if (queued) return;
+            queued = true;
+            requestAnimationFrame(() => {
+                queued = false;
+                cursorMark.style.left = cx + 'px';
+                cursorMark.style.top = cy + 'px';
+            });
+        }, { passive: true });
+    }
 
     /* ── Theme toggle ── */
     const themeToggle = document.getElementById('theme-toggle');
@@ -105,18 +163,34 @@
         };
         resizeMatrix();
         window.addEventListener('resize', resizeMatrix);
-        const cols = Math.floor(matrix.width / 14) || 40;
+        const cols = Math.max(1, Math.floor(matrix.width / 18));
         const drops = Array(cols).fill(0);
-        setInterval(() => {
-            mctx.fillStyle = 'rgba(0,0,0,0.05)';
-            mctx.fillRect(0, 0, matrix.width, matrix.height);
-            mctx.fillStyle = 'rgba(255,255,255,0.15)';
-            mctx.font = '10px monospace';
-            drops.forEach((y, i) => {
-                mctx.fillText(String.fromCharCode(48 + Math.random() * 10), i * 14, y);
-                drops[i] = y > matrix.height ? 0 : y + 14;
-            });
-        }, 80);
+        let matrixOn = false;
+        let matrixTimer = 0;
+        function matrixStart() {
+            if (matrixOn) return;
+            matrixOn = true;
+            matrixTimer = setInterval(() => {
+                mctx.fillStyle = 'rgba(0,0,0,0.08)';
+                mctx.fillRect(0, 0, matrix.width, matrix.height);
+                mctx.fillStyle = 'rgba(255,255,255,0.15)';
+                mctx.font = '10px monospace';
+                for (let i = 0; i < drops.length; i++) {
+                    const y = drops[i];
+                    mctx.fillText(String(i % 10), i * 18, y);
+                    drops[i] = y > matrix.height ? 0 : y + 18;
+                }
+            }, phone ? 160 : 110);
+        }
+        function matrixStop() {
+            matrixOn = false;
+            clearInterval(matrixTimer);
+        }
+        if (typeof IntersectionObserver === 'function') {
+            new IntersectionObserver((entries) => {
+                entries.forEach(e => { if (e.isIntersecting) matrixStart(); else matrixStop(); });
+            }, { rootMargin: '80px' }).observe(productsSection);
+        } else matrixStart();
     }
 
     /* ── Constellation lines in orbit ── */
@@ -144,9 +218,8 @@
                 cctx.lineTo(cx + Math.cos(a2) * r2, cy + Math.sin(a2) * r2 * 0.45);
                 cctx.stroke();
             }
-            requestAnimationFrame(drawConst);
         }
-        drawConst();
+        paintWhileVisible(orbitStage, drawConst);
     }
 
     /* ── Game orbit ── */
@@ -181,25 +254,54 @@
                 el.style.zIndex = Math.floor(depth * 10);
                 el.style.opacity = 0.78 + depth * 0.22;
             });
-            requestAnimationFrame(placeOrbit);
         }
         window.addEventListener('resize', () => { ({ rx, ry } = getRadii()); });
-        placeOrbit();
+        paintWhileVisible(orbit, placeOrbit);
     }
 
     /* ── Nav + scroll + sticky CTA ── */
     const sticky = document.getElementById('sticky-cta');
+    const heroBrand = document.querySelector('.hero-brand-row');
+    const heroShow = document.querySelector('.hero-showcase');
+    let scrollQueued = false;
     window.addEventListener('scroll', () => {
-        document.getElementById('nav')?.classList.toggle('scrolled', window.scrollY > 40);
-        sticky?.classList.toggle('show', window.scrollY > 600);
-        const y = window.scrollY;
-        document.querySelector('.hero-brand-row')?.style && (document.querySelector('.hero-brand-row').style.transform = `translateY(${y * 0.04}px)`);
-        document.querySelector('.hero-showcase')?.style && (document.querySelector('.hero-showcase').style.transform = `translateY(${y * 0.02}px)`);
-    });
+        if (scrollQueued) return;
+        scrollQueued = true;
+        requestAnimationFrame(() => {
+            scrollQueued = false;
+            const y = window.scrollY;
+            document.getElementById('nav')?.classList.toggle('scrolled', y > 40);
+            sticky?.classList.toggle('show', y > 600);
+            if (!phone) {
+                if (heroBrand) heroBrand.style.transform = `translateY(${y * 0.04}px)`;
+                if (heroShow) heroShow.style.transform = `translateY(${y * 0.02}px)`;
+            }
+        });
+    }, { passive: true });
+
+    function jumpTo(el) {
+        const start = window.scrollY;
+        const end = Math.max(0, el.getBoundingClientRect().top + start - 78);
+        const dist = end - start;
+        if (Math.abs(dist) < 4) return;
+        const dur = Math.min(420, Math.max(160, Math.abs(dist) * 0.22));
+        const t0 = performance.now();
+        function step(now) {
+            const t = Math.min(1, (now - t0) / dur);
+            const eased = 1 - Math.pow(1 - t, 3);
+            window.scrollTo(0, start + dist * eased);
+            if (t < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
     document.querySelectorAll('a[href^="#"]').forEach(a => {
         a.addEventListener('click', e => {
-            const t = document.querySelector(a.getAttribute('href'));
-            if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
+            const id = a.getAttribute('href');
+            if (!id || id === '#') return;
+            const t = document.querySelector(id);
+            if (!t) return;
+            e.preventDefault();
+            jumpTo(t);
         });
     });
 
@@ -334,12 +436,10 @@
                     ctx.stroke();
                 });
             }
-
-            requestAnimationFrame(draw);
         }
 
         resize();
-        draw();
+        paintWhileVisible(media, draw);
         window.addEventListener('resize', resize);
 
         card.addEventListener('mouseenter', () => {
@@ -383,11 +483,9 @@
         const card = media.closest('.product-card');
         if (!canvas || !video || !card) return;
 
-        video.play().catch(() => {});
-
         const ctx = canvas.getContext('2d');
         let particles = [];
-        let w = 0, h = 0, mx = 0.5, my = 0.5, active = false, rafId = null;
+        let w = 0, h = 0, mx = 0.5, my = 0.5, active = false;
 
         function resize() {
             w = canvas.width = media.offsetWidth;
@@ -430,17 +528,16 @@
                     ctx.stroke();
                 }
             });
-
-            rafId = requestAnimationFrame(draw);
         }
 
         resize();
-        draw();
+        paintWhileVisible(media, draw);
         window.addEventListener('resize', resize);
 
         const editObs = new IntersectionObserver(entries => {
             entries.forEach(e => {
                 if (e.isIntersecting) video.play().catch(() => {});
+                else video.pause();
             });
         }, { threshold: 0.3 });
         editObs.observe(media);
@@ -513,8 +610,6 @@
                 ctx.lineTo(w, cy);
                 ctx.stroke();
             }
-
-            rafId = requestAnimationFrame(draw);
         }
 
         function animateHz() {
@@ -532,7 +627,7 @@
         }
 
         resize();
-        draw();
+        paintWhileVisible(media, draw);
         window.addEventListener('resize', resize);
 
         card.addEventListener('mouseenter', () => { active = true; animateHz(); });
@@ -562,11 +657,9 @@
         const card = media.closest('.product-card');
         if (!canvas || !video || !card) return;
 
-        video.play().catch(() => {});
-
         const ctx = canvas.getContext('2d');
         let particles = [];
-        let w = 0, h = 0, mx = 0.5, my = 0.5, active = false, rafId = null;
+        let w = 0, h = 0, mx = 0.5, my = 0.5, active = false;
 
         function resize() {
             w = canvas.width = media.offsetWidth;
@@ -619,16 +712,17 @@
                 ctx.moveTo(cx, cy - s); ctx.lineTo(cx, cy + s);
                 ctx.stroke();
             }
-
-            rafId = requestAnimationFrame(draw);
         }
 
         resize();
-        draw();
+        paintWhileVisible(media, draw);
         window.addEventListener('resize', resize);
 
         const aimObs = new IntersectionObserver(entries => {
-            entries.forEach(e => { if (e.isIntersecting) video.play().catch(() => {}); });
+            entries.forEach(e => {
+                if (e.isIntersecting) video.play().catch(() => {});
+                else video.pause();
+            });
         }, { threshold: 0.3 });
         aimObs.observe(media);
 
@@ -653,8 +747,6 @@
         const fpsFrom = media.querySelector('.storm-fps');
         const card = media.closest('.product-card');
         if (!canvas || !video || !card) return;
-
-        video.play().catch(() => {});
 
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -712,8 +804,6 @@
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, w, h);
             }
-
-            requestAnimationFrame(draw);
         }
 
         function animateFps() {
@@ -731,11 +821,14 @@
         }
 
         resize();
-        draw();
+        paintWhileVisible(media, draw);
         window.addEventListener('resize', resize);
 
         const stormObs = new IntersectionObserver(entries => {
-            entries.forEach(e => { if (e.isIntersecting) video.play().catch(() => {}); });
+            entries.forEach(e => {
+                if (e.isIntersecting) video.play().catch(() => {});
+                else video.pause();
+            });
         }, { threshold: 0.3 });
         stormObs.observe(media);
 
@@ -806,23 +899,10 @@
                 ctx.strokeStyle = active ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)';
                 ctx.stroke();
             });
-
-            rafId = requestAnimationFrame(draw);
-        }
-
-        function start() {
-            if (rafId) return;
-            resize();
-            draw();
-        }
-
-        function stop() {
-            if (rafId) cancelAnimationFrame(rafId);
-            rafId = null;
         }
 
         resize();
-        start();
+        paintWhileVisible(media, draw);
         window.addEventListener('resize', resize);
 
         card.addEventListener('mouseenter', () => { active = true; });
@@ -894,8 +974,6 @@
                 ctx.strokeStyle = active ? 'rgba(57,255,20,0.08)' : 'rgba(57,255,20,0.04)';
                 ctx.stroke();
             });
-
-            rafId = requestAnimationFrame(draw);
         }
 
         function animateFpsCounter() {
@@ -913,7 +991,7 @@
         }
 
         resize();
-        draw();
+        paintWhileVisible(media, draw);
         window.addEventListener('resize', resize);
 
         card.addEventListener('mouseenter', () => {
@@ -998,8 +1076,6 @@
                     ctx.stroke();
                 }
             });
-
-            requestAnimationFrame(draw);
         }
 
         function animateMs() {
@@ -1024,7 +1100,7 @@
         }
 
         resize();
-        draw();
+        paintWhileVisible(media, draw);
         updateColors();
         window.addEventListener('resize', resize);
 
@@ -1061,7 +1137,7 @@
     });
 
     /* ── Particle burst ── */
-    document.querySelectorAll('.btn-get, .btn-primary').forEach(btn => {
+    document.querySelectorAll('.btn-get').forEach(btn => {
         btn.addEventListener('click', e => {
             for (let i = 0; i < 12; i++) {
                 const p = document.createElement('div');
