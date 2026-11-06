@@ -17,8 +17,10 @@ import AimBundleShowcase3D from './AimBundleShowcase3D'
 import MultiversalCompatibilityShowcase3D from './MultiversalCompatibilityShowcase3D'
 import AboutShowcase3D from './AboutShowcase3D'
 import PCModel from './PCModel'
+import Prewarm from './Prewarm'
 import { SIDE_YAW } from '../lib/layout'
 import { padKey, padLeft, padRight, padRim } from '../lib/padLights'
+import { resetShowLights, showFill, showKey } from '../lib/showLights'
 import { quality } from '../lib/quality'
 import { rig, scrollProgress } from '../lib/rig'
 import { subscribeScenePaused } from '../lib/smoothScroll'
@@ -765,6 +767,7 @@ function Atmosphere() {
   const fill = useRef()
 
   useFrame(() => {
+    resetShowLights()
     if (scene.fog) scene.fog.density = rig.fog
     const flash = rig.flash
     key.current.intensity = 2.8 + flash * 4.2
@@ -784,6 +787,8 @@ function Atmosphere() {
       <primitive object={padRim} />
       <primitive object={padLeft} />
       <primitive object={padRight} />
+      <primitive object={showKey} />
+      <primitive object={showFill} />
       <Environment resolution={quality.mobile ? 64 : 96} frames={1}>
         <Lightformer form="rect" intensity={6} position={[0, 12, 10]} scale={[20, 2, 1]} color="#ffffff" />
         <Lightformer form="rect" intensity={2.2} position={[-10, 2, 4]} scale={[2, 18, 1]} color="#ffffff" />
@@ -845,6 +850,7 @@ function LaterVisuals() {
           <AboutShowcase3D />
         </Suspense>
       )}
+      {stage >= 3 && <Prewarm />}
     </>
   )
 }

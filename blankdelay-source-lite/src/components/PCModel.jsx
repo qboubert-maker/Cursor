@@ -1088,8 +1088,23 @@ export default function PCModel() {
     const dt = Math.min(delta, 0.05)
     const f = rig.float
     const shell = THREE.MathUtils.clamp(rig.shell, 0, 1)
-    root.current.visible = shell > 0.02
-    if (shell <= 0.02) return
+    const shown = shell > 0.02
+    if (shown !== scratch.shown) {
+      scratch.shown = shown
+      // Hide the meshes but keep the lights in the scene (at intensity 0): a
+      // changing light count would recompile every material mid-scroll.
+      tower.current.children.forEach((child) => {
+        if (!child.isLight) child.visible = shown
+      })
+    }
+    if (!shown) {
+      flare.current.visible = false
+      streak.current.visible = false
+      logoLight.current.intensity = 0
+      interiorLight.current.intensity = 0
+      lowerLight.current.intensity = 0
+      return
+    }
     root.current.scale.setScalar(0.86 + shell * 0.14)
 
     root.current.position.y = Math.sin(t * 0.8) * 0.11 * f

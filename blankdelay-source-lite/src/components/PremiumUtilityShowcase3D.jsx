@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import { rig } from '../lib/rig'
+import { aimShowLight, showFill, showKey } from '../lib/showLights'
 
 const NVIDIA_URL = '/nvidia.webp'
 const RADEON_URL = '/radeon.webp'
@@ -87,8 +88,6 @@ export default function PremiumUtilityShowcase3D() {
   const root = useRef(null)
   const nvidia = useRef(null)
   const radeon = useRef(null)
-  const rimA = useRef(null)
-  const rimB = useRef(null)
 
   useFrame((state) => {
     const show = THREE.MathUtils.clamp(rig.utility, 0, 1)
@@ -134,16 +133,12 @@ export default function PremiumUtilityShowcase3D() {
     radeon.current.scale.setScalar(scale)
 
     const sweep = Math.sin(t * 0.45) * 4.5
-    rimA.current.position.x = -5.5 + sweep
-    rimB.current.position.x = 5.5 - sweep
-    rimA.current.intensity = show * (16 + rig.gpuMacro * 14)
-    rimB.current.intensity = show * (12 + rig.gpuMacro * 10)
+    aimShowLight(showKey, { position: [-5.5 + sweep, 2.4, 2], angle: 0.55, penumbra: 0.7, distance: 18, intensity: show * (16 + rig.gpuMacro * 14) })
+    aimShowLight(showFill, { position: [5.5 - sweep, 1.2, 1.5], angle: 0.6, penumbra: 0.75, distance: 18, intensity: show * (12 + rig.gpuMacro * 10) })
   })
 
   return (
     <group ref={root} visible={false}>
-      <spotLight ref={rimA} position={[-5.5, 2.4, 2]} angle={0.55} penumbra={0.7} intensity={0} color="#ffffff" distance={18} decay={2} />
-      <spotLight ref={rimB} position={[5.5, 1.2, 1.5]} angle={0.6} penumbra={0.75} intensity={0} color="#ffffff" distance={18} decay={2} />
       <DissolveField />
       <group ref={nvidia}>
         <CardArt url={NVIDIA_URL} />
