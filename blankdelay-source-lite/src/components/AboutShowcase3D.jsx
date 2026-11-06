@@ -74,19 +74,25 @@ function BlankMark() {
 export default function AboutShowcase3D() {
   const root = useRef(null)
   const crest = useRef(null)
+  const crestLight = useRef(null)
   const shieldGeo = useMemo(() => shieldGeometry(), [])
 
   useFrame((state) => {
     const about = THREE.MathUtils.clamp(rig.about, 0, 1)
     const lock = THREE.MathUtils.smoothstep(rig.aboutLock, 0, 1)
     if (!root.current || !crest.current) return
-    root.current.visible = about > 0.02
-    if (!root.current.visible) return
+    const crestShow = THREE.MathUtils.smoothstep(about, 0.08, 0.85)
+    const shown = about > 0.02 && crestShow > 0.02
+    // The crest light stays in the scene at intensity 0 so the light count
+    // never changes (which would recompile every material).
+    crest.current.children.forEach((child) => {
+      if (!child.isLight) child.visible = shown
+    })
+    crestLight.current.intensity = shown ? 0.35 : 0
+    if (about <= 0.02) return
 
     const t = state.clock.elapsedTime
     const portrait = state.size.width / state.size.height < 0.9
-    const crestShow = THREE.MathUtils.smoothstep(about, 0.08, 0.85)
-    crest.current.visible = crestShow > 0.02
     const crestScale = portrait ? 0.32 : 0.78
     crest.current.scale.setScalar(crestScale * crestShow * (0.92 + lock * 0.08))
     crest.current.position.y = (portrait ? 2.15 : 0.72) + Math.sin(t * 0.7) * 0.04
@@ -95,8 +101,8 @@ export default function AboutShowcase3D() {
   })
 
   return (
-    <group ref={root} visible={false}>
-      <group ref={crest} position={[0, 0.72, 0]} visible={false}>
+    <group ref={root}>
+      <group ref={crest} position={[0, 0.72, 0]}>
         <mesh geometry={shieldGeo}>
           <meshPhysicalMaterial
             color="#050505"
@@ -113,7 +119,7 @@ export default function AboutShowcase3D() {
           />
         </mesh>
         <BlankMark />
-        <pointLight position={[0, -0.35, 1.6]} intensity={0.35} distance={4} color="#ffffff" />
+        <pointLight ref={crestLight} position={[0, -0.35, 1.6]} intensity={0} distance={4} color="#ffffff" />
       </group>
     </group>
   )

@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useGLTF, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import { rig } from '../lib/rig'
+import { aimShowLight, showFill, showKey } from '../lib/showLights'
 
 const PC_URL = '/zero-pc.glb'
 const MARK_URL = '/zero-mark.png'
@@ -126,6 +127,8 @@ export default function ZeroDelayAppShowcase3D() {
     const open = THREE.MathUtils.smoothstep(rig.kernelOpen, 0.05, 1)
     root.current.visible = rig.kernel > 0.02
     if (!root.current.visible) return
+    aimShowLight(showKey, { position: [-2.4, 2.8, 3.4], angle: 0.5, penumbra: 0.6, distance: 14, intensity: 22 })
+    aimShowLight(showFill, { position: [2.6, 2.6, 3.2], angle: 0.5, penumbra: 0.65, distance: 14, intensity: 12 })
     const t = state.clock.elapsedTime
     const bob = Math.sin(t * 0.45) * 0.02 * reveal
     const rise = THREE.MathUtils.lerp(-3.6, 0.02, reveal)
@@ -143,8 +146,6 @@ export default function ZeroDelayAppShowcase3D() {
 
   return (
     <group ref={root} visible={false}>
-      <spotLight position={[-2.4, 2.8, 3.4]} angle={0.5} penumbra={0.6} intensity={22} color="#ffffff" distance={14} decay={2} />
-      <spotLight position={[2.6, 2.6, 3.2]} angle={0.5} penumbra={0.65} intensity={12} color="#ffffff" distance={14} decay={2} />
       <group ref={black}>
         <Tower tone="black" />
         <group position={[0.18, 0.12, 1.05]}>

@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import { rig } from '../lib/rig'
+import { aimShowLight, showFill, showKey } from '../lib/showLights'
 
 const GAMES = [
   { title: 'FORTNITE', cover: '/covers/fortnite.jpg?v=nova' },
@@ -70,8 +71,6 @@ function buildCoverMask() {
 export default function MultiversalCompatibilityShowcase3D() {
   const root = useRef(null)
   const cards = useRef([])
-  const rimA = useRef(null)
-  const rimB = useRef(null)
   const scratch = useRef({
     ring: new THREE.Vector3(),
     stack: new THREE.Vector3(),
@@ -159,16 +158,12 @@ export default function MultiversalCompatibilityShowcase3D() {
     })
 
     const sweep = Math.sin(state.clock.elapsedTime * 0.55) * 5
-    rimA.current.position.x = -6 + sweep
-    rimB.current.position.x = 6 - sweep
-    rimA.current.intensity = show * 22
-    rimB.current.intensity = show * 16
+    aimShowLight(showKey, { position: [-6 + sweep, 3.2, 5], angle: 0.55, penumbra: 0.8, distance: 22, intensity: show * 22 })
+    aimShowLight(showFill, { position: [6 - sweep, 1.4, 3], angle: 0.6, penumbra: 0.85, distance: 22, intensity: show * 16 })
   })
 
   return (
     <group ref={root} visible={false}>
-      <spotLight ref={rimA} position={[-6, 3.2, 5]} angle={0.55} penumbra={0.8} intensity={0} color="#ffffff" distance={22} decay={2} />
-      <spotLight ref={rimB} position={[6, 1.4, 3]} angle={0.6} penumbra={0.85} intensity={0} color="#ffffff" distance={22} decay={2} />
       {GAMES.map((game, i) => (
         <group key={game.title} ref={(node) => (cards.current[i] = node)}>
           <mesh geometry={frameGeometry} material={glassMaterials[i]} userData={{ fade: true }} position={[0, 0, -0.02]} />
